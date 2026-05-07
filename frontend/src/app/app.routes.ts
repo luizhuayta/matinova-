@@ -9,12 +9,13 @@ import { Home } from './pages/home/home';
 
 // nuevo
 import { Contacto } from './pages/contacto/contacto';
+import { AcercaDe } from './pages/acerca-de/acerca-de';
 
 export const routes: Routes = [
   { path: '', component: Home },
-
+  { path: 'acerca-de', component: AcercaDe },
   {
-    path: "servicios",
+    path: 'servicios',
     component: Servicios,
     children: [
       { path: 'saas', component: Saas },
@@ -24,6 +25,5 @@ export const routes: Routes = [
       { path: 'soluciones-ti', component: SolucionesTi },
     ]
   },
-
   { path: 'contacto', component: Contacto }
 ];
