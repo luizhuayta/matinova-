@@ -2,13 +2,13 @@
   display: flex;
   gap: 40px;
   padding: 60px;
-  margin-top: 60px; // 👈 AGREGA ESTO
+  margin-top: 60px;
   background: #f5f7fa;
   font-family: 'Segoe UI', sans-serif;
   flex-wrap: wrap;
 }
 
-/* IZQUIERDA */
+/* IZQUIERDA - LEFT*/
 .info {
   flex: 1;
   min-width: 300px;

@@ -25,5 +25,6 @@ export class Contacto {
     this.email = ""
     this.mensaje = ""
     this.asunto = ""
+    
   }
 }
