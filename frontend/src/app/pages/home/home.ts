@@ -39,22 +39,27 @@ export class Home {
     {
       title: 'Soluciones TI',
       desc: 'Transformamos tu trabajo con soluciones de TI.',
-      img: 'imagen.jpg'
+      img: 'sol_ti.jpg'
     },
     {
       title: 'SAAS',
       desc: 'Gestiona todo, así puedes centrarte en tu negocio.',
-      img: 'imagen.jpg'
+      img: 'saas.jpg'
     },
     {
       title: 'Hardware',
       desc: 'Ofrecemos hardware avanzado para un rendimiento óptimo.',
-      img: 'imagen.jpg'
+      img: 'hard.avif'
     },
     {
-      title: 'Ciberseguridad',
-      desc: 'Protegemos tu infraestructura contra amenazas.',
-      img: 'imagen.jpg'
+      title: 'Software',
+      desc: 'Creamos Software a medida para tu negocio',
+      img: 'software.png'
+    },
+    {
+      title: 'Consultoria',
+      desc: 'Consultores en TI para transformar tu negocio',
+      img: 'consultoria.jpg'
     }
   ];
 

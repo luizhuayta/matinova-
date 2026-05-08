@@ -1,11 +1,13 @@
 // HERO
 .hero {
-  background: url('/sol_ti.jpg') center center / cover no-repeat;
-  height: 280px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  width: 100%;
+  height: 400px;
+
+  .heroImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 .hero-overlay {
@@ -51,7 +53,7 @@
 
 .info-imagen {
   flex: 1;
-  padding: 8px; 
+  padding: 8px;
   border-radius: 12px;
   border: 1px solid #e0e0e0;
   background: #fff;
@@ -187,5 +189,5 @@
     line-height: 1.6;
     padding: 0 12px 12px;
   }
-  
+
 }

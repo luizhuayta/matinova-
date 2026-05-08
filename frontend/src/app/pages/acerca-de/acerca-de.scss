@@ -702,7 +702,7 @@ $dark-bg: #0f1113;
   padding: 6px 16px;
   font-size: 11px;
   font-weight: 700;
-  border-radius: 20px; 
+  border-radius: 20px;
   letter-spacing: 1px;
   margin-bottom: 15px;
 }
@@ -745,3 +745,83 @@ $dark-bg: #0f1113;
   font-weight: bold;
 }
 
+/* SECCION MOVIL */
+@media (max-width: 768px) {
+  .porque,
+  .about,
+  .contact-section,
+  .services-main,
+  .innovative-services,
+  .testimonials-section,
+  .equipo,
+  .youtube {
+    padding: 40px 20px !important;
+    margin: 0 !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  .texto, .equipo-texto, .about-text, .innovative-intro, .testimonials-intro {
+    width: 100%;
+    text-align: left;
+    margin-bottom: 30px;
+    padding: 0;
+  }
+  .stats,
+  .about-grid,
+  .contact-grid,
+  .services-grid,
+  .innovative-grid,
+  .testimonials-grid,
+  .equipo-cards,
+  .videos {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 20px !important;
+    margin: 0 !important;
+  }
+  .about-img, .card, .video-card, .service-card, .mini-card, .testimonial-card {
+    width: 100% !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    box-sizing: border-box;
+
+    img {
+      width: 100% !important;
+      height: auto !important;
+      display: block;
+    }
+  }
+  .about-grid {
+    .about-img {
+      order: 1;
+      margin-bottom: 20px;
+      img {
+        max-width: 250px;
+        margin: 0 auto;
+      }
+    }
+    .about-text {
+      order: 2;
+    }
+  }
+  .hero {
+    height: auto;
+    min-height: 350px;
+    .hero-overlay {
+      padding: 40px 20px;
+    }
+    .hero-content {
+      margin: 0;
+      h1 { font-size: 1.8rem; }
+    }
+    .slider-indicators { display: none; }
+  }
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+}

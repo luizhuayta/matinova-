@@ -1,21 +1,14 @@
 <main class="serviciosPage">
-  <!-- HERO -->
   <section class="hero">
-    <img 
-      src="/carousel.jpg" 
-      alt="Servicios Banner"
-      class="heroImage"
-    />
+    <img src="/carousel.jpg" alt="Servicios Banner" class="heroImage" />
     <div class="heroOverlay">
       <h1>Nuestros Servicios</h1>
       <p>Soluciones tecnológicas integrales para tu empresa</p>
     </div>
   </section>
 
-  <!-- CONTENIDO DINÁMICO -->
   <router-outlet></router-outlet>
 
-  <!-- SERVICIOS GRID (opcional si quieres que siga apareciendo) -->
   <section class="servicesGrid">
     <div class="container">
       <div class="servicesHeader">
@@ -24,51 +17,70 @@
       </div>
 
       <div class="servicesCards">
-        <div class="serviceCard" routerLink="/servicios/software">
-          <img src="/imac.jpg" alt="Software"/>
-          <h3>Software</h3>
-          <p>Desarrollo e implementación de soluciones de software a medida.</p>
-          <a class="serviceLink">Ver más →</a>
+        <div class="serviceCard" [routerLink]="['/servicios/software']">
+          <div class="card-image-wrapper">
+            <img src="/software.png" alt="Software" />
+          </div>
+          <div class="card-body">
+            <h3>Software</h3>
+            <p>Desarrollo e implementación de soluciones de software a medida.</p>
+            <a class="serviceLink" [routerLink]="['/servicios/software']">Ver más →</a>
+          </div>
         </div>
 
-        <div class="serviceCard" routerLink="/servicios/hardware">
-          <img src="/tecnocom.jpg" alt="Hardware"/>
-          <h3>Hardware</h3>
-          <p>Suministro e instalación de equipos.</p>
-          <a class="serviceLink">Ver más →</a>
+        <div class="serviceCard" [routerLink]="['/servicios/hardware']">
+          <div class="card-image-wrapper">
+            <img src="/imac.jpg" alt="Hardware" />
+          </div>
+          <div class="card-body">
+            <h3>Hardware</h3>
+            <p>Suministro e instalación de equipos.</p>
+            <a class="serviceLink" [routerLink]="['/servicios/hardware']">Ver más →</a>
+          </div>
         </div>
 
-        <div class="serviceCard" routerLink="/servicios/consultoria">
-          <img src="/about-image.jpg" alt="Consultoría"/>
-          <h3>Consultoría</h3>
-          <p>Asesoramiento experto para tu negocio.</p>
-          <a class="serviceLink">Ver más →</a>
+        <div class="serviceCard" [routerLink]="['/servicios/consultoria']">
+          <div class="card-image-wrapper">
+            <img src="/about-image.jpg" alt="Consultoría" />
+          </div>
+          <div class="card-body">
+            <h3>Consultoría</h3>
+            <p>Asesoramiento experto para tu negocio.</p>
+            <a class="serviceLink" [routerLink]="['/servicios/consultoria']">Ver más →</a>
+          </div>
         </div>
 
-        <div class="serviceCard" routerLink="/servicios/saas">
-          <img src="/worldnet.jpg" alt="SaaS"/>
-          <h3>SaaS</h3>
-          <p>Soluciones en la nube seguras.</p>
-          <a class="serviceLink">Ver más →</a>
+        <div class="serviceCard" [routerLink]="['/servicios/saas']">
+          <div class="card-image-wrapper">
+            <img src="/saas.jpg" alt="SaaS" />
+          </div>
+          <div class="card-body">
+            <h3>SaaS</h3>
+            <p>Soluciones en la nube seguras.</p>
+            <a class="serviceLink" [routerLink]="['/servicios/saas']">Ver más →</a>
+          </div>
         </div>
 
-        <div class="serviceCard" routerLink="/servicios/soluciones-ti">
-          <img src="/imagen.jpg" alt="Soluciones TI"/>
-          <h3>Soluciones TI</h3>
-          <p>Infraestructura tecnológica completa.</p>
-          <a class="serviceLink">Ver más →</a>
+        <div class="serviceCard" [routerLink]="['/servicios/soluciones-ti']">
+          <div class="card-image-wrapper">
+            <img src="/imagen.jpg" alt="Soluciones TI" />
+          </div>
+          <div class="card-body">
+            <h3>Soluciones TI</h3>
+            <p>Infraestructura tecnológica completa.</p>
+            <a class="serviceLink" [routerLink]="['/servicios/soluciones-ti']">Ver más →</a>
+          </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- CTA -->
   <section class="ctaSection">
     <div class="container">
       <div class="ctaContent">
         <h2>¿Listo para transformar tu negocio?</h2>
         <p>Contáctanos y descubre cómo podemos ayudarte.</p>
-        <a routerLink="/contacto" class="ctaBtn">Contáctanos</a>
+        <a [routerLink]="['/contacto']" class="ctaBtn">Contáctanos</a>
       </div>
     </div>
   </section>

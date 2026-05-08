@@ -1,11 +1,13 @@
 // HERO
 .hero {
-  background: url('/consultoria.jpg') center center / cover no-repeat;
-  height: 280px;
   width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  height: 400px;
+
+  .heroImage {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
 }
 
 // INFO
@@ -24,10 +26,10 @@
 
 .info-imagen {
   flex: 0 0 340px;
-  padding: 8px; // 🔥 esto crea el espacio entre imagen y borde
+  padding: 8px;
   border-radius: 12px;
   border: 1px solid #e0e0e0;
-  background: #fff; // importante para que se vea el “marco”
+  background: #fff;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
 
   img {
@@ -35,7 +37,7 @@
     height: 100%;
     display: block;
     object-fit: cover;
-    border-radius: 8px; // un poco menor que el contenedor
+    border-radius: 8px;
   }
 }
 
@@ -139,7 +141,7 @@
   border: 1px solid #e0e0e0;
   box-shadow: 0 3px 12px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
-  padding: 8px; // 🔥 AQUI está la clave
+  padding: 8px;
 
   &:hover {
     transform: translateY(-5px);
@@ -151,8 +153,8 @@
     height: 180px;
     object-fit: cover;
     display: block;
-    border-radius: 6px; // 🔥 menor que el contenedor
-    margin-bottom: 10px; // separa del texto
+    border-radius: 6px;
+    margin-bottom: 10px;
   }
 
   h3 {
@@ -173,4 +175,100 @@
   border-top: 1px solid #e0e0e0;
   margin: 0 60px;
 }
+}
+
+/* SECCION MOVIL */
+@media (max-width: 768px) {
+
+  body, html {
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* HERO */
+  .hero {
+    height: 250px !important;
+
+    .heroImage {
+      height: 100% !important;
+    }
+  }
+
+  /* INFO */
+  .info-section {
+    padding: 40px 20px !important;
+  }
+
+  .info-container {
+    flex-direction: column !important;
+    gap: 30px !important;
+    width: 100% !important;
+  }
+
+  .info-imagen {
+    flex: none !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+
+    img {
+      height: 240px !important;
+    }
+  }
+
+  .info-texto {
+    width: 100% !important;
+    text-align: left !important;
+
+    h2 {
+      font-size: 1.6rem !important;
+    }
+
+    .btn-contacto {
+      width: 100% !important;
+      text-align: center;
+      display: block;
+    }
+  }
+
+  /* RAZONES */
+  .razones-section {
+    padding: 40px 20px !important;
+  }
+
+  .razones-container {
+    width: 100% !important;
+    text-align: center !important;
+
+    h2 {
+      font-size: 1.6rem !important;
+      margin-bottom: 25px !important;
+    }
+  }
+
+  .razones-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 20px !important;
+    width: 100% !important;
+  }
+
+  .razon-card {
+    width: 100% !important;
+    margin: 0 !important;
+    transform: none !important;
+
+    &:hover {
+      transform: none !important;
+    }
+
+    img {
+      height: 200px !important;
+    }
+  }
+
+  /* DIVIDER */
+  .section-divider {
+    margin: 0 20px !important;
+  }
 }
