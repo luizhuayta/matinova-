@@ -3,6 +3,7 @@ import { RouterOutlet } from '@angular/router';
 import { Header } from './components/header/header';
 import { Footer } from './components/footer/footer';
 import { ChatbotComponent } from './components/chatbot/chatbot';
+import { WhatsappBubble } from "./components/whatsapp-bubble/whatsapp-bubble";
 
 @Component({
   selector: 'app-root',
@@ -10,8 +11,9 @@ import { ChatbotComponent } from './components/chatbot/chatbot';
     RouterOutlet,
     Header,
     Footer,
-    ChatbotComponent
-  ],
+    ChatbotComponent,
+    WhatsappBubble
+],
   templateUrl: './app.html',
   styleUrl: './app.scss'
 })

@@ -1,27 +1,16 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Router } from '@angular/router';
-import { Observable, catchError, of } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class ChatService {
-  private apiUrl = 'http://localhost:3000/chatbot/ask';
+  private apiUrl = 'http://localhost:3000/chatbot';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(private http: HttpClient) {}
 
-  sendMessage(userMessage: string): Observable<any> {
-    const currentPath = this.router.url;
-
-    return this.http.post(this.apiUrl, {
-      message: userMessage,
-      context: currentPath
-    }).pipe(
-      catchError(error => {
-        console.error('Error conectando con MIS-Bot:', error);
-        return of({ response: 'Lo siento, mi conexión con el servidor de Matt Innova Solution se interrumpió.' });
-      })
-    );
+  sendMessage(message: string): Observable<any> {
+    return this.http.post<any>(this.apiUrl, { message });
   }
 }

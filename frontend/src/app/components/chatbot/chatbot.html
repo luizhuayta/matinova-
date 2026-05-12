@@ -19,14 +19,14 @@
     </div>
 
     <div class="bubble-wrapper">
-      <p>{{ msg.text }}</p>
+      <p [innerHTML]="formatText(msg.text)"></p>
     </div>
 
   </div>
 
   <div class="bot message-row typing-indicator" *ngIf="isTyping">
     <div class="avatar">
-      <img src="assets/logo-mis.png" alt="MIS">
+      <img src="logo.svg" alt="MIS" onerror="this.src='https://cdn-icons-png.flaticon.com/512/8943/8943377.png'">
     </div>
     <div class="bubble-wrapper points">
       <span></span><span></span><span></span>

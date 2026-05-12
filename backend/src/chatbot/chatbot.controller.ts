@@ -5,8 +5,9 @@ import { ChatbotService } from './chatbot.service';
 export class ChatbotController {
   constructor(private readonly chatbotService: ChatbotService) {}
 
-  @Post('ask')
-  async askChatbot(@Body('message') message: string) {
-    return this.chatbotService.getChatResponse(message);
+  @Post()
+  getReply(@Body('message') message: string) {
+    const reply = this.chatbotService.getReply(message);
+    return { reply };
   }
 }
