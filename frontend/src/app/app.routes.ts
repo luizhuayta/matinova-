@@ -6,6 +6,7 @@ import { Software } from './pages/servicios/software/software';
 import { Consultoria } from './pages/servicios/consultoria/consultoria';
 import { SolucionesTi } from './pages/servicios/soluciones-ti/soluciones-ti';
 import { Home } from './pages/home/home';
+import { LibroReclamacionesComponent } from './components/libro-reclamaciones/libro-reclamaciones';
 
 // nuevo
 import { Contacto } from './pages/contacto/contacto';
@@ -20,5 +21,6 @@ export const routes: Routes = [
   { path: 'servicios/software', component: Software },
   { path: 'servicios/consultoria', component: Consultoria },
   { path: 'servicios/soluciones-ti', component: SolucionesTi },
-  { path: 'contacto', component: Contacto }
+  { path: 'contacto', component: Contacto },
+  { path: 'libro-reclamaciones', component: LibroReclamacionesComponent }
 ];

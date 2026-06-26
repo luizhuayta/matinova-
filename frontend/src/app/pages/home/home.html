@@ -108,7 +108,7 @@
 
     <div class="service-card">
       <div class="card-img">
-        <img src="cursos.jpg" alt="Capacitaciones">
+        <img src="integridad.jpg" alt="Capacitaciones">
       </div>
       <div class="card-body">
         <h3>Capacitaciones y Cursos con Certificación</h3>
@@ -150,11 +150,13 @@
       </div>
 
       <div class="service-indicators">
-        <div *ngFor="let dot of [0, 1, 2, 3, 4, 5]; let i = index"
-             class="service-dot"
-             [class.active]="currentServiceSlide === i"
-             (click)="setServiceSlide(i)">
-        </div>
+        <ng-container *ngFor="let service of innovativeServices; let i = index">
+          <div *ngIf="i < innovativeServices.length - 2"
+              class="service-dot"
+              [class.active]="currentServiceSlide === i"
+              (click)="setServiceSlide(i)">
+          </div>
+        </ng-container>
       </div>
     </div>
 
@@ -195,11 +197,13 @@
         </div>
 
         <div class="testimonial-indicators">
-          <div *ngFor="let dot of [0, 1, 2, 3, 4, 5, 6]; let i = index"
-              class="dot"
-              [class.active]="currentTestimonialSlide === i"
-              (click)="setTestimonialSlide(i)">
-          </div>
+          <ng-container *ngFor="let item of testimonials; let i = index">
+            <div *ngIf="i < testimonials.length - 3"
+                 class="dot"
+                 [class.active]="currentTestimonialSlide === i"
+                 (click)="setTestimonialSlide(i)">
+            </div>
+          </ng-container>
         </div>
       </div>
 

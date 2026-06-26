@@ -306,6 +306,16 @@ export class ChatbotService {
     state.messageCount++;
     state.userMood = this.detectMood(input);
 
+    // Intercepta comandos de navegación globales
+    if (input === 'menu' || input === 'volver') {
+      this.conversations.delete(sessionId);
+      return (
+        '👋 *Volviendo al menú principal...*\n' +
+        this.rand(this.KNOWLEDGE.USUARIO.saludos.casual) +
+        this.getMainMenu()
+      );
+    }
+
     // --- 1. SALUDOS Y CORTESÍA CON MEMORIA ---
     if (
       this.match(
@@ -754,7 +764,7 @@ export class ChatbotService {
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
-      .replace(/[^\w\sáéíóúüñ¿¡]/gi, '') // Mantiene signos de pregunta
+      .replace(/[^\w\sáéíóúüñ¿¡]/gi, '')
       .trim();
   }
 
@@ -777,6 +787,16 @@ export class ChatbotService {
       `🎓 *Academy:* Cursos, metodología y testimonios.\n` +
       `📞 *Contacto:* WhatsApp, Email, Soporte Técnico.\n\n` +
       `*Escribe tu interés y te daré todos los detalles.*`
+    );
+  }
+  private readonly VOLVER = `\n\n¿Hay algo más en lo que pueda asesorarte? (Escribe *menu* si deseas ver las opciones).`;
+
+  private resetConversation(sessionId: string): string {
+    this.conversations.delete(sessionId);
+    return (
+      '🔄 *Sesión reiniciada.*\n' +
+      this.rand(this.KNOWLEDGE.USUARIO.saludos.casual) +
+      this.getMainMenu()
     );
   }
 
@@ -806,6 +826,4 @@ export class ChatbotService {
     };
     return names[mood] || 'atento';
   }
-
-  private readonly VOLVER = `\n\n¿Hay algo más en lo que pueda asesorarte? (Escribe *menu* si deseas ver las opciones).`;
 }

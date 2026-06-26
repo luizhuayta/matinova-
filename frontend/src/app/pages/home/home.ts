@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { RouterModule } from '@angular/router';
 
 @Component({
@@ -8,8 +8,10 @@ import { RouterModule } from '@angular/router';
   templateUrl: './home.html',
   styleUrl: './home.scss',
 })
-export class Home {
+export class Home implements OnInit, OnDestroy {
   currentSlide = 0;
+  currentServiceSlide = 0;
+  currentTestimonialSlide = 0;
 
   slides = [
     {
@@ -28,12 +30,6 @@ export class Home {
       image: 'carousel.jpg'
     }
   ];
-
-  setSlide(index: number) {
-    this.currentSlide = index;
-  }
-
-  currentServiceSlide = 0;
 
   innovativeServices = [
     {
@@ -63,12 +59,6 @@ export class Home {
     }
   ];
 
-  setServiceSlide(index: number) {
-    this.currentServiceSlide = index;
-  }
-
-  currentTestimonialSlide = 0;
-
   testimonials = [
     {
       text: 'Un equipo profesional como la empresa MIS que entiende nuestras necesidades y resuelve problemas rápidamente.',
@@ -86,6 +76,62 @@ export class Home {
       logo: 'worldnet.jpg'
     }
   ];
+
+  private heroIntervalId: any;
+  private serviceIntervalId: any;
+  private testimonialIntervalId: any;
+
+  ngOnInit(): void {
+    this.iniciarCarruselesAutomaticos();
+  }
+
+  ngOnDestroy(): void {
+    if (this.heroIntervalId) clearInterval(this.heroIntervalId);
+    if (this.serviceIntervalId) clearInterval(this.serviceIntervalId);
+    if (this.testimonialIntervalId) clearInterval(this.testimonialIntervalId);
+  }
+
+  private iniciarCarruselesAutomaticos(): void {
+    this.heroIntervalId = setInterval(() => {
+      this.nextSlide();
+    }, 4000);
+
+    this.serviceIntervalId = setInterval(() => {
+      this.nextServiceSlide();
+    }, 2000);
+
+    this.testimonialIntervalId = setInterval(() => {
+      this.nextTestimonialSlide();
+    }, 2000);
+  }
+
+  nextSlide(): void {
+    if (this.slides.length > 0) {
+      this.currentSlide = (this.currentSlide + 1) % this.slides.length;
+    }
+  }
+
+  nextServiceSlide(): void {
+    if (this.innovativeServices.length > 0) {
+      const maxSlides = this.innovativeServices.length - 2;
+      this.currentServiceSlide = (this.currentServiceSlide + 1) % maxSlides;
+    }
+  }
+
+  nextTestimonialSlide(): void {
+    if (this.testimonials.length > 0) {
+      const maxTestimonials = this.testimonials.length - 1;
+      this.currentTestimonialSlide = (this.currentTestimonialSlide + 1) % maxTestimonials;
+    }
+  }
+
+  setSlide(index: number) {
+    this.currentSlide = index;
+  }
+
+  setServiceSlide(index: number) {
+    this.currentServiceSlide = index;
+  }
 
   setTestimonialSlide(index: number) {
     this.currentTestimonialSlide = index;

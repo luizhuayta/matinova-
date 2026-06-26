@@ -6,7 +6,7 @@ export class ChatbotController {
   constructor(private readonly chatbotService: ChatbotService) {}
 
   @Post()
-  getReply(@Body('message') message: string) {
+  getReply(@Body('message') message: string = '') {
     const reply = this.chatbotService.getReply(message);
     return { reply };
   }

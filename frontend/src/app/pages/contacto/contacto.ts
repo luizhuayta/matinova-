@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import emailjs from '@emailjs/browser';
+import { HttpClient } from '@angular/common/http';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -11,25 +11,25 @@ import Swal from 'sweetalert2';
   styleUrls: ['./contacto.scss']
 })
 export class Contacto {
+  private http = inject(HttpClient);
+
   nombre: string = '';
   email: string = '';
   asunto: string = '';
   mensaje: string = '';
 
   enviar() {
-    const serviceID = 'service_c4ylqod';
-    const templateID = 'template_sb512fl';
-    const publicKey = '3xG2yzqmGg2-X3KXt';
+    const urlBackend = 'https://api.myec.website/contacto';
 
-    const templateParams = {
-      subject: this.asunto,
+    const body = {
       name: this.nombre,
       email: this.email,
+      subject: this.asunto,
       message: this.mensaje
     };
 
-    emailjs.send(serviceID, templateID, templateParams, publicKey)
-      .then((response) => {
+    this.http.post(urlBackend, body).subscribe({
+      next: () => {
         Swal.fire({
           title: '¡Mensaje enviado!',
           text: 'Nos pondremos en contacto contigo lo antes posible.',
@@ -38,7 +38,9 @@ export class Contacto {
           confirmButtonText: 'Aceptar'
         });
         this.limpiarFormulario();
-      }, (err) => {
+      },
+      error: (err) => {
+        console.error('Error al enviar contacto:', err);
         Swal.fire({
           title: 'Error',
           text: 'Ocurrió un error al enviar el mensaje. Inténtalo de nuevo.',
@@ -46,7 +48,8 @@ export class Contacto {
           confirmButtonColor: '#d33',
           confirmButtonText: 'Cerrar'
         });
-      });
+      }
+    });
   }
 
   limpiarFormulario() {

@@ -379,12 +379,14 @@ $dark-bg: #0f1113;
       &:hover { background: #1565c0; }
     }
   }
+
   .innovative-carousel-viewport {
     position: relative;
     width: 100%;
     overflow: hidden;
     z-index: 10;
-    padding: 10px 0;
+    padding: 15px 5px;
+    margin: 0 -5px;
 
     .innovative-items {
       display: flex;
@@ -393,7 +395,8 @@ $dark-bg: #0f1113;
       will-change: transform;
 
       .mini-card {
-        min-width: calc(33.333% - 14px);
+        min-width: calc(33.333% - 13.333px);
+        box-sizing: border-box;
         background: white;
         border: 3px solid #eee;
         border-radius: 12px;
