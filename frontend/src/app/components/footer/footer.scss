@@ -104,6 +104,42 @@
   }
 }
 
+.libro-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.18s ease, opacity 0.18s ease;
+  padding: 2px;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.02);
+    opacity: 0.95;
+  }
+}
+
+.libro-image {
+  width: 71px;
+  height: auto;
+  display: block;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 8px;
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.12);
+  border: 1px solid rgba(2, 6, 23, 0.06);
+}
+
+@media (max-width: 576px) {
+  .libro-image {
+    width: 56px;
+    padding: 6px;
+  }
+
+  .contact-info li {
+    font-size: 14px;
+    gap: 10px;
+  }
+}
+
 .tagline {
   font-weight: 600;
   margin-bottom: 20px;
