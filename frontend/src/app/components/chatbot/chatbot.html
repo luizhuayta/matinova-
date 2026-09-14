@@ -6,7 +6,7 @@
   <div class="chat-header">
     <div class="bot-info">
       <span class="status-dot"></span>
-      <strong>MIS-Bot</strong>
+      <strong>MIS-Bot Inteligente</strong>
     </div>
     <button (click)="toggleChat()">×</button>
   </div>
@@ -20,6 +20,15 @@
 
     <div class="bubble-wrapper">
       <p [innerHTML]="formatText(msg.text)"></p>
+      
+      <!-- Enlaces rápidos del bot -->
+      <div class="bot-links" *ngIf="msg.links && msg.links.length">
+        <a *ngFor="let link of msg.links" 
+           (click)="navigateTo(link.path)"
+           class="bot-link">
+          <i class="bi bi-arrow-right"></i> {{ link.label }}
+        </a>
+      </div>
     </div>
 
   </div>
@@ -30,6 +39,12 @@
     </div>
     <div class="bubble-wrapper points">
       <span></span><span></span><span></span>
+    </div>
+  </div>
+
+  <div class="suggestions-container" *ngIf="isOpen && messages.length === 1">
+    <div class="suggestion-chip" *ngFor="let suggestion of suggestions" (click)="selectSuggestion(suggestion)">
+      {{ suggestion }}
     </div>
   </div>
 </div>

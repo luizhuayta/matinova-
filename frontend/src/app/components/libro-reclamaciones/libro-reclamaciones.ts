@@ -13,6 +13,7 @@ import Swal from 'sweetalert2';
 })
 export class LibroReclamacionesComponent {
   private http = inject(HttpClient);
+  isLoading: boolean = false;
 
   reclamo = {
     fullname: '',
@@ -33,27 +34,30 @@ export class LibroReclamacionesComponent {
   };
 
   enviarReclamo() {
+    this.isLoading = true;
     const urlBackend = 'https://mattinnovasolution.com/libro-reclamaciones';
 
     this.http.post(urlBackend, this.reclamo).subscribe({
       next: (response: any) => {
+        this.isLoading = false;
         Swal.fire({
           title: '¡Reclamación Registrada!',
           text: `Su caso ha sido enviado con el ticket ${response.ticket}. Se envió una copia a su correo.`,
           icon: 'success',
-          confirmButtonColor: '#0c2340',
+          confirmButtonColor: '#1e3a8a',
           confirmButtonText: 'Aceptar'
         });
 
         this.limpiarFormulario();
       },
       error: (err) => {
+        this.isLoading = false;
         console.error('Error al enviar reclamación:', err);
         Swal.fire({
           title: 'Error',
           text: 'No se pudo registrar la reclamación en el servidor. Intente más tarde.',
           icon: 'error',
-          confirmButtonColor: '#d33',
+          confirmButtonColor: '#dc2626',
           confirmButtonText: 'Cerrar'
         });
       }

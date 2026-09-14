@@ -113,14 +113,16 @@ export class Home implements OnInit, OnDestroy {
 
   nextServiceSlide(): void {
     if (this.innovativeServices.length > 0) {
-      const maxSlides = this.innovativeServices.length - 2;
+      const visibleItems = 3; // Cantidad de items visibles
+      const maxSlides = Math.max(0, this.innovativeServices.length - visibleItems + 1);
       this.currentServiceSlide = (this.currentServiceSlide + 1) % maxSlides;
     }
   }
 
   nextTestimonialSlide(): void {
     if (this.testimonials.length > 0) {
-      const maxTestimonials = this.testimonials.length - 1;
+      const visibleItems = 2; // Cantidad de testimonios visibles
+      const maxTestimonials = Math.max(0, this.testimonials.length - visibleItems + 1);
       this.currentTestimonialSlide = (this.currentTestimonialSlide + 1) % maxTestimonials;
     }
   }

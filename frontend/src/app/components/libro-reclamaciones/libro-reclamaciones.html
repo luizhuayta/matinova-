@@ -6,7 +6,7 @@
     <div class="header-text">
       <h2>Libro de Reclamaciones Virtual</h2>
       <p class="company-info">Matt Innova Solution</p>
-      <p class="subtitle">Conforme a lo establecido en el Código de Protección y Defensa del Consumidor (Ley N° 29711) y su Reglamento.</p>
+      <p class="subtitle">Conforme a lo establecido en el Código de Protección y Defensa del Consumidor (Ley N° 29571) y su Reglamento.</p>
     </div>
   </div>
 
@@ -128,6 +128,6 @@
       <p>De conformidad con la Ley N° 29733 de Protección de Datos Personales, los datos registrados serán tratados con absoluta confidencialidad únicamente para la gestión y respuesta de su disconformidad dentro del plazo legal.</p>
     </div>
 
-    <button type="submit" class="btn-submit" [disabled]="!reclamacionesForm.valid">Enviar Reclamación Virtual</button>
+    <button type="submit" class="btn-submit" [disabled]="!reclamacionesForm.valid || isLoading">{{ isLoading ? 'Enviando...' : 'Enviar Reclamación Virtual' }}</button>
   </form>
 </div>

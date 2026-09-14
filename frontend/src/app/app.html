@@ -1,5 +1,71 @@
+<!-- Loading Screen -->
+@if (showLoading()) {
+  <div class="loading-screen">
+    <div class="loading-content">
+      <div class="logo-animation">
+        <img src="logo.svg" alt="Matt Innova Solution" class="loading-logo">
+      </div>
+      <div class="founder-section">
+        <img src="taya.jpg" alt="Ing. Pedro Alex Taya Yactayo - CEO & Founder" class="founder-image">
+        <div class="founder-info">
+          <h3 class="founder-name">Ing. Pedro Alex Taya Yactayo</h3>
+          <p class="founder-role">CEO & Founder</p>
+        </div>
+      </div>
+      <div class="loading-tagline">SOLUCIONES TI QUE TRANSFORMAN</div>
+      <div class="loading-spinner"></div>
+    </div>
+  </div>
+}
+
 <app-header></app-header>
-<router-outlet></router-outlet>
+
+<!-- Banner de CTA Superior -->
+@if (showCtaBanner()) {
+  <div class="cta-banner">
+    <div class="container">
+      <div class="cta-content">
+        <p class="cta-text">¿Necesitas una solución web para tu negocio?</p>
+        <div class="cta-actions">
+          <a href="mailto:contacto@mattinnovasolution.com" class="cta-email">
+            <i class="bi bi-envelope-fill"></i>
+            contacto@mattinnovasolution.com
+          </a>
+          <a routerLink="/contacto" class="cta-button">
+            Contáctanos
+          </a>
+          <button class="cta-close" (click)="closeCtaBanner()">
+            <i class="bi bi-x-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}
+
+<div class="router-transition">
+  <router-outlet></router-outlet>
+</div>
+
 <app-footer></app-footer>
 <app-chatbot></app-chatbot>
 <app-whatsapp-bubble></app-whatsapp-bubble>
+<app-accessibility></app-accessibility>
+
+<!-- Banner de Cookies -->
+@if (showCookieBanner()) {
+  <div class="cookie-banner">
+    <div class="container">
+      <div class="cookie-content">
+        <p class="cookie-text">
+          Usamos cookies para asegurar que te damos la mejor experiencia en nuestra web.
+          Si continúas usando este sitio, asumiremos que estás de acuerdo con ello.
+        </p>
+        <div class="cookie-actions">
+          <button class="cookie-accept" (click)="acceptCookies()">Aceptar</button>
+          <button class="cookie-reject" (click)="rejectCookies()">Rechazar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

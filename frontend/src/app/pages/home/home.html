@@ -115,6 +115,26 @@
         <p>Ofrecemos cursos especializados en tecnología, impartidos por expertos, con certificaciones que avalan tus conocimientos y mejoran tu perfil profesional.</p>
       </div>
     </div>
+
+    <div class="service-card">
+      <div class="card-img">
+        <img src="ecommerce.jpeg" alt="Ecommerce">
+      </div>
+      <div class="card-body">
+        <h3>Pagina Ecommerce para tu negocio</h3>
+        <p>Creamos tu tienda en línea con diseño responsivo, hosting y dominio incluidos. Automatiza tus ventas, integra pasarelas de pago y gestiona tu catálogo de productos de manera fácil y rápida.</p>
+      </div>
+    </div>
+
+    <div class="service-card">
+      <div class="card-img">
+        <img src="software.png" alt="Web">
+      </div>
+      <div class="card-body">
+        <h3>Creacion de Paginas Web</h3>
+        <p>Ofrecemos planes para crear tu página web, con dominio incluido y funciones como subdominios y correos corporativos ilimitados, adaptados a tus necesidades.</p>
+      </div>
+    </div>
   </div>
 </section>
 
@@ -169,13 +189,14 @@
     <div class="container testimonials-grid">
 
       <div class="testimonials-intro">
-        <span class="section-tag-light">NUESTROS CLIENTES</span>
-        <h2>Lo que dicen nuestro clientes</h2>
+        <span class="section-tag">CLIENTES SATISFECHOS</span>
+        <h2>Opiniones positivas y casos de éxito en implementación de TI</h2>
         <p>
           En MIS ha sido fundamental en la mejora de nuestras soluciones TI.
           Su atención personalizada y soporte excepcional nos han ayudado a
           alcanzar nuestros objetivos tecnológicos con gran éxito.
         </p>
+        <button class="btn-cta-testimonials" routerLink="/contacto">Aprender Más</button>
       </div>
 
       <div class="testimonials-carousel">
@@ -183,13 +204,26 @@
 
           <div class="testimonial-card" *ngFor="let item of testimonials">
             <div class="testimonial-bubble">
+              <div class="quote-icon">
+                <i class="bi bi-quote"></i>
+              </div>
               <p>{{ item.text }}</p>
+              <div class="rating">
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+                <i class="bi bi-star-fill"></i>
+              </div>
             </div>
             <div class="client-info">
-              <img [src]="item.logo" [alt]="item.client">
+              <div class="client-avatar">
+                <img [src]="item.logo" [alt]="item.client">
+              </div>
               <div class="client-details">
                 <h4>{{ item.client }}</h4>
-                <span>Matt Innova Solution</span>
+                <span class="client-role">Cliente Satisfecho</span>
+                <span class="client-company">Matt Innova Solution</span>
               </div>
             </div>
           </div>

@@ -58,6 +58,18 @@
         />
       </div>
 
+      <div class="fila">
+        <input
+          type="tel"
+          placeholder="Teléfono (9 dígitos)"
+          [(ngModel)]="telefono"
+          name="telefono"
+          pattern="[0-9]{9}"
+          maxlength="9"
+          required
+        />
+      </div>
+
       <input
         type="text"
         placeholder="Asunto"
@@ -73,7 +85,7 @@
         required
       ></textarea>
 
-      <button type="submit">Enviar Mensaje</button>
+      <button type="submit" [disabled]="isLoading">{{ isLoading ? 'Enviando...' : 'Enviar Mensaje' }}</button>
 
     </form>
   </div>

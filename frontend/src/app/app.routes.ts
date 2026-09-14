@@ -1,26 +1,52 @@
 import { Routes } from '@angular/router';
-import { Servicios} from './pages/servicios/servicios';
-import { Saas } from './pages/servicios/saas/saas';
-import { Hardware } from './pages/servicios/hardware/hardware';
-import { Software } from './pages/servicios/software/software';
-import { Consultoria } from './pages/servicios/consultoria/consultoria';
-import { SolucionesTi } from './pages/servicios/soluciones-ti/soluciones-ti';
-import { Home } from './pages/home/home';
-import { LibroReclamacionesComponent } from './components/libro-reclamaciones/libro-reclamaciones';
-
-// nuevo
-import { Contacto } from './pages/contacto/contacto';
-import { AcercaDe } from './pages/acerca-de/acerca-de';
 
 export const routes: Routes = [
-  { path: '', component: Home },
-  { path: 'acerca-de', component: AcercaDe },
-  { path: 'servicios', component: Servicios },
-  { path: 'servicios/saas', component: Saas },
-  { path: 'servicios/hardware', component: Hardware },
-  { path: 'servicios/software', component: Software },
-  { path: 'servicios/consultoria', component: Consultoria },
-  { path: 'servicios/soluciones-ti', component: SolucionesTi },
-  { path: 'contacto', component: Contacto },
-  { path: 'libro-reclamaciones', component: LibroReclamacionesComponent }
+  {
+    path: '',
+    loadComponent: () => import('./pages/home/home').then(m => m.Home)
+  },
+  {
+    path: 'acerca-de',
+    loadComponent: () => import('./pages/acerca-de/acerca-de').then(m => m.AcercaDe)
+  },
+  {
+    path: 'servicios',
+    loadComponent: () => import('./pages/servicios/servicios').then(m => m.Servicios)
+  },
+  {
+    path: 'servicios/saas',
+    loadComponent: () => import('./pages/servicios/saas/saas').then(m => m.Saas)
+  },
+  {
+    path: 'servicios/hardware',
+    loadComponent: () => import('./pages/servicios/hardware/hardware').then(m => m.Hardware)
+  },
+  {
+    path: 'servicios/software',
+    loadComponent: () => import('./pages/servicios/software/software').then(m => m.Software)
+  },
+  {
+    path: 'servicios/consultoria',
+    loadComponent: () => import('./pages/servicios/consultoria/consultoria').then(m => m.Consultoria)
+  },
+  {
+    path: 'servicios/soluciones-ti',
+    loadComponent: () => import('./pages/servicios/soluciones-ti/soluciones-ti').then(m => m.SolucionesTi)
+  },
+  {
+    path: 'contacto',
+    loadComponent: () => import('./pages/contacto/contacto').then(m => m.Contacto)
+  },
+  {
+    path: 'libro-reclamaciones',
+    loadComponent: () => import('./components/libro-reclamaciones/libro-reclamaciones').then(m => m.LibroReclamacionesComponent)
+  },
+  {
+    path: 'privacidad',
+    loadComponent: () => import('./pages/privacidad/privacidad').then(m => m.Privacidad)
+  },
+  {
+    path: 'terminos',
+    loadComponent: () => import('./pages/terminos/terminos').then(m => m.Terminos)
+  }
 ];
