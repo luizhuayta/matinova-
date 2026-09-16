@@ -234,22 +234,15 @@ export function changedPaths(before: unknown, after: unknown, prefix = ''): stri
   return out;
 }
 
+const ROUTE_SLUGS: Record<string, string> = Object.fromEntries(
+  Object.entries(SLUG_PATHS)
+    .filter(([slug]) => slug !== 'sitio')
+    .map(([slug, path]) => [path, slug])
+);
+
 export function slugFromRoute(url: string): string | null {
   if (url === '/' || url === '') {
     return 'inicio';
   }
-  const map: Record<string, string> = {
-    '/acerca-de': 'acerca-de',
-    '/servicios': 'servicios',
-    '/servicios/software': 'servicios-software',
-    '/servicios/hardware': 'servicios-hardware',
-    '/servicios/saas': 'servicios-saas',
-    '/servicios/consultoria': 'servicios-consultoria',
-    '/servicios/soluciones-ti': 'servicios-soluciones-ti',
-    '/contacto': 'contacto',
-    '/privacidad': 'privacidad',
-    '/terminos': 'terminos',
-    '/libro-reclamaciones': 'libro-reclamaciones',
-  };
-  return map[url] ?? null;
+  return ROUTE_SLUGS[url] ?? null;
 }

@@ -2,7 +2,9 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError } from 'rxjs';
 import { describe, expect, it } from 'vitest';
+import { CmsApiService } from './cms-api.service';
 import { CmsContentService } from './cms-content.service';
+import { CmsHistoryService } from './cms-history.service';
 
 const INICIO_DOC = {
   sections: [
@@ -17,7 +19,7 @@ const INICIO_DOC = {
 };
 
 function makeCms(http: { put?: () => Observable<unknown> } = {}): CmsContentService {
-  const cms = new CmsContentService(http as never);
+  const cms = new CmsContentService(new CmsApiService(http as never), new CmsHistoryService());
   cms.useSlug('inicio');
   cms.replaceContent({ ...INICIO_DOC });
   return cms;

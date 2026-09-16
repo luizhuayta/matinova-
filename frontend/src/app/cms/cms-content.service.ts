@@ -1,15 +1,11 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
-import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
 import { blankClone } from './cms-fields';
+import { CmsApiService } from './cms-api.service';
+import { CmsHistoryService } from './cms-history.service';
 import { blankFromSchema, humanChangeLine, itemFieldsAt, migrateCmsDocument, minListLength, schemaForSlug } from './cms-schema';
 import {
-  API_URL,
   CmsDocResponse,
-  CmsMediaItem,
-  CmsMessage,
-  CmsPageSummary,
-  CmsRevision,
   ImageMeta,
   JsonMap,
   SLUG_PATHS,
@@ -17,21 +13,13 @@ import {
   setByPath,
 } from './cms.models';
 
-interface FieldPatch {
-  slug: string;
-  path: string;
-  scope: 'page' | 'site';
-  before: unknown;
-  after: unknown;
-}
-
 @Injectable({ providedIn: 'root' })
 export class CmsContentService {
-  private http: HttpClient;
+  constructor(
+    private api: CmsApiService = inject(CmsApiService),
+    private undoHistory: CmsHistoryService = inject(CmsHistoryService)
+  ) {}
 
-  constructor(http?: HttpClient) {
-    this.http = http ?? inject(HttpClient);
-  }
   readonly site = signal<JsonMap>({});
   readonly pages = signal<Record<string, JsonMap>>({});
   readonly currentSlug = signal('inicio');
@@ -41,8 +29,6 @@ export class CmsContentService {
   readonly conflict = signal('');
   readonly hasDraft = signal<Record<string, boolean>>({});
   readonly versions = signal<Record<string, number>>({});
-  readonly undoStack = signal<FieldPatch[]>([]);
-  readonly redoStack = signal<FieldPatch[]>([]);
   readonly dirtyFields = signal<Set<string>>(new Set());
   readonly imageMeta = signal<Record<string, ImageMeta>>({});
   readonly removeToast = signal('');
@@ -63,8 +49,21 @@ export class CmsContentService {
     return slug === 'sitio' ? this.site() : (this.pages()[slug] ?? {});
   });
 
-  readonly canUndo = computed(() => this.undoStack().length > 0);
-  readonly canRedo = computed(() => this.redoStack().length > 0);
+  get undoStack() {
+    return this.undoHistory.undoStack;
+  }
+
+  get redoStack() {
+    return this.undoHistory.redoStack;
+  }
+
+  get canUndo() {
+    return this.undoHistory.canUndo;
+  }
+
+  get canRedo() {
+    return this.undoHistory.canRedo;
+  }
 
   useSlug(slug: string): void {
     this.currentSlug.set(slug);
@@ -95,8 +94,7 @@ export class CmsContentService {
       return;
     }
     if (record) {
-      this.undoStack.update((stack) => [...stack.slice(-79), { slug, path, scope, before, after: value }]);
-      this.redoStack.set([]);
+      this.undoHistory.push({ slug, path, scope, before, after: value });
     }
     this.applyValue(slug, path, value, scope);
     if (slug === 'inicio') {
@@ -106,7 +104,7 @@ export class CmsContentService {
       if (list.length > 0 && list.every((item) => !!item?.hidden)) {
         this.applyValue(slug, path, before, scope);
         if (record) {
-          this.undoStack.update((stack) => stack.slice(0, -1));
+          this.undoHistory.dropLast();
         }
         this.conflict.set('Deja al menos una parte de la página visible.');
         return;
@@ -207,52 +205,41 @@ export class CmsContentService {
   }
 
   undo(): void {
-    const stack = [...this.undoStack()];
-    const last = stack.pop();
+    const last = this.undoHistory.takeUndo();
     if (!last) {
       return;
     }
-    this.undoStack.set(stack);
-    this.redoStack.update((items) => [...items, last]);
     this.applyValue(last.slug, last.path, last.before, last.scope);
     this.dirty.set(true);
     this.scheduleAutosave();
   }
 
   redo(): void {
-    const stack = [...this.redoStack()];
-    const last = stack.pop();
+    const last = this.undoHistory.takeRedo();
     if (!last) {
       return;
     }
-    this.redoStack.set(stack);
-    this.undoStack.update((items) => [...items, last]);
     this.applyValue(last.slug, last.path, last.after, last.scope);
     this.dirty.set(true);
     this.scheduleAutosave();
   }
 
-  history(): FieldPatch[] {
-    return this.undoStack();
+  history() {
+    return this.undoHistory.items();
   }
 
   async loadAll(): Promise<void> {
     const preview = this.previewQuery();
-    const [site, list] = await Promise.all([
-      firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`)),
-      firstValueFrom(this.http.get<{ pages: CmsPageSummary[] }>(`${API_URL}/pages`)),
-    ]);
+    const [site, list] = await Promise.all([this.api.getSite(preview), this.api.getPages()]);
     this.writeDoc('sitio', site);
     const pageMap: Record<string, JsonMap> = {};
     const versions: Record<string, number> = { ...this.versions(), sitio: site.version };
     const drafts: Record<string, boolean> = { ...this.hasDraft(), sitio: !!site.hasDraft };
     await Promise.all(
-      (list.pages ?? [])
+      list
         .filter((p) => p.slug !== 'sitio')
         .map(async (p) => {
-          const full = await firstValueFrom(
-            this.http.get<CmsDocResponse>(`${API_URL}/pages/${p.slug}${preview}`)
-          );
+          const full = await this.api.getPage(p.slug, preview);
           pageMap[p.slug] = migrateCmsDocument(full.content ?? {}, p.slug);
           versions[p.slug] = full.version;
           drafts[p.slug] = !!full.hasDraft;
@@ -268,25 +255,16 @@ export class CmsContentService {
 
   async reloadSlug(slug: string): Promise<void> {
     const preview = this.previewQuery();
-    if (slug === 'sitio') {
-      const site = await firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`));
-      this.writeDoc('sitio', site);
-    } else {
-      const full = await firstValueFrom(
-        this.http.get<CmsDocResponse>(`${API_URL}/pages/${slug}${preview}`)
-      );
-      this.writeDoc(slug, full);
-    }
+    const full = slug === 'sitio' ? await this.api.getSite(preview) : await this.api.getPage(slug, preview);
+    this.writeDoc(slug, full);
     this.dirty.set(false);
     this.conflict.set('');
-    this.undoStack.set([]);
-    this.redoStack.set([]);
+    this.undoHistory.clear();
     this.dirtyFields.set(new Set());
   }
 
-  async listPages(): Promise<CmsPageSummary[]> {
-    const res = await firstValueFrom(this.http.get<{ pages: CmsPageSummary[] }>(`${API_URL}/pages`));
-    return res.pages ?? [];
+  async listPages() {
+    return this.api.getPages();
   }
 
   async save(): Promise<void> {
@@ -296,10 +274,7 @@ export class CmsContentService {
     try {
       const version = this.versions()[slug] ?? 1;
       const content = slug === 'sitio' ? this.site() : (this.pages()[slug] ?? {});
-      const url = slug === 'sitio' ? `${API_URL}/site` : `${API_URL}/pages/${slug}`;
-      const res = await firstValueFrom(
-        this.http.put<CmsDocResponse>(url, { content, version })
-      );
+      const res = await this.api.save(slug, content, version);
       this.applySaveResponse(slug, res);
     } catch (err) {
       this.handleSaveError(err);
@@ -313,8 +288,7 @@ export class CmsContentService {
     const slug = this.currentSlug();
     this.saving.set(true);
     try {
-      const url = slug === 'sitio' ? `${API_URL}/site/publish` : `${API_URL}/pages/${slug}/publish`;
-      const res = await firstValueFrom(this.http.post<CmsDocResponse>(url, { version: this.versions()[slug] ?? 1 }));
+      const res = await this.api.publish(slug, this.versions()[slug] ?? 1);
       this.applySaveResponse(slug, res);
       this.hasDraft.update((map) => ({ ...map, [slug]: false }));
       this.dirtyFields.set(new Set());
@@ -327,22 +301,14 @@ export class CmsContentService {
     }
   }
 
-  async listRevisions(): Promise<CmsRevision[]> {
-    const slug = this.currentSlug();
-    const res = await firstValueFrom(
-      this.http.get<{ items: CmsRevision[] }>(`${API_URL}/pages/${slug}/revisions`)
-    );
-    return res.items ?? [];
+  async listRevisions() {
+    return this.api.listRevisions(this.currentSlug());
   }
 
   async restoreRevision(id: number): Promise<void> {
     const slug = this.currentSlug();
     try {
-      const res = await firstValueFrom(
-        this.http.post<CmsDocResponse>(`${API_URL}/pages/${slug}/revisions/${id}/restore`, {
-          version: this.versions()[slug] ?? 1,
-        })
-      );
+      const res = await this.api.restoreRevision(slug, id, this.versions()[slug] ?? 1);
       this.applySaveResponse(slug, res);
       this.dirty.set(false);
     } catch (err) {
@@ -353,18 +319,12 @@ export class CmsContentService {
 
   async createPreviewLink(): Promise<string> {
     const slug = this.currentSlug();
-    const res = await firstValueFrom(
-      this.http.post<{ url: string }>(`${API_URL}/pages/${slug}/preview-token`, {})
-    );
+    const res = await this.api.createPreviewToken(slug);
     return res.url || `${SLUG_PATHS[slug] || '/'}?preview=`;
   }
 
   async uploadImage(file: File): Promise<string> {
-    const body = new FormData();
-    body.append('file', file);
-    const res = await firstValueFrom(
-      this.http.post<{ url: string; width?: number; height?: number }>(`${API_URL}/media`, body)
-    );
+    const res = await this.api.uploadMedia(file);
     if (res.width && res.height) {
       this.imageMeta.update((map) => ({ ...map, [res.url]: { width: res.width!, height: res.height! } }));
     }
@@ -378,9 +338,8 @@ export class CmsContentService {
     this.imageMeta.update((map) => ({ ...map, [url]: { width, height } }));
   }
 
-  async listMedia(): Promise<CmsMediaItem[]> {
-    const res = await firstValueFrom(this.http.get<{ items: CmsMediaItem[] }>(`${API_URL}/media`));
-    const items = res.items ?? [];
+  async listMedia() {
+    const items = await this.api.listMedia();
     for (const item of items) {
       this.rememberImage(item.url, item.width, item.height);
     }
@@ -388,12 +347,11 @@ export class CmsContentService {
   }
 
   async deleteMedia(id: number): Promise<void> {
-    await firstValueFrom(this.http.delete(`${API_URL}/media/${id}`));
+    await this.api.deleteMedia(id);
   }
 
-  async listMessages(): Promise<CmsMessage[]> {
-    const res = await firstValueFrom(this.http.get<{ items: CmsMessage[] }>(`${API_URL}/messages`));
-    return res.items ?? [];
+  async listMessages() {
+    return this.api.listMessages();
   }
 
   private applySaveResponse(slug: string, res: CmsDocResponse): void {
@@ -456,11 +414,13 @@ export class CmsContentService {
   private pushWhole(content: JsonMap): void {
     const slug = this.currentSlug();
     const before = slug === 'sitio' ? this.site() : (this.pages()[slug] ?? {});
-    this.undoStack.update((stack) => [
-      ...stack.slice(-79),
-      { slug, path: '', scope: slug === 'sitio' ? 'site' : 'page', before, after: content },
-    ]);
-    this.redoStack.set([]);
+    this.undoHistory.push({
+      slug,
+      path: '',
+      scope: slug === 'sitio' ? 'site' : 'page',
+      before,
+      after: content,
+    });
   }
 
   private scheduleAutosave(): void {
