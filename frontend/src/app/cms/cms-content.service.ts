@@ -27,7 +27,11 @@ interface FieldPatch {
 
 @Injectable({ providedIn: 'root' })
 export class CmsContentService {
-  private http = inject(HttpClient);
+  private http: HttpClient;
+
+  constructor(http?: HttpClient) {
+    this.http = http ?? inject(HttpClient);
+  }
   readonly site = signal<JsonMap>({});
   readonly pages = signal<Record<string, JsonMap>>({});
   readonly currentSlug = signal('inicio');

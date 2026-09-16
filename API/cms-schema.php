@@ -24,6 +24,21 @@ function cms_known_links(): array
     ];
 }
 
+/**
+ * Comprueba optimistic concurrency sin tocar la base.
+ * @return array{status:int, body:array}|null  null = la versión encaja
+ */
+function cms_version_guard(int $current, mixed $given): ?array
+{
+    if (!is_int($given) && !is_numeric($given)) {
+        return ['status' => 400, 'body' => ['field' => 'version', 'message' => 'Falta la versión del documento']];
+    }
+    if ((int) $given !== $current) {
+        return ['status' => 409, 'body' => ['version' => $current]];
+    }
+    return null;
+}
+
 function validate_cms_payload(mixed $content): ?array
 {
     if (!is_array($content) || array_is_list($content)) {

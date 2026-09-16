@@ -276,15 +276,13 @@ function save_site_draft(): never
 function cms_read_expected_version(int $current): int
 {
     $input = json_input();
-    $given = $input['version'] ?? null;
-    if (!is_int($given) && !is_numeric($given)) {
-        json_out(['field' => 'version', 'message' => 'Falta la versión del documento'], 400);
-    }
-    if ((int) $given !== $current) {
-        json_out([
-            'message' => 'Alguien publicó o guardó antes. Recarga para no pisar cambios.',
-            'version' => $current,
-        ], 409);
+    $err = cms_version_guard($current, $input['version'] ?? null);
+    if ($err) {
+        $body = $err['body'];
+        if ($err['status'] === 409) {
+            $body['message'] = 'Alguien publicó o guardó antes. Recarga para no pisar cambios.';
+        }
+        json_out($body, $err['status']);
     }
     return $current;
 }

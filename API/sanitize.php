@@ -55,7 +55,12 @@ function sanitize_dom_node(DOMNode $node, array $allowed): void
         }
         $tag = strtolower($child->tagName);
         if ($tag === 'h1' || $tag === 'h3') {
-            $repl = $dom->createElement($tag === 'h1' ? 'p' : 'h2');
+            $doc = $child->ownerDocument;
+            if (!$doc) {
+                $remove[] = $child;
+                continue;
+            }
+            $repl = $doc->createElement($tag === 'h1' ? 'p' : 'h2');
             while ($child->firstChild) {
                 $repl->appendChild($child->firstChild);
             }
