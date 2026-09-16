@@ -9,6 +9,7 @@ import { CmsSelectionService } from '../cms/cms-selection.service';
 import { labelForPath } from '../cms/cms-schema';
 import { CmsRevision, PAGE_LABELS, SLUG_PATHS, changedPaths } from '../cms/cms.models';
 import { CmsInspector } from './cms-inspector';
+import { AdminTour } from './admin-tour';
 import { Header } from '../components/header/header';
 import { Footer } from '../components/footer/footer';
 
@@ -38,13 +39,14 @@ const PAGE_LOADERS: Record<string, () => Promise<Type<unknown>>> = {
 @Component({
   selector: 'app-page-editor',
   standalone: true,
-  imports: [NgComponentOutlet, RouterLink, Header, Footer, CmsInspector],
+  imports: [NgComponentOutlet, RouterLink, Header, Footer, CmsInspector, AdminTour],
   templateUrl: './page-editor.html',
   styleUrl: './page-editor.scss',
 })
 export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('previewWrap') previewWrap?: ElementRef<HTMLElement>;
   @ViewChild('previewFrame') previewFrame?: ElementRef<HTMLElement>;
+  @ViewChild(AdminTour) tour?: AdminTour;
   private route = inject(ActivatedRoute);
   cms = inject(CmsContentService);
   editor = inject(CmsEditorService);
@@ -81,10 +83,33 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     }
     return 'Guardado';
   });
+  notice = computed(() => {
+    const err = this.error() || this.cms.conflict();
+    if (err) {
+      return { kind: 'error' as const, text: err, action: 'reload' as const, path: '' };
+    }
+    const fieldErr = this.cms.fieldError();
+    if (fieldErr) {
+      return { kind: 'error' as const, text: fieldErr.message, action: 'goto' as const, path: fieldErr.path };
+    }
+    const toast = this.cms.removeToast();
+    if (toast) {
+      return { kind: 'info' as const, text: toast, action: 'undo' as const, path: '' };
+    }
+    if (this.editor.uploading()) {
+      return { kind: 'info' as const, text: 'La foto se está ajustando…', action: '' as const, path: '' };
+    }
+    const status = this.status();
+    if (status) {
+      return { kind: 'ok' as const, text: status, action: '' as const, path: '' };
+    }
+    return null;
+  });
   unpublishedCount = computed(() => this.cms.changeLines().length);
   changeLines = computed(() => this.cms.changeLines());
   private resize?: ResizeObserver;
   private timer?: number;
+  private tourTimer?: number;
 
   constructor() {
     effect(() => {
@@ -115,6 +140,7 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
       this.resize.observe(this.previewWrap.nativeElement);
     }
     this.scheduleScale();
+    this.tourTimer = window.setTimeout(() => this.tour?.maybeStart(), 400);
   }
 
   ngOnDestroy(): void {
@@ -124,10 +150,23 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     if (this.timer) {
       window.clearTimeout(this.timer);
     }
+    if (this.tourTimer) {
+      window.clearTimeout(this.tourTimer);
+    }
   }
 
   setEditing(on: boolean): void {
     this.editor.setEditing(on);
+  }
+
+  onTourActive(on: boolean): void {
+    if (on) {
+      this.editor.setEditing(true);
+    }
+  }
+
+  replayTour(): void {
+    this.tour?.start();
   }
 
   setDevice(device: PreviewDevice): void {
@@ -156,7 +195,6 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     this.status.set('');
     try {
       await this.cms.save();
-      this.status.set('Borrador guardado. Publica para que se vea en la web.');
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 409) {
         this.error.set(this.cms.conflict() || 'Alguien guardó antes. Recarga para no pisar cambios.');

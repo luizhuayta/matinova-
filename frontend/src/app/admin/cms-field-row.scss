@@ -1,57 +1,15 @@
-:host-context(.insp.nested) .box.field {
-  border: 0;
-  background: transparent;
-  padding: 0;
-}
-
-.box {
+.field {
   min-width: 0;
-  border: 1px solid var(--admin-line);
-  border-radius: 14px;
-  background: #f7f9fc;
-  padding: 12px;
-}
-
-.box.field {
   display: grid;
-  gap: 8px;
+  gap: 6px;
 }
 
 .lbl,
-.box.field label {
+.field label {
   font-weight: 600;
-  font-size: 0.86rem;
+  font-size: 0.8125rem;
   color: var(--admin-text);
   overflow-wrap: anywhere;
-}
-
-.box.field input,
-.box.field textarea,
-.box.field select {
-  width: 100%;
-  min-width: 0;
-  box-sizing: border-box;
-  min-height: 44px;
-  border: 1px solid var(--admin-line);
-  border-radius: 10px;
-  padding: 8px 12px;
-  background: #fff;
-  color: var(--admin-text);
-}
-
-.box.field textarea {
-  min-height: 72px;
-  resize: vertical;
-  line-height: 1.45;
-  overflow-wrap: anywhere;
-}
-
-.box.field input:focus,
-.box.field textarea:focus,
-.box.field select:focus {
-  border-color: var(--admin-blue);
-  outline: 2px solid #b7d0ff;
-  outline-offset: 0;
 }
 
 .help {
@@ -61,36 +19,28 @@
 .help summary {
   list-style: none;
   cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border-radius: 999px;
-  border: 1px solid var(--admin-line);
-  background: #fff;
+  display: inline;
+  border: 0;
+  background: none;
   color: var(--admin-muted);
   font-size: 0.75rem;
-  font-weight: 700;
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .help summary::-webkit-details-marker {
   display: none;
 }
 
-.help[open] summary {
-  border-color: var(--admin-blue);
-  color: var(--admin-blue-deep);
-}
-
 .help p {
   margin: 6px 0 0;
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
   color: var(--admin-muted);
 }
 
 .len-note {
   margin: 0;
-  font-size: 0.8rem;
-  color: #9a6700;
+  font-size: 0.75rem;
+  color: var(--admin-warn);
 }

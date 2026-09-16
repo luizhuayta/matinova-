@@ -35,7 +35,7 @@ import { CmsMediaItem } from '../cms/cms.models';
       @if (altPath()) {
         <label class="alt-label" [attr.for]="'alt-' + path()">Texto de la imagen</label>
         <p class="micro">Se lee en voz alta si la foto no carga. Ejemplo: «Equipo de Matt Innova en la oficina».</p>
-        <input [id]="'alt-' + path()" type="text" [value]="altValue()" (input)="setAlt($any($event.target).value)" [disabled]="decorative()">
+        <input class="admin-control" [id]="'alt-' + path()" type="text" [value]="altValue()" (input)="setAlt($any($event.target).value)" [disabled]="decorative()">
         <label class="switch-row">
           <span>Es decorativa (no hace falta describirla)</span>
           <input type="checkbox" [checked]="decorative()" (change)="setDecorative($any($event.target).checked)">
@@ -72,22 +72,22 @@ import { CmsMediaItem } from '../cms/cms.models';
     .preview {
       width: 100%;
       min-height: 112px;
-      border-radius: 10px;
+      border-radius: var(--admin-radius-ctrl);
       overflow: hidden;
-      background: #e8ecf1;
+      background: #ece8e2;
       display: grid;
       place-items: center;
     }
     .preview.empty span {
-      color: #3e4754;
-      font-size: 0.85rem;
+      color: var(--admin-muted);
+      font-size: 0.8125rem;
       padding: 12px;
       text-align: center;
     }
     img { width: 100%; height: 112px; object-fit: cover; display: block; }
     .name {
       margin: 0;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       color: var(--admin-muted);
       overflow-wrap: anywhere;
     }
@@ -99,8 +99,8 @@ import { CmsMediaItem } from '../cms/cms.models';
     .image-actions label,
     .image-actions button {
       flex: 1 1 96px;
-      min-height: 40px;
-      font-size: 0.85rem;
+      min-height: 36px;
+      font-size: 0.8125rem;
       white-space: nowrap;
     }
     .image-actions input { display: none; }
@@ -108,7 +108,7 @@ import { CmsMediaItem } from '../cms/cms.models';
       position: fixed;
       inset: 0;
       z-index: 50;
-      background: rgba(15, 17, 19, 0.5);
+      background: rgba(20, 24, 31, 0.5);
       display: grid;
       place-items: center;
       padding: 1rem;
@@ -117,21 +117,21 @@ import { CmsMediaItem } from '../cms/cms.models';
       width: min(100%, 640px);
       max-height: 80vh;
       overflow: auto;
-      background: #fff;
-      border-radius: 16px;
+      background: var(--admin-surface);
+      border-radius: var(--admin-radius);
       padding: 1rem;
       display: grid;
       gap: 0.75rem;
     }
     .picker-card header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .picker-card h3 { margin: 0; font-size: 1.05rem; }
+    .picker-card h3 { margin: 0; font-size: 1rem; }
     .picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
-    .picker-grid button { padding: 0; border: 0; background: #eef1f5; border-radius: 8px; overflow: hidden; min-height: 80px; }
+    .picker-grid button { padding: 0; border: 0; background: var(--admin-paper); border-radius: var(--admin-radius-ctrl); overflow: hidden; min-height: 80px; }
     .picker-grid img { width: 100%; height: 80px; object-fit: cover; }
-    .warn, .micro { margin: 0; font-size: 0.8rem; color: #9a6700; }
+    .warn, .micro { margin: 0; font-size: 0.8125rem; color: var(--admin-warn); }
     .micro { color: var(--admin-muted); }
-    .alt-label { font-size: 0.85rem; font-weight: 600; }
-    .switch-row { display: flex; gap: 8px; align-items: center; font-size: 0.85rem; }
+    .alt-label { font-size: 0.8125rem; font-weight: 600; }
+    .switch-row { display: flex; gap: 8px; align-items: center; font-size: 0.8125rem; }
   `],
 })
 export class CmsImageField {

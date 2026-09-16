@@ -1,4 +1,4 @@
-<main class="login-split" lang="es">
+<main class="login-split">
   <aside class="login-brand">
     <img src="logo.svg" alt="Matt Innova Solution" class="login-logo">
     <h1>Panel de la web</h1>
@@ -12,12 +12,12 @@
 
       <div class="admin-field">
         <label for="admin-user">Usuario</label>
-        <input id="admin-user" name="username" type="text" [(ngModel)]="username" autocomplete="username" required autofocus>
+        <input id="admin-user" class="admin-control" name="username" type="text" [(ngModel)]="username" autocomplete="username" required autofocus>
       </div>
 
       <div class="admin-field">
         <label for="admin-pass">Contraseña</label>
-        <input id="admin-pass" name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required>
+        <input id="admin-pass" class="admin-control" name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required>
       </div>
 
       @if (error) {

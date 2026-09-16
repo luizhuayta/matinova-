@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { AuthService } from '../cms/auth.service';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsMediaItem } from '../cms/cms.models';
@@ -10,6 +10,13 @@ import { CmsMediaItem } from '../cms/cms.models';
     <section>
       <h1>Imágenes y archivos</h1>
       <p class="admin-lead">Puedes subir una foto pesada del celular. El sistema la achica solo.</p>
+
+      @if (toast()) {
+        <p class="admin-banner info" role="status">
+          {{ toast() }}
+          <button type="button" class="admin-btn-ghost" (click)="undoRemove()">Deshacer</button>
+        </p>
+      }
 
       <label
         class="drop"
@@ -29,7 +36,7 @@ import { CmsMediaItem } from '../cms/cms.models';
       }
 
       @if (loading()) {
-        <div class="grid">
+        <div class="grid" aria-busy="true">
           <div class="admin-skel"></div>
           <div class="admin-skel"></div>
           <div class="admin-skel"></div>
@@ -45,7 +52,7 @@ import { CmsMediaItem } from '../cms/cms.models';
                 [alt]="item.original_name">
               <figcaption>
                 <strong>{{ item.original_name }}</strong>
-                <span>{{ size(item.size_bytes) }}{{ dims(item) }}</span>
+                <span class="admin-num">{{ size(item.size_bytes) }}{{ dims(item) }}</span>
               </figcaption>
               @if (auth.isAdmin()) {
                 <button type="button" class="admin-btn-danger" (click)="remove(item)">Borrar</button>
@@ -62,35 +69,35 @@ import { CmsMediaItem } from '../cms/cms.models';
       place-items: center;
       gap: 0.3rem;
       margin: 1.1rem 0 1.25rem;
-      min-height: 132px;
-      padding: 1.25rem;
+      min-height: 120px;
+      padding: 1.15rem;
       border: 1px dashed var(--admin-line);
-      border-radius: 14px;
+      border-radius: var(--admin-radius);
       background: var(--admin-surface);
       text-align: center;
       cursor: pointer;
       color: var(--admin-muted);
     }
-    .drop i { font-size: 1.6rem; color: var(--admin-blue); }
-    .drop strong { color: var(--admin-text); font-size: 0.98rem; }
-    .drop span { font-size: 0.85rem; }
-    .drop.over, .drop:hover { border-color: var(--admin-blue); background: var(--admin-blue-soft); }
+    .drop i { font-size: 1.4rem; color: var(--admin-ink); }
+    .drop strong { color: var(--admin-text); font-size: 0.9375rem; }
+    .drop span { font-size: 0.8125rem; }
+    .drop.over, .drop:hover { border-color: var(--admin-ink); background: #ece8e2; }
     .drop.busy { opacity: 0.7; pointer-events: none; }
     .drop input { display: none; }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); gap: 14px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); gap: 12px; }
     figure {
       background: var(--admin-surface);
       border: 1px solid var(--admin-line);
-      border-radius: 12px;
+      border-radius: var(--admin-radius);
       padding: 10px;
       margin: 0;
       display: grid;
       gap: 8px;
     }
-    img { width: 100%; height: 140px; object-fit: cover; border-radius: 8px; background: #e8ecf1; }
+    img { width: 100%; height: 140px; object-fit: cover; border-radius: var(--admin-radius-ctrl); background: #ece8e2; }
     figcaption { display: grid; gap: 2px; min-height: 2.6rem; }
     figcaption strong {
-      font-size: 0.82rem;
+      font-size: 0.8125rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
@@ -98,7 +105,7 @@ import { CmsMediaItem } from '../cms/cms.models';
     figcaption span { font-size: 0.75rem; color: var(--admin-muted); }
   `],
 })
-export class AdminMedia implements OnInit {
+export class AdminMedia implements OnInit, OnDestroy {
   private cms = inject(CmsContentService);
   auth = inject(AuthService);
   items = signal<CmsMediaItem[]>([]);
@@ -106,9 +113,16 @@ export class AdminMedia implements OnInit {
   loading = signal(true);
   dragging = signal(false);
   error = signal('');
+  toast = signal('');
+  private pending: CmsMediaItem | null = null;
+  private timer?: number;
 
   async ngOnInit(): Promise<void> {
     await this.refresh();
+  }
+
+  ngOnDestroy(): void {
+    void this.commitPending();
   }
 
   dims(item: CmsMediaItem): string {
@@ -121,7 +135,9 @@ export class AdminMedia implements OnInit {
   async refresh(): Promise<void> {
     this.loading.set(true);
     try {
-      this.items.set(await this.cms.listMedia());
+      const list = await this.cms.listMedia();
+      const hidden = this.pending?.id;
+      this.items.set(hidden ? list.filter((item) => item.id !== hidden) : list);
       this.error.set('');
     } catch {
       this.error.set('No se pudieron cargar las imágenes. Revisa tu conexión.');
@@ -159,13 +175,44 @@ export class AdminMedia implements OnInit {
   }
 
   async remove(item: CmsMediaItem): Promise<void> {
-    if (!confirm(`¿Borrar ${item.original_name}?`)) {
+    await this.commitPending();
+    this.pending = item;
+    this.items.update((list) => list.filter((entry) => entry.id !== item.id));
+    this.toast.set('Eliminado — Deshacer');
+    this.timer = window.setTimeout(() => {
+      void this.commitPending();
+    }, 5000);
+  }
+
+  undoRemove(): void {
+    const item = this.pending;
+    if (!item) {
       return;
     }
+    if (this.timer) {
+      window.clearTimeout(this.timer);
+      this.timer = undefined;
+    }
+    this.pending = null;
+    this.toast.set('');
+    this.items.update((list) => [item, ...list]);
+  }
+
+  private async commitPending(): Promise<void> {
+    const item = this.pending;
+    if (this.timer) {
+      window.clearTimeout(this.timer);
+      this.timer = undefined;
+    }
+    if (!item) {
+      return;
+    }
+    this.pending = null;
+    this.toast.set('');
     try {
       await this.cms.deleteMedia(item.id);
-      await this.refresh();
     } catch {
+      this.items.update((list) => [item, ...list]);
       this.error.set('No se pudo borrar la imagen.');
     }
   }

@@ -1,10 +1,9 @@
 import { Component, computed, inject, input, signal } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList } from '@angular/cdk/drag-drop';
 import { FormsModule } from '@angular/forms';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsSelectionService } from '../cms/cms-selection.service';
-import { FieldDesc, addLabel, describeObject, fieldIcon, itemImage, itemTitle } from '../cms/cms-fields';
+import { FieldDesc, addLabel, describeObject, itemImage, itemTitle } from '../cms/cms-fields';
 import { cmsControlId, JsonMap, getByPath } from '../cms/cms.models';
 import { schemaFieldsAt, schemaForSlug, inspectorRootSchema } from '../cms/cms-schema';
 import { CmsImageField } from './cms-image-field';
@@ -14,7 +13,7 @@ import { CmsFieldRow } from './cms-field-row';
 @Component({
   selector: 'app-cms-inspector',
   standalone: true,
-  imports: [NgClass, FormsModule, CmsInspector, CmsImageField, CmsRichField, CmsFieldRow, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [FormsModule, CmsInspector, CmsImageField, CmsRichField, CmsFieldRow, CdkDropList, CdkDrag, CdkDragHandle],
   templateUrl: './cms-inspector.html',
   styleUrl: './cms-inspector.scss',
 })
@@ -77,7 +76,6 @@ export class CmsInspector {
 
   itemTitle = itemTitle;
   add = addLabel;
-  icon = fieldIcon;
   thumb = itemImage;
 
   end(path: string): void {

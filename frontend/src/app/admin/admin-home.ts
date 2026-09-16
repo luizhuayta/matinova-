@@ -1,6 +1,4 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
-import { AuthService } from '../cms/auth.service';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsPageSummary } from '../cms/cms.models';
 import { AdminPageList } from './admin-page-list';
@@ -8,35 +6,16 @@ import { AdminPageList } from './admin-page-list';
 @Component({
   selector: 'app-admin-home',
   standalone: true,
-  imports: [RouterLink, AdminPageList],
+  imports: [AdminPageList],
   template: `
     <section class="dash">
       <header class="dash-head">
-        <div>
-          <h1>Hola, {{ auth.username() }}</h1>
-          <p class="admin-lead">Elige una página y cambia sus textos, fotos y tarjetas.</p>
-        </div>
-        <div class="dash-tools">
-          <a routerLink="/admin/mensajes" class="admin-btn-ghost">
-            <i class="bi bi-inbox" aria-hidden="true"></i>
-            Mensajes
-          </a>
-          <a routerLink="/admin/archivos" class="admin-btn-ghost">
-            <i class="bi bi-images" aria-hidden="true"></i>
-            Imágenes
-          </a>
-        </div>
+        <h1>Páginas</h1>
+        <p class="admin-lead">Textos, fotos y listas de la web.</p>
       </header>
 
-      <aside class="limits">
-        <p>
-          Puedes cambiar el contenido de cada página (textos, fotos, banners y cuántas tarjetas hay).
-          No puedes crear páginas nuevas ni cambiar el diseño: eso está en Angular.
-        </p>
-      </aside>
-
       @if (loading()) {
-        <div class="admin-group">
+        <div class="admin-group" aria-busy="true">
           <div class="admin-skel"></div>
           <div class="admin-skel"></div>
           <div class="admin-skel"></div>
@@ -50,27 +29,10 @@ import { AdminPageList } from './admin-page-list';
   `,
   styles: [`
     .dash { max-width: 820px; }
-    .dash-head {
-      display: flex;
-      justify-content: space-between;
-      gap: 1rem;
-      flex-wrap: wrap;
-      align-items: flex-end;
-      margin-bottom: 0.5rem;
-    }
-    .dash-tools { display: flex; flex-wrap: wrap; gap: 8px; }
-    .limits {
-      margin: 1rem 0 0;
-      padding: 0.9rem 1rem;
-      background: var(--admin-blue-soft);
-      border-radius: 12px;
-      color: var(--admin-blue-deep);
-    }
-    .limits p { color: var(--admin-blue-deep); }
+    .dash-head { margin-bottom: 0.35rem; }
   `],
 })
 export class AdminHome implements OnInit {
-  auth = inject(AuthService);
   private cms = inject(CmsContentService);
   pages = signal<CmsPageSummary[]>([]);
   loading = signal(true);

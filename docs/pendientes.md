@@ -17,7 +17,6 @@ Aplazado a propósito. No mezclar con “ejecuta la fase N” ni con el refactor
 
 ## UX que no entra en 1–8
 
-- Tour de 4 pasos (mencionado en el backlog F; el cromo de Fase 2 debe bastar para el primer uso).
 - Recorte de imagen tipo page-builder (Fase 6 lo aplazó: el recorte con ratio del hueco no cabe sin un editor nuevo).
 - Overlay de edición en WhatsApp / hrefs (`academyUrl`, redes) — no son texto de página.
 - Usar `cmsList` en plantillas públicas (hoy la directiva solo registra el nodo; reordenar es cosa del inspector).

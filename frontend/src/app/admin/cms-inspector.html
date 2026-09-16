@@ -1,10 +1,10 @@
 @if (!rootPath()) {
   <div class="insp-search">
-    <label class="sr-only" for="cms-search">Buscar en el contenido</label>
-    <i class="bi bi-search" aria-hidden="true"></i>
     <input
       id="cms-search"
+      class="admin-control"
       type="search"
+      aria-label="Buscar en el contenido"
       placeholder="Buscar título, foto, botón…"
       [ngModel]="query()"
       (ngModelChange)="query.set($event)">
@@ -34,7 +34,7 @@
         </label>
         @if (field.hint) {
           <details class="help">
-            <summary aria-label="Ayuda">?</summary>
+            <summary>Ayuda</summary>
             <p>{{ field.hint }}</p>
           </details>
         }
@@ -42,6 +42,7 @@
       @case ('number') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-n'" [hint]="field.hint || ''">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-n'"
             type="number"
             min="0"
@@ -63,6 +64,7 @@
       @case ('area') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''" [note]="lengthNote(field)">
           <textarea
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             [attr.rows]="field.rows || 5"
             [ngModel]="str(field.path)"
@@ -73,6 +75,7 @@
       @case ('url') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             type="url"
             inputmode="url"
@@ -85,6 +88,7 @@
       @case ('email') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             type="email"
             inputmode="email"
@@ -97,6 +101,7 @@
       @case ('tel') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             type="tel"
             inputmode="tel"
@@ -109,6 +114,7 @@
       @case ('link') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             type="url"
             inputmode="url"
@@ -122,6 +128,7 @@
       @case ('embed') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="hintOf(field)">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             type="url"
             inputmode="url"
@@ -135,6 +142,7 @@
       @case ('select') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <select
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)">
@@ -147,9 +155,10 @@
       @case ('color') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             type="color"
-            [ngModel]="str(field.path) || '#0066ff'"
+            [ngModel]="str(field.path) || '#14181f'"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
         </app-cms-field-row>
@@ -157,6 +166,7 @@
       @case ('text') {
         <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''" [note]="lengthNote(field)">
           <input
+            class="admin-control"
             [id]="id(field.path) + '-i'"
             type="text"
             [ngModel]="str(field.path)"
@@ -165,21 +175,21 @@
         </app-cms-field-row>
       }
       @case ('strings') {
-        <section class="box stack">
+        <section class="stack">
           <header class="box-head">
-            <i class="bi" [ngClass]="icon(field.kind)" aria-hidden="true"></i>
             <h3>{{ field.label }}</h3>
             <span class="count">{{ strings(field.path).length }}</span>
           </header>
           @for (item of strings(field.path); track $index) {
             <div class="string-row">
               <input
+                class="admin-control"
                 type="text"
                 [attr.aria-label]="field.label + ' ' + ($index + 1)"
                 [ngModel]="item"
                 (ngModelChange)="setStringItem(field.path, $index, $event)"
                 (blur)="end(field.path + '.' + $index)">
-              <button type="button" class="icon-btn" (click)="cms.removeListItem(field.path, $index)" aria-label="Quitar">
+              <button type="button" class="admin-icon-btn" (click)="cms.removeListItem(field.path, $index)" aria-label="Quitar">
                 <i class="bi bi-trash" aria-hidden="true"></i>
               </button>
             </div>
@@ -188,15 +198,13 @@
             <p class="empty">Aún no hay elementos.</p>
           }
           <button type="button" class="admin-btn-ghost add" (click)="cms.addStringItem(field.path)">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i>
             {{ add(field.label) }}
           </button>
         </section>
       }
       @case ('list') {
-        <section class="box stack">
+        <section class="stack">
           <header class="box-head">
-            <i class="bi" [ngClass]="icon(field.kind)" aria-hidden="true"></i>
             <h3>{{ field.label }}</h3>
             <span class="count">{{ list(field.path).length }}</span>
           </header>
@@ -214,16 +222,16 @@
                   {{ itemTitle(item, i) }}
                 </span>
                 <span class="item-actions">
-                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.moveListItem(field.path, i, i - 1)" [disabled]="i === 0" aria-label="Subir">
+                  <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.moveListItem(field.path, i, i - 1)" [disabled]="i === 0" aria-label="Subir">
                     <i class="bi bi-chevron-up" aria-hidden="true"></i>
                   </button>
-                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.moveListItem(field.path, i, i + 1)" [disabled]="i === list(field.path).length - 1" aria-label="Bajar">
+                  <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.moveListItem(field.path, i, i + 1)" [disabled]="i === list(field.path).length - 1" aria-label="Bajar">
                     <i class="bi bi-chevron-down" aria-hidden="true"></i>
                   </button>
-                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.duplicateListItem(field.path, i)" aria-label="Duplicar">
+                  <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.duplicateListItem(field.path, i)" aria-label="Duplicar">
                     <i class="bi bi-copy" aria-hidden="true"></i>
                   </button>
-                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.removeListItem(field.path, i)" aria-label="Quitar">
+                  <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.removeListItem(field.path, i)" aria-label="Quitar">
                     <i class="bi bi-trash" aria-hidden="true"></i>
                   </button>
                 </span>
@@ -236,15 +244,13 @@
             <p class="empty">Aún no hay {{ field.label.toLowerCase() }}.</p>
           }
           <button type="button" class="admin-btn-ghost add" (click)="cms.addListItem(field.path)">
-            <i class="bi bi-plus-lg" aria-hidden="true"></i>
             {{ add(field.label) }}
           </button>
         </section>
       }
       @case ('group') {
-        <details class="box group" open>
+        <details class="group" open>
           <summary>
-            <i class="bi" [ngClass]="icon(field.kind)" aria-hidden="true"></i>
             <span>{{ field.label }}</span>
             <i class="bi bi-chevron-down chev" aria-hidden="true"></i>
           </summary>

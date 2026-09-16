@@ -4,7 +4,7 @@ import { Component, input } from '@angular/core';
   selector: 'app-cms-field-row',
   standalone: true,
   template: `
-    <div class="box field">
+    <div class="field">
       @if (controlId()) {
         <label [attr.for]="controlId()">{{ label() }}</label>
       } @else {
@@ -16,7 +16,7 @@ import { Component, input } from '@angular/core';
       }
       @if (hint()) {
         <details class="help">
-          <summary aria-label="Ayuda">?</summary>
+          <summary>Ayuda</summary>
           <p>{{ hint() }}</p>
         </details>
       }

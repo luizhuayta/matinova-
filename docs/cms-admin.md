@@ -40,15 +40,37 @@ Roles:
 
 1. **Ver / Editar** — En Ver la preview se ve limpia. En Editar, un clic en un texto o foto abre esa parte en el panel.
 2. Estado siempre visible: **Guardado** / **Guardando…** / **Cambios sin publicar**.
-3. Los cambios se guardan solos en el **borrador** (unos 2 s). **Guardar borrador** es secundario.
+3. Los cambios se guardan solos en el **borrador** (unos 2 s). **Guardar** es secundario.
 4. **Publicar** (solo admin) pide confirmación: “esto lo verá todo el mundo”.
 5. Vista previa: enlace temporal (~2 h) para ver el borrador como la web real, con `?preview=…`.
-6. Deshacer / Rehacer en la barra. Quitar un ítem de lista: aviso **Eliminado — Deshacer** (5 s).
-7. Lista **Cambios sin publicar** en español; si publicar falla, el error es clicable y lleva al hueco.
+6. Deshacer / Rehacer en la barra. Quitar un ítem de lista o una imagen: aviso **Eliminado — Deshacer** (5 s).
+7. Un solo aviso a la vez (error > conflicto > deshacer > estado). Si publicar falla, el error es clicable y lleva al hueco.
+8. **Tour de primera visita** (4 pasos) al abrir un editor. Se puede saltar; **Cómo funciona** lo vuelve a abrir.
 
 Páginas con schema explícito (labels y orden del panel): **Inicio** y **Apariencia del sitio**. El resto del sitio se edita igual, con nombres inferidos del JSON.
 
 En Inicio se puede reordenar u ocultar secciones (Banner, Quiénes somos, tarjetas, servicios, innovadores, opiniones), pero no inventar tipos nuevos ni dejar la home sin ninguna sección visible.
+
+---
+
+## Diseño del panel
+
+El panel es una herramienta (modo Operate). La web pública no comparte su tipografía ni su paleta.
+
+Tokens en `frontend/src/app/admin/admin-theme.scss`, solo bajo `.admin-root` y `.login-host`:
+
+| Token | Uso |
+|-------|-----|
+| `--admin-font` | Stack del sistema (`ui-sans-serif`, Segoe UI, Roboto). No Poppins. |
+| `--admin-ink` `#14181f` | Texto, menú, acción primaria (Entrar / Publicar) |
+| `--admin-paper` `#f3f1ee` | Fondo |
+| `--admin-mark` `#ff6600` | Marcador de selección (ítem activo, campo enfocado en el inspector) |
+| `--admin-mark-ink` `#7a3200` | Texto sobre tinte naranja |
+| Radios | `6px` controles, `10px` paneles |
+
+La preview de una página fija `--admin-public-font` (Poppins) en `.preview-frame` para no heredar la fuente del panel.
+
+Iconos solo cuando sustituyen texto (deshacer, dispositivos, arrastrar, borrar). El menú y las listas de páginas van sin iconos.
 
 ---
 
@@ -66,6 +88,7 @@ El admin se carga **lazy** (`app.routes.ts`). Quill (textos legales) y el arrast
 | `admin-shell.ts` | Menú lateral: Páginas, Mensajes, Imágenes |
 | `admin-pages.ts` | Listado |
 | `page-editor.ts` / `.html` | Preview (escritorio / tablet / celular) + inspector |
+| `admin-tour.ts` | Tour de 4 pasos en la primera visita al editor |
 | `cms-inspector.ts` | Panel automático a partir del schema o del JSON |
 | `cms-field-row.ts` | Envoltorio repetido del inspector (label, ayuda `?`, aviso de largo) |
 | `cms-image-field.ts` | Subir / elegir / quitar foto, alt, “es decorativa” |

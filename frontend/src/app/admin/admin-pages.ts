@@ -10,10 +10,10 @@ import { AdminPageList } from './admin-page-list';
   template: `
     <section class="wrap">
       <h1>Páginas</h1>
-      <p class="admin-lead">Abre una página para editar sus componentes: textos, fotos y listas.</p>
+      <p class="admin-lead">Abre una para cambiar textos, fotos y listas.</p>
 
       @if (loading()) {
-        <div class="admin-group">
+        <div class="admin-group" aria-busy="true">
           <div class="admin-skel"></div>
           <div class="admin-skel"></div>
         </div>

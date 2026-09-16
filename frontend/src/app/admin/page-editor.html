@@ -1,78 +1,87 @@
 <section class="editor">
   <header class="editor-bar">
     <div class="editor-title">
-      <a class="back admin-link" routerLink="/admin/paginas">
-        <i class="bi bi-arrow-left" aria-hidden="true"></i>
-        Páginas
-      </a>
+      <a class="back admin-link" routerLink="/admin/paginas">Páginas</a>
       <h1>{{ title() }}</h1>
-      <p>En Editar, un clic en la página abre esa parte en el panel. En Ver ves la página sin marcas.</p>
     </div>
     <div class="editor-actions">
-      <div class="mode-toggle" role="group" aria-label="Modo de la vista">
-        <button type="button" [class.active]="!editor.editMode()" (click)="setEditing(false)">Ver</button>
-        <button type="button" [class.active]="editor.editMode()" (click)="setEditing(true)">Editar</button>
+      <div class="admin-seg" role="group" aria-label="Modo de la vista" data-tour="mode">
+        <button type="button" [class.active]="!editor.editMode()" [attr.aria-pressed]="!editor.editMode()" (click)="setEditing(false)">Ver</button>
+        <button type="button" [class.active]="editor.editMode()" [attr.aria-pressed]="editor.editMode()" (click)="setEditing(true)">Editar</button>
       </div>
-      <p class="save-state" [attr.data-state]="saveState()">{{ saveState() }}</p>
-      <div class="devices" role="group" aria-label="Tamaño de vista">
-        <button type="button" [class.active]="editor.device() === 'desktop'" (click)="setDevice('desktop')">
+      <p class="save-state" data-tour="status" [attr.data-state]="saveState()">{{ saveState() }}</p>
+      <div class="icon-tools" role="group" aria-label="Herramientas">
+        <button type="button" class="admin-icon-btn" (click)="cms.undo()" [disabled]="!cms.canUndo()" aria-label="Deshacer">
+          <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="admin-icon-btn" (click)="cms.redo()" [disabled]="!cms.canRedo()" aria-label="Rehacer">
+          <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
+        </button>
+        <button type="button" class="admin-icon-btn" (click)="previewPublic()" aria-label="Vista previa">
+          <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+        </button>
+      </div>
+      <div class="admin-seg" role="group" aria-label="Tamaño de vista">
+        <button
+          type="button"
+          [class.active]="editor.device() === 'desktop'"
+          [attr.aria-pressed]="editor.device() === 'desktop'"
+          (click)="setDevice('desktop')"
+          aria-label="Escritorio">
           <i class="bi bi-display" aria-hidden="true"></i>
-          Escritorio
         </button>
-        <button type="button" [class.active]="editor.device() === 'tablet'" (click)="setDevice('tablet')">
+        <button
+          type="button"
+          [class.active]="editor.device() === 'tablet'"
+          [attr.aria-pressed]="editor.device() === 'tablet'"
+          (click)="setDevice('tablet')"
+          aria-label="Tablet">
           <i class="bi bi-tablet" aria-hidden="true"></i>
-          Tablet
         </button>
-        <button type="button" [class.active]="editor.device() === 'mobile'" (click)="setDevice('mobile')">
+        <button
+          type="button"
+          [class.active]="editor.device() === 'mobile'"
+          [attr.aria-pressed]="editor.device() === 'mobile'"
+          (click)="setDevice('mobile')"
+          aria-label="Celular">
           <i class="bi bi-phone" aria-hidden="true"></i>
-          Celular
         </button>
       </div>
-      <button type="button" class="admin-btn-ghost" (click)="cms.undo()" [disabled]="!cms.canUndo()">Deshacer</button>
-      <button type="button" class="admin-btn-ghost" (click)="cms.redo()" [disabled]="!cms.canRedo()">Rehacer</button>
-      <button type="button" class="admin-btn-ghost" (click)="previewPublic()">Vista previa</button>
-      <button type="button" class="admin-btn-ghost" (click)="save()" [disabled]="cms.saving() || !cms.dirty()">
-        {{ cms.saving() ? 'Guardando…' : 'Guardar borrador' }}
-      </button>
-      @if (canPublish()) {
-        <button type="button" class="admin-btn-primary" (click)="publish()" [disabled]="cms.saving()">Publicar</button>
-      }
+      <div class="publish-cluster" data-tour="publish">
+        <button type="button" class="admin-btn-ghost" (click)="save()" [disabled]="cms.saving() || !cms.dirty()">
+          {{ cms.saving() ? 'Guardando…' : 'Guardar' }}
+        </button>
+        @if (canPublish()) {
+          <button type="button" class="admin-btn-primary" (click)="publish()" [disabled]="cms.saving()">Publicar</button>
+        }
+      </div>
     </div>
   </header>
 
-  @if (cms.dirty()) {
-    <p class="admin-banner info">Hay cambios sin guardar. Se guardan solos a los 2 segundos.</p>
-  }
-  @if (cms.hasDraft()[slug()] && !cms.dirty()) {
-    <p class="admin-banner info">Hay un borrador. La web pública sigue mostrando la última versión publicada.</p>
-  }
-  @if (status()) {
-    <p class="admin-banner info">{{ status() }}</p>
-  }
-  @if (cms.removeToast()) {
-    <p class="admin-banner info" role="status">
-      {{ cms.removeToast() }}
-      <button type="button" class="admin-btn-ghost" (click)="cms.undoRemove()">Deshacer</button>
+  @if (notice(); as n) {
+    <p
+      class="admin-banner"
+      [class.error]="n.kind === 'error'"
+      [class.info]="n.kind === 'info'"
+      [class.ok]="n.kind === 'ok'"
+      [attr.role]="n.kind === 'error' ? 'alert' : 'status'">
+      @if (n.action === 'goto' && n.path) {
+        <button type="button" class="admin-link" (click)="goToPath(n.path)">{{ n.text }}</button>
+      } @else {
+        <span>{{ n.text }}</span>
+      }
+      @if (n.action === 'undo') {
+        <button type="button" class="admin-btn-ghost" (click)="cms.undoRemove()">Deshacer</button>
+      }
+      @if (n.action === 'reload') {
+        <button type="button" class="admin-btn-ghost" (click)="reload()">Recargar</button>
+      }
     </p>
-  }
-  @if (cms.fieldError(); as err) {
-    <p class="admin-banner error" role="alert">
-      <button type="button" class="admin-link" (click)="goToPath(err.path)">{{ err.message }}</button>
-    </p>
-  }
-  @if (error() || cms.conflict()) {
-    <p class="admin-banner error" role="alert">
-      {{ error() || cms.conflict() }}
-      <button type="button" class="admin-btn-ghost" (click)="reload()">Recargar</button>
-    </p>
-  }
-  @if (editor.uploading()) {
-    <p class="admin-banner info">La foto se está ajustando…</p>
   }
 
   <div class="editor-body">
     <div class="preview-pane">
-      <div class="preview-wrap" #previewWrap>
+      <div class="preview-wrap" #previewWrap data-tour="preview">
         <div
           class="preview-stage"
           [class.is-device]="editor.device() !== 'desktop'"
@@ -108,18 +117,18 @@
 
     <aside class="side-panel" [class.is-viewing]="!editor.editMode()">
       <header class="side-head">
-        <h2>Contenido</h2>
-        @if (!editor.editMode()) {
-          <p>Estás en Ver. Pasa a Editar para cambiar textos y fotos.</p>
-        } @else {
-          <p>Cada caja es una parte de la página. Los cambios se guardan solos en el borrador.</p>
-        }
+        <div class="side-title">
+          <h2>Contenido</h2>
+          <div class="side-tools">
+            <button type="button" class="admin-link" (click)="replayTour()">Cómo funciona</button>
+            <button type="button" class="admin-btn-ghost" (click)="toggleRevisions()">
+              {{ showRevisions() ? 'Ocultar revisiones' : 'Revisiones' }}
+            </button>
+          </div>
+        </div>
         @if (isLibro()) {
-          <p>Los datos del reclamo los pide la ley; no se pueden quitar. Sí puedes cambiar textos, RUC y el correo.</p>
+          <p class="hint">Los datos del reclamo los pide la ley; no se pueden quitar.</p>
         }
-        <button type="button" class="admin-btn-ghost" (click)="toggleRevisions()">
-          {{ showRevisions() ? 'Ocultar revisiones' : 'Revisiones' }}
-        </button>
       </header>
       @if (changeLines().length > 0) {
         <details class="changes" open>
@@ -150,4 +159,5 @@
       <app-cms-inspector />
     </aside>
   </div>
+  <app-admin-tour [canPublish]="canPublish()" (activeChange)="onTourActive($event)" />
 </section>

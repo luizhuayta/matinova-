@@ -1,6 +1,9 @@
 @use './app/admin/admin-theme.scss';
 @use './styles/bp' as *;
 
+// Admin tokens live in admin-theme.scss and apply only under .admin-root / .login-host.
+
+
 // ============================================
 // SISTEMA DE DISEÑO CENTRALIZADO
 // ============================================

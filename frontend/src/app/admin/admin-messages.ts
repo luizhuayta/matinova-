@@ -14,14 +14,14 @@ type MessageFilter = 'all' | 'contacto' | 'reclamacion';
       <h1>Mensajes recibidos</h1>
       <p class="admin-lead">Consultas de contacto y hojas del libro de reclamaciones.</p>
 
-      <div class="filters" role="tablist" aria-label="Filtrar mensajes">
-        <button type="button" role="tab" [attr.aria-selected]="filter() === 'all'" [class.active]="filter() === 'all'" (click)="filter.set('all')">Todos</button>
-        <button type="button" role="tab" [attr.aria-selected]="filter() === 'contacto'" [class.active]="filter() === 'contacto'" (click)="filter.set('contacto')">Contacto</button>
-        <button type="button" role="tab" [attr.aria-selected]="filter() === 'reclamacion'" [class.active]="filter() === 'reclamacion'" (click)="filter.set('reclamacion')">Reclamaciones</button>
+      <div class="admin-seg" role="group" aria-label="Filtrar mensajes">
+        <button type="button" [attr.aria-pressed]="filter() === 'all'" [class.active]="filter() === 'all'" (click)="filter.set('all')">Todos</button>
+        <button type="button" [attr.aria-pressed]="filter() === 'contacto'" [class.active]="filter() === 'contacto'" (click)="filter.set('contacto')">Contacto</button>
+        <button type="button" [attr.aria-pressed]="filter() === 'reclamacion'" [class.active]="filter() === 'reclamacion'" (click)="filter.set('reclamacion')">Reclamaciones</button>
       </div>
 
       @if (loading()) {
-        <div class="admin-group">
+        <div class="admin-group" aria-busy="true">
           <div class="admin-skel"></div>
           <div class="admin-skel"></div>
         </div>
@@ -37,8 +37,10 @@ type MessageFilter = 'all' | 'contacto' | 'reclamacion';
                 <span class="admin-chip" [class.warn]="item.kind === 'reclamacion'">
                   {{ item.kind === 'reclamacion' ? 'Reclamación' : 'Contacto' }}
                 </span>
-                <strong>{{ item.subject }}</strong>
-                <time>{{ item.created_at | date:'d/M/yyyy, H:mm' }}</time>
+                <span class="msg-copy">
+                  <strong>{{ item.subject }}</strong>
+                  <time>{{ item.created_at | date:'d/M/yyyy, H:mm' }}</time>
+                </span>
                 <i class="bi" [class.bi-chevron-down]="openId() !== item.id" [class.bi-chevron-up]="openId() === item.id" aria-hidden="true"></i>
               </button>
               @if (openId() === item.id) {
@@ -62,64 +64,38 @@ type MessageFilter = 'all' | 'contacto' | 'reclamacion';
   `,
   styles: [`
     .wrap { max-width: 860px; }
-    .filters {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-      margin: 1.1rem 0 0.35rem;
-      padding: 4px;
-      width: fit-content;
-      background: #fff;
-      border: 1px solid var(--admin-line);
-      border-radius: 12px;
-    }
-    .filters button {
-      min-height: 40px;
-      padding: 0 0.9rem;
-      border-radius: 8px;
-      background: transparent;
-      color: var(--admin-muted);
-      font-weight: 600;
-    }
-    .filters button.active {
-      background: var(--admin-blue-btn);
-      color: #fff;
-    }
-    .msg-list { list-style: none; padding: 0; margin: 1rem 0 0; display: grid; gap: 10px; }
-    li {
-      background: var(--admin-surface);
-      border: 1px solid var(--admin-line);
-      border-radius: 12px;
-      overflow: hidden;
-    }
+    .admin-seg { margin: 1.1rem 0 0.5rem; width: fit-content; }
+    .msg-list { list-style: none; padding: 0; margin: 0.75rem 0 0; display: grid; gap: 0; }
+    li { border-bottom: 1px solid var(--admin-line); }
     .msg-head {
       width: 100%;
       display: grid;
-      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      grid-template-columns: auto minmax(0, 1fr) auto;
       gap: 0.75rem;
       align-items: center;
       min-height: 56px;
-      padding: 0.7rem 1rem;
+      padding: 0.7rem 0;
       background: transparent;
       text-align: left;
+      font-family: inherit;
     }
+    .msg-copy { display: grid; gap: 0.1rem; min-width: 0; }
     .msg-head strong {
-      font-size: 0.95rem;
+      font-size: 0.9375rem;
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      color: var(--admin-text);
     }
-    .msg-head time { color: var(--admin-muted); font-size: 0.8rem; }
+    .msg-head time { color: var(--admin-muted); font-size: 0.75rem; }
     .msg-body {
       display: grid;
       gap: 0.75rem;
-      padding: 0 1rem 1rem;
-      border-top: 1px solid var(--admin-line);
-      padding-top: 0.9rem;
+      padding: 0 0 1rem;
     }
-    .ticket { font-weight: 600; color: var(--admin-text); }
+    .ticket { font-weight: 600; color: var(--admin-text); margin: 0; }
     .field dt {
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-weight: 600;
       color: var(--admin-muted);
       margin-bottom: 0.15rem;
@@ -128,12 +104,6 @@ type MessageFilter = 'all' | 'contacto' | 'reclamacion';
       margin: 0;
       color: var(--admin-text);
       white-space: pre-wrap;
-    }
-    @media (max-width: 640px) {
-      .msg-head {
-        grid-template-columns: auto minmax(0, 1fr) auto;
-      }
-      .msg-head time { display: none; }
     }
   `],
 })
