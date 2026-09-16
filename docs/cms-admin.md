@@ -1,6 +1,6 @@
 # CMS Matt Innova — qué se construyó
 
-Documentación del panel de administración y de la API, con el estado **actual** del código (CMS acoplado Angular + PHP, fases 0–8). No es un page builder: las plantillas Angular son fijas; el editor cambia textos, fotos y listas dentro de esas plantillas.
+Documentación del panel de administración y de la API, con el estado **actual** del código (CMS acoplado Angular + PHP, fases 0–8 y refactor interno R1–R5). No es un page builder: las plantillas Angular son fijas; el editor cambia textos, fotos y listas dentro de esas plantillas.
 
 Local: frontend `http://127.0.0.1:4200`, API `http://127.0.0.1:8000`, MariaDB en el puerto `3307`. Login de desarrollo: `admin` / `admin123` (cambiar en producción).
 
@@ -67,6 +67,7 @@ El admin se carga **lazy** (`app.routes.ts`). Quill (textos legales) y el arrast
 | `admin-pages.ts` | Listado |
 | `page-editor.ts` / `.html` | Preview (escritorio / tablet / celular) + inspector |
 | `cms-inspector.ts` | Panel automático a partir del schema o del JSON |
+| `cms-field-row.ts` | Envoltorio repetido del inspector (label, ayuda `?`, aviso de largo) |
 | `cms-image-field.ts` | Subir / elegir / quitar foto, alt, “es decorativa” |
 | `cms-rich-field.ts` | Texto con formato (privacidad / términos) |
 | `admin-messages.ts` | Bandeja |
@@ -78,13 +79,16 @@ El admin se carga **lazy** (`app.routes.ts`). Quill (textos legales) y el arrast
 |-------|---------|
 | `auth.service.ts` + `auth.guard.ts` | Sesión y rutas `/admin` |
 | `credentials.interceptor.ts` | Cookie + cabecera `X-CSRF-Token` |
-| `cms-content.service.ts` | Estado (signals), autosave, undo por parches, publish con `version` |
+| `cms-content.service.ts` | Estado (signals), autosave, guards editoriales, toasts |
+| `cms-api.service.ts` | HTTP: páginas, sitio, media, mensajes, preview |
+| `cms-history.service.ts` | Pilas deshacer / rehacer (`FieldPatch`) |
 | `cms-editor.service.ts` | Modo Ver/Editar y tamaño de preview |
 | `cms-selection.service.ts` | Clic en la página ↔ scroll en el panel |
 | `cms-schema.ts` | Schema de `inicio` y `sitio`, migraciones `schemaVersion`, labels |
-| `cms-fields.ts` | Inferencia para páginas sin schema |
+| `cms-fields.ts` | Inferencia y etiquetas solo para páginas **sin** schema |
+| `cms-editable-host.ts` | Base de las directivas editables (registro, hover, clic) |
 | `cms-seo.service.ts` | `<title>`, Open Graph, JSON-LD (no corre en modo edición) |
-| `cms-text` / `cms-image` / `cms-rich` | Anclas en las plantillas públicas (las mismas que el preview) |
+| `cms-text` / `cms-image` / `cms-rich` / `cms-list` | Anclas en las plantillas públicas (las mismas que el preview) |
 
 Las páginas (`home`, `contacto`, etc.) se pintan igual en la web y dentro del preview (`NgComponentOutlet`). No hay un HTML distinto “de admin”.
 
@@ -101,7 +105,13 @@ Las páginas (`home`, `contacto`, etc.) se pintan igual en la web y dentro del p
 
 ## Backend (PHP + MariaDB)
 
-Carpeta: `API/`. Entrada `index.php`. En Docker: `php -S` + `router.php`. En cPanel el DocumentRoot no debe ejecutar PHP dentro de `uploads/`.
+### Archivos PHP
+
+`index.php` enruta. `pages.php` solo despacha HTTP (`cms_write_guard`: sesión + CSRF + rate limit; publicar exige rol `admin`). Leer/guardar/publicar/restaurar está en `cms-doc.php` (página y `sitio` son el mismo documento con distinta tabla). Validación y `schemaVersion` viven en `cms-schema.php`.
+
+En Docker: `php -S` + `router.php`. En cPanel el DocumentRoot no debe ejecutar PHP dentro de `uploads/`.
+
+Contrato de tests (deben seguir pasando tras cambios internos): `frontend` → `npm run test:cms`; API → `php tests/verify-cms.php`.
 
 ### Tablas
 
@@ -150,11 +160,11 @@ Errores típicos: **401** sin sesión, **403** CSRF o rol insuficiente, **409** 
 
 ## Archivos clave (mapa rápido)
 
-**API:** `index.php`, `auth.php`, `pages.php`, `media.php`, `messages.php`, `security.php`, `sanitize.php`, `cms-schema.php`, `migrate.php`, `schema.sql`.
+**API:** `index.php`, `auth.php`, `pages.php` (rutas), `cms-doc.php` (documento), `cms-schema.php`, `media.php`, `messages.php`, `security.php`, `sanitize.php`, `migrate.php`, `schema.sql`.
 
-**Admin:** `frontend/src/app/admin/page-editor.*`, `cms-inspector.*`, `admin-shell.*`.
+**Admin:** `frontend/src/app/admin/page-editor.*`, `cms-inspector.*`, `cms-field-row.*`, `admin-shell.*`.
 
-**Motor:** `frontend/src/app/cms/cms-content.service.ts`, `cms-schema.ts`, `cms-selection.service.ts`.
+**Motor:** `frontend/src/app/cms/cms-content.service.ts`, `cms-api.service.ts`, `cms-history.service.ts`, `cms-schema.ts`, `cms-selection.service.ts`, `cms-editable-host.ts`.
 
 ---
 

@@ -1,6 +1,6 @@
-# Pendientes (fuera del plan de fases 1–8)
+# Pendientes (fuera del plan de fases 1–8 y del refactor R1–R5)
 
-Aplazado a propósito. No mezclar con “ejecuta la fase N”.
+Aplazado a propósito. No mezclar con “ejecuta la fase N” ni con el refactor interno.
 
 - **Rotar la contraseña SMTP** que estuvo en `API/contacto.php` / `API/reclamaciones.php` (ya no están en el árbol; sigue en el historial de git).
 
@@ -20,4 +20,13 @@ Aplazado a propósito. No mezclar con “ejecuta la fase N”.
 - Tour de 4 pasos (mencionado en el backlog F; el cromo de Fase 2 debe bastar para el primer uso).
 - Recorte de imagen tipo page-builder (Fase 6 lo aplazó: el recorte con ratio del hueco no cabe sin un editor nuevo).
 - Overlay de edición en WhatsApp / hrefs (`academyUrl`, redes) — no son texto de página.
-- Usar `cmsList` en plantillas públicas (hoy la directiva no tiene usos; reordenar es cosa del inspector).
+- Usar `cmsList` en plantillas públicas (hoy la directiva solo registra el nodo; reordenar es cosa del inspector).
+
+## Tras el refactor interno (R1–R5)
+
+No se hizo a propósito (el refactor era puro: mismas rutas, mismo panel, diseño público intacto):
+
+- Unificar el mapa de rutas PHP (`create_preview_token` / sitemap) con `SLUG_PATHS` del frontend.
+- Quitar reglas `.box.field` que quedaron en `cms-inspector.scss` (el control ya vive en `cms-field-row`).
+- Tests e2e / comparación visual automática del panel.
+- Cambiar quién puede restaurar revisiones (hoy basta con sesión; publicar sigue exigiendo rol `admin`).
