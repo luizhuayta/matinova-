@@ -5,3 +5,23 @@ API/uploads/*
 !API/uploads/.gitkeep
 API/tmp
 
+# Documentacion interna (no se sube a esta rama)
+docs/
+
+# Herramientas de IA / temporales
+.impeccable/
+.claude/
+.cursor/
+skills/
+
+# Editores y sistema
+.vscode/
+.idea/
+*.log
+.DS_Store
+Thumbs.db
+
+# Entornos locales
+.env
+.env.local
+
