@@ -7,6 +7,7 @@ require __DIR__ . '/security.php';
 require __DIR__ . '/sanitize.php';
 require __DIR__ . '/cms-schema.php';
 require __DIR__ . '/db.php';
+require __DIR__ . '/cms-doc.php';
 require __DIR__ . '/migrate.php';
 require __DIR__ . '/mailer.php';
 require __DIR__ . '/seed.php';
@@ -47,10 +48,8 @@ try {
         handle_auth($path, $method);
     }
     if ($path === '/site/publish' && $method === 'POST') {
-        require_role('admin');
-        require_csrf();
-        rate_limit('cms_write', 40, 60);
-        publish_document('sitio');
+        cms_write_guard(true);
+        cms_doc_publish('sitio');
     }
     if ($path === '/site') {
         handle_site($method);

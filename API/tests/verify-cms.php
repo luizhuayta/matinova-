@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 require __DIR__ . '/../sanitize.php';
 require __DIR__ . '/../cms-schema.php';
+require __DIR__ . '/../cms-doc.php';
 
 $failed = 0;
 function expect(bool $ok, string $label): void
@@ -84,5 +85,11 @@ $stale = cms_version_guard(4, 3);
 expect(($stale['status'] ?? 0) === 409 && ($stale['body']['version'] ?? 0) === 4, 'versión vieja es 409');
 expect(cms_version_guard(4, 4) === null, 'versión igual es ok');
 expect(cms_version_guard(4, '4') === null, 'versión numérica en string es ok');
+
+expect(cms_doc_not_found_message('sitio') === 'Sitio no encontrado', '404 sitio');
+expect(cms_doc_not_found_message('inicio') === 'Página no encontrada', '404 página');
+expect(cms_doc_save_conflict_message('sitio') === 'Alguien guardó el sitio antes. Recarga para no pisar cambios.', '409 save sitio');
+expect(cms_doc_save_conflict_message('inicio') === 'Alguien guardó esta página antes. Recarga para no pisar cambios.', '409 save página');
+expect(cms_doc_publish_conflict_message() === 'Alguien publicó o guardó antes. Recarga para no pisar cambios.', '409 publish');
 
 exit($failed > 0 ? 1 : 0);
