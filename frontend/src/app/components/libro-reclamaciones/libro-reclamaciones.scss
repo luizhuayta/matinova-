@@ -1,3 +1,5 @@
+@use '../../../styles/bp' as *;
+
 .libro-container {
   max-width: 800px;
   margin: 40px auto;
@@ -297,7 +299,7 @@ textarea {
   }
 }
 
-@media (max-width: 768px) {
+@include down(768px) {
   .libro-container {
     margin: 20px 12px;
     padding: 20px 16px;
@@ -344,7 +346,7 @@ textarea {
   }
 }
 
-@media (max-width: 480px) {
+@include down(480px) {
   .libro-container {
     margin: 10px 8px;
     padding: 16px 12px;

@@ -1,12 +1,13 @@
 <div class="libro-container">
   <div class="libro-header">
     <div class="logo-legal">
-      <img src="logo.svg" alt="Matt Innova Solution" class="legal-logo-img">
+      <img [src]="page()['logo'] || 'logo.svg'" [alt]="page()['company'] || 'Matt Innova Solution'" class="legal-logo-img" cmsImage="logo">
     </div>
     <div class="header-text">
-      <h2>Libro de Reclamaciones Virtual</h2>
-      <p class="company-info">Matt Innova Solution</p>
-      <p class="subtitle">Conforme a lo establecido en el Código de Protección y Defensa del Consumidor (Ley N° 29571) y su Reglamento.</p>
+      <h2 cmsText="title"></h2>
+      <p class="company-info" cmsText="company"></p>
+      <p class="company-ruc">RUC: <span cmsText="ruc"></span></p>
+      <p class="subtitle" cmsText="subtitle"></p>
     </div>
   </div>
 
@@ -124,10 +125,12 @@
     </fieldset>
 
     <div class="legal-disclaimer">
-      <p>La formulación del reclamo en esta hoja no impide acudir a otras vías de solución de controversias ni es requisito previo para interponer una denuncia ante el INDECOPI.</p>
-      <p>De conformidad con la Ley N° 29733 de Protección de Datos Personales, los datos registrados serán tratados con absoluta confidencialidad únicamente para la gestión y respuesta de su disconformidad dentro del plazo legal.</p>
+      <p cmsText="disclaimer1"></p>
+      <p cmsText="disclaimer2"></p>
     </div>
 
-    <button type="submit" class="btn-submit" [disabled]="!reclamacionesForm.valid || isLoading">{{ isLoading ? 'Enviando...' : 'Enviar Reclamación Virtual' }}</button>
+    <button type="submit" class="btn-submit" [disabled]="!reclamacionesForm.valid || isLoading">
+      {{ isLoading ? 'Enviando...' : (page()['submitLabel'] || 'Enviar Reclamación Virtual') }}
+    </button>
   </form>
 </div>

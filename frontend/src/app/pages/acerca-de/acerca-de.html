@@ -1,188 +1,100 @@
 <div class="acerca-container">
-
-  <!-- Hero Section -->
   <section class="about-hero">
     <div class="hero-overlay">
       <div class="container hero-content">
-        <span class="hero-badge">ACERCA DE NOSOTROS</span>
-        <h1>Innovación y Tecnología<br>al Servicio de tu Negocio</h1>
-        <p>Más de 30 años transformando empresas con soluciones digitales de vanguardia</p>
-        <button class="btn-hero" routerLink="/contacto">Contáctanos</button>
+        <span class="hero-badge" cmsText="heroBadge"></span>
+        <h1 cmsText="heroTitle"></h1>
+        <p cmsText="heroText"></p>
+        <button class="btn-hero" routerLink="/contacto" cmsText="heroCta"></button>
       </div>
     </div>
   </section>
 
-  <!-- Stats Section -->
   <section class="stats-section">
     <div class="container">
       <div class="stats-grid">
-        <div class="stat-card">
-          <div class="stat-icon">🎯</div>
-          <div class="stat-number">+30</div>
-          <div class="stat-label">Años de Experiencia</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">👥</div>
-          <div class="stat-number">10</div>
-          <div class="stat-label">Expertos Calificados</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">🏆</div>
-          <div class="stat-number">+4000</div>
-          <div class="stat-label">Clientes Felices</div>
-        </div>
-        <div class="stat-card">
-          <div class="stat-icon">💼</div>
-          <div class="stat-number">50</div>
-          <div class="stat-label">Proyectos Completados</div>
+        <div class="stat-card" *ngFor="let stat of stats(); let i = index">
+          <div class="stat-icon" [cmsText]="'stats.' + i + '.icon'"></div>
+          <div class="stat-number" [cmsText]="'stats.' + i + '.number'"></div>
+          <div class="stat-label" [cmsText]="'stats.' + i + '.label'"></div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- About Section -->
   <section class="about-section">
     <div class="container">
       <div class="about-content">
         <div class="about-image">
-          <img src="about-image.jpg" alt="Equipo MIS trabajando">
+          <img [src]="page()['aboutImage'] || 'about-image.jpg'" alt="Equipo MIS trabajando" cmsImage="aboutImage">
         </div>
         <div class="about-text">
-          <span class="section-tag">QUIENES SOMOS</span>
-          <h2>Soluciones TI que Transforman Negocios</h2>
-          <p>
-            Nuestra empresa tiene como objetivo principal impulsar el crecimiento de las empresas
-            mediante soluciones tecnológicas innovadoras y de alta calidad. Contamos con
-            un equipo de profesionales altamente capacitados y una amplia gama de servicios
-            adaptados a las necesidades de nuestros clientes.
-          </p>
+          <span class="section-tag" cmsText="aboutTag"></span>
+          <h2 cmsText="aboutTitle"></h2>
+          <p cmsText="aboutText"></p>
           <div class="features-list">
-            <div class="feature-item">
+            <div class="feature-item" *ngFor="let feature of features(); let i = index">
               <span class="feature-icon">✓</span>
-              <span>Experiencia comprobada en proyectos complejos</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-icon">✓</span>
-              <span>Enfoque personalizado en cada cliente</span>
-            </div>
-            <div class="feature-item">
-              <span class="feature-icon">✓</span>
-              <span>Innovación constante y compromiso con la calidad</span>
+              <span [cmsText]="'features.' + i"></span>
             </div>
           </div>
-          <button class="btn-primary" routerLink="/contacto">Saber Más</button>
+          <button class="btn-primary" routerLink="/contacto" cmsText="aboutCta"></button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Team Section -->
   <section class="team-section">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">NUESTRO EQUIPO</span>
-        <h2>Conoce a los Expertos de MIS</h2>
-        <p>Profesionales apasionados por la tecnología y la innovación</p>
+        <span class="section-tag" cmsText="teamTag"></span>
+        <h2 cmsText="teamTitle"></h2>
+        <p cmsText="teamText"></p>
       </div>
       <div class="team-grid">
-        <div class="team-card">
+        <div class="team-card" *ngFor="let member of team(); let i = index">
           <div class="team-image">
-            <img src="giovani.jpg" alt="Giovanni Risco Collazos">
+            <img [src]="member['image']" [alt]="member['name']" [cmsImage]="'team.' + i + '.image'">
           </div>
           <div class="team-info">
-            <h3>Giovanni Risco Collazos</h3>
-            <p class="team-role">Web Developer</p>
-            <div class="team-social">
-              <a href="#"><i class="bi bi-linkedin"></i></a>
-              <a href="#"><i class="bi bi-github"></i></a>
-            </div>
-          </div>
-        </div>
-        <div class="team-card">
-          <div class="team-image">
-            <img src="taya.jpg" alt="Pedro Alex Taya Yactayo">
-          </div>
-          <div class="team-info">
-            <h3>Pedro Alex Taya Yactayo</h3>
-            <p class="team-role">CEO, Founder</p>
-            <div class="team-social">
-              <a href="#"><i class="bi bi-linkedin"></i></a>
-              <a href="#"><i class="bi bi-github"></i></a>
-            </div>
+            <h3 [cmsText]="'team.' + i + '.name'"></h3>
+            <p class="team-role" [cmsText]="'team.' + i + '.role'"></p>
           </div>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Contact Info Section -->
   <section class="contact-info-section">
     <div class="container">
       <div class="contact-info-grid">
-        <div class="contact-info-card">
-          <div class="contact-icon">
-            <i class="bi bi-geo-alt-fill"></i>
-          </div>
-          <h3>Domicilio Legal</h3>
-          <p>Urb. Libertad Mz.I Lt.5 Calle Las Moras S/N<br>San Vicente - Cañete - Lima - Perú</p>
-        </div>
-        <div class="contact-info-card">
-          <div class="contact-icon">
-            <i class="bi bi-envelope-fill"></i>
-          </div>
-          <h3>Correo Electrónico</h3>
-          <p>contacto@mattinnovasolution.com</p>
-        </div>
-        <div class="contact-info-card">
-          <div class="contact-icon">
-            <i class="bi bi-telephone-fill"></i>
-          </div>
-          <h3>WhatsApp</h3>
-          <p>(+51) 992 422 219</p>
+        <div class="contact-info-card" *ngFor="let card of contactCards(); let i = index">
+          <div class="contact-icon"><i class="bi bi-geo-alt-fill"></i></div>
+          <h3 [cmsText]="'contactCards.' + i + '.title'"></h3>
+          <p [cmsText]="'contactCards.' + i + '.text'"></p>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- YouTube Section -->
   <section class="youtube-section">
     <div class="container">
       <div class="section-header">
-        <span class="section-tag">NOVEDADES</span>
-        <h2>Lo Último en YouTube</h2>
-        <p>Descubre nuestro contenido técnico y novedades</p>
+        <span class="section-tag" cmsText="videosTag"></span>
+        <h2 cmsText="videosTitle"></h2>
+        <p cmsText="videosText"></p>
       </div>
       <div class="videos-grid">
-        <div class="video-card">
+        <div class="video-card" *ngFor="let video of videos(); let i = index">
           <div class="video-wrapper">
-            <iframe
-              src="https://www.youtube.com/embed/RtNdTuCxWoI"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen>
-            </iframe>
+            <iframe [src]="embed(video['embed'])" title="YouTube" allowfullscreen></iframe>
           </div>
           <div class="video-info">
-            <div class="video-user">@mattinnovasolution</div>
-            <div class="video-title">Relacionamiento con Partner Microsoft Local y Tenant Microsoft 365</div>
-          </div>
-        </div>
-        <div class="video-card">
-          <div class="video-wrapper">
-            <iframe
-              src="https://www.youtube.com/embed/RtNdTuCxWoI"
-              frameborder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowfullscreen>
-            </iframe>
-          </div>
-          <div class="video-info">
-            <div class="video-user">@mattinnovasolution</div>
-            <div class="video-title">Relacionamiento con Partner Microsoft Local y Tenant Microsoft 365</div>
+            <div class="video-user" [cmsText]="'videos.' + i + '.user'"></div>
+            <div class="video-title" [cmsText]="'videos.' + i + '.title'"></div>
           </div>
         </div>
       </div>
     </div>
   </section>
-
 </div>

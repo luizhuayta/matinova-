@@ -1,247 +1,135 @@
 <div class="home-wrapper">
-  <section class="hero" [ngStyle]="{'background-image': 'url(' + slides[currentSlide].image + ')'}">
-    <div class="hero-overlay">
-
-      <div class="slider-indicators">
-        <div
-          *ngFor="let slide of slides; let i = index"
-          class="dot"
-          [class.active]="currentSlide === i"
-          (click)="setSlide(i)">
-        </div>
-      </div>
-
-      <div class="container hero-content">
-        <span class="badge">{{ slides[currentSlide].badge }}</span>
-        <h1>{{ slides[currentSlide].title }}</h1>
-        <button class="btn-primary" routerLink="/servicios/soluciones-ti">Aprender Más</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="about container">
-    <div class="about-grid">
-      <div class="about-img">
-        <img src="about-image.jpg" alt="Especialista TI trabajando">
-      </div>
-
-      <div class="about-text">
-        <span class="section-tag">QUIENES SOMOS</span>
-        <h2>Soluciones TI que Transforman</h2>
-        <p>
-          Nuestra empresa tiene como objetivo principal impulsar el crecimiento de las empresas
-          mediante soluciones tecnológicas innovadoras y de alta calidad, ya que contamos con
-          un equipo de profesionales altamente capacitados y una amplia gama de servicios
-          adaptados a las necesidades de nuestros clientes.
-        </p>
-        <button class="btn-read-more" routerLink="/acerca-de">Leer más</button>
-      </div>
-    </div>
-  </section>
-
-  <section class="contact-section container">
-  <div class="contact-grid">
-
-    <div class="info-card">
-      <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
-      <div class="text-box">
-        <h3>Domicilio Legal</h3>
-        <p>Urb. Libertad Mz.I Lt.5 Calle Las Moras S/N San Vicente - Cañete - Lima - Perú</p>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="icon-box"><i class="bi bi-envelope-fill"></i></div>
-      <div class="text-box">
-        <h3>Envíanos un Correo electrónico</h3>
-        <p>contacto@mattinnovasolution.com</p>
-      </div>
-    </div>
-
-    <div class="info-card">
-      <div class="icon-box"><i class="bi bi-telephone-fill"></i></div>
-      <div class="text-box">
-        <h3>WhatsApp</h3>
-        <p>(+51) 992 422 219</p>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-  <hr class="section-divider">
-
-  <section class="services-main container">
-  <span class="section-tag">QUÉ HACEMOS</span>
-  <h2 class="title-left">Ofrecemos Servicios</h2>
-
-  <div class="services-grid">
-    <div class="service-card">
-      <div class="card-img">
-        <img src="imac.jpg" alt="Consultoría TI">
-      </div>
-      <div class="card-body">
-        <h3>Consultoría De Informática Y De Gestión De Instalaciones Informáticas</h3>
-        <p>Ofrecemos servicios de hosting y dominio, diseño y creación de páginas web, desarrollo de sistemas informáticos, implementación de redes, y mucho más.</p>
-      </div>
-    </div>
-
-    <div class="service-card">
-      <div class="card-img">
-        <img src="imas.jpg" alt="Tecnología">
-      </div>
-      <div class="card-body">
-        <h3>Actividades De Tecnología De La Información Y De Servicios Informáticos</h3>
-        <p>Nos especializamos en la automatización de procesos, integración y mantenimiento de sistemas informáticos, soporte técnico, y arquitectura de soluciones TI.</p>
-      </div>
-    </div>
-
-    <div class="service-card">
-      <div class="card-img">
-        <img src="imat.jpg" alt="Consultoría Gestión">
-      </div>
-      <div class="card-body">
-        <h3>Actividades De Consultoría De Gestión</h3>
-        <p>Brindamos nuevos productos y servicios de TI, implementación de ecosistemas de trabajo digital colaborativo, y desarrollo de nuevos sistemas informáticos.</p>
-      </div>
-    </div>
-
-    <div class="service-card">
-      <div class="card-img">
-        <img src="integridad.jpg" alt="Capacitaciones">
-      </div>
-      <div class="card-body">
-        <h3>Capacitaciones y Cursos con Certificación</h3>
-        <p>Ofrecemos cursos especializados en tecnología, impartidos por expertos, con certificaciones que avalan tus conocimientos y mejoran tu perfil profesional.</p>
-      </div>
-    </div>
-
-    <div class="service-card">
-      <div class="card-img">
-        <img src="ecommerce.jpeg" alt="Ecommerce">
-      </div>
-      <div class="card-body">
-        <h3>Pagina Ecommerce para tu negocio</h3>
-        <p>Creamos tu tienda en línea con diseño responsivo, hosting y dominio incluidos. Automatiza tus ventas, integra pasarelas de pago y gestiona tu catálogo de productos de manera fácil y rápida.</p>
-      </div>
-    </div>
-
-    <div class="service-card">
-      <div class="card-img">
-        <img src="software.png" alt="Web">
-      </div>
-      <div class="card-body">
-        <h3>Creacion de Paginas Web</h3>
-        <p>Ofrecemos planes para crear tu página web, con dominio incluido y funciones como subdominios y correos corporativos ilimitados, adaptados a tus necesidades.</p>
-      </div>
-    </div>
-  </div>
-</section>
-
-  <hr class="section-divider">
-
-  <section class="innovative-services">
-  <div class="container innovative-grid">
-
-    <div class="innovative-intro">
-      <span class="section-tag-light">SERVICIOS INNOVADORES</span>
-      <h2>Conozca Nuestro Servicios</h2>
-      <p>
-        En Matt Innova Solution, brindamos soluciones tecnológicas integrales:
-        desde el diseño web y la implementación de sistemas, hasta la
-        automatización y la seguridad de la información.
-      </p>
-      <button class="btn-discover" routerLink="/servicios">Descubrir más</button>
-    </div>
-
-    <div class="innovative-carousel-viewport">
-      <div class="innovative-items"
-           [ngStyle]="{'transform': 'translateX(-' + (currentServiceSlide * 33.33) + '%)'}">
-
-        <div class="mini-card" *ngFor="let service of innovativeServices">
-          <div class="card-img">
-            <img [src]="service.img" [alt]="service.title">
-          </div>
-          <div class="card-info">
-            <h4>{{ service.title }}</h4>
-            <p>{{ service.desc }}</p>
-          </div>
-        </div>
-      </div>
-
-      <div class="service-indicators">
-        <ng-container *ngFor="let service of innovativeServices; let i = index">
-          <div *ngIf="i < innovativeServices.length - 2"
-              class="service-dot"
-              [class.active]="currentServiceSlide === i"
-              (click)="setServiceSlide(i)">
-          </div>
-        </ng-container>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-  <hr class="section-divider">
-
-  <section class="testimonials-section">
-    <div class="container testimonials-grid">
-
-      <div class="testimonials-intro">
-        <span class="section-tag">CLIENTES SATISFECHOS</span>
-        <h2>Opiniones positivas y casos de éxito en implementación de TI</h2>
-        <p>
-          En MIS ha sido fundamental en la mejora de nuestras soluciones TI.
-          Su atención personalizada y soporte excepcional nos han ayudado a
-          alcanzar nuestros objetivos tecnológicos con gran éxito.
-        </p>
-        <button class="btn-cta-testimonials" routerLink="/contacto">Aprender Más</button>
-      </div>
-
-      <div class="testimonials-carousel">
-        <div class="testimonial-track" [ngStyle]="{'transform': 'translateX(-' + (currentTestimonialSlide * 50) + '%)'}">
-
-          <div class="testimonial-card" *ngFor="let item of testimonials">
-            <div class="testimonial-bubble">
-              <div class="quote-icon">
-                <i class="bi bi-quote"></i>
-              </div>
-              <p>{{ item.text }}</p>
-              <div class="rating">
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
-                <i class="bi bi-star-fill"></i>
+  @for (sec of visibleSections(); track $index + '-' + sec.type) {
+    @switch (sec.type) {
+      @case ('hero') {
+        <section class="hero" [ngStyle]="{'background-image': 'url(' + heroImage() + ')'}">
+          <div class="hero-overlay">
+            <div class="slider-indicators">
+              <div
+                *ngFor="let slide of slides(); let i = index"
+                class="dot"
+                [class.active]="currentSlide === i"
+                (click)="setSlide(i)">
               </div>
             </div>
-            <div class="client-info">
-              <div class="client-avatar">
-                <img [src]="item.logo" [alt]="item.client">
-              </div>
-              <div class="client-details">
-                <h4>{{ item.client }}</h4>
-                <span class="client-role">Cliente Satisfecho</span>
-                <span class="client-company">Matt Innova Solution</span>
+            <div class="container hero-content">
+              <span class="badge" [cmsText]="'slides.' + currentSlide + '.badge'"></span>
+              <h1 [cmsText]="'slides.' + currentSlide + '.title'"></h1>
+              @if (heroCtaInternal()) {
+                <a class="btn-primary" [routerLink]="heroCtaLink()" cmsText="heroCta"></a>
+              } @else {
+                <a class="btn-primary" [href]="heroCtaLink()" cmsText="heroCta"></a>
+              }
+              @if (editor.editMode()) {
+                <img class="cms-hero-pick" [cmsImage]="'slides.' + currentSlide + '.image'" [src]="heroImage()" alt="Foto del banner">
+              }
+            </div>
+          </div>
+        </section>
+      }
+      @case ('about') {
+        <section class="about container">
+          <div class="about-grid">
+            <div class="about-img">
+              <img [src]="about()['image'] || 'about-image.jpg'" [alt]="about()['imageAlt'] || ''" cmsImage="about.image">
+            </div>
+            <div class="about-text">
+              <span class="section-tag" cmsText="about.tag"></span>
+              <h2 cmsText="about.title"></h2>
+              <p cmsText="about.text"></p>
+              <a class="btn-read-more" routerLink="/acerca-de" cmsText="about.cta"></a>
+            </div>
+          </div>
+        </section>
+      }
+      @case ('contactCards') {
+        <section class="contact-section container">
+          <div class="contact-grid">
+            <div class="info-card" *ngFor="let card of contactCards(); let i = index">
+              <div class="icon-box"><i class="bi bi-geo-alt-fill"></i></div>
+              <div class="text-box">
+                <h3 [cmsText]="'contactCards.' + i + '.title'"></h3>
+                <p [cmsText]="'contactCards.' + i + '.text'"></p>
               </div>
             </div>
           </div>
-
-        </div>
-
-        <div class="testimonial-indicators">
-          <ng-container *ngFor="let item of testimonials; let i = index">
-            <div *ngIf="i < testimonials.length - 3"
-                 class="dot"
-                 [class.active]="currentTestimonialSlide === i"
-                 (click)="setTestimonialSlide(i)">
+        </section>
+      }
+      @case ('services') {
+        <hr class="section-divider">
+        <section class="services-main container">
+          <span class="section-tag" cmsText="services.tag"></span>
+          <h2 class="title-left" cmsText="services.title"></h2>
+          <div class="services-grid">
+            <div class="service-card" *ngFor="let card of serviceCards(); let i = index">
+              <div class="card-img">
+                <img [src]="card['img']" [alt]="card['alt'] || card['title']" [cmsImage]="'services.cards.' + i + '.img'">
+              </div>
+              <div class="card-body">
+                <h3 [cmsText]="'services.cards.' + i + '.title'"></h3>
+                <p [cmsText]="'services.cards.' + i + '.text'"></p>
+              </div>
             </div>
-          </ng-container>
-        </div>
-      </div>
-
-    </div>
-  </section>
-
+          </div>
+        </section>
+      }
+      @case ('innovative') {
+        <hr class="section-divider">
+        <section class="innovative-services">
+          <div class="container innovative-grid">
+            <div class="innovative-intro">
+              <span class="section-tag-light" cmsText="innovative.tag"></span>
+              <h2 cmsText="innovative.title"></h2>
+              <p cmsText="innovative.text"></p>
+              <a class="btn-discover" routerLink="/servicios" cmsText="innovative.cta"></a>
+            </div>
+            <div class="innovative-carousel-viewport">
+              <div class="innovative-items" [ngStyle]="{'transform': 'translateX(-' + (currentServiceSlide * 33.33) + '%)'}">
+                <div class="mini-card" *ngFor="let service of innovativeItems(); let i = index">
+                  <div class="card-img">
+                    <img [src]="service['img']" [alt]="service['title']" [cmsImage]="'innovative.items.' + i + '.img'">
+                  </div>
+                  <div class="card-info">
+                    <h4 [cmsText]="'innovative.items.' + i + '.title'"></h4>
+                    <p [cmsText]="'innovative.items.' + i + '.desc'"></p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+      @case ('testimonials') {
+        <hr class="section-divider">
+        <section class="testimonials-section">
+          <div class="container testimonials-grid">
+            <div class="testimonials-intro">
+              <span class="section-tag" cmsText="testimonials.tag"></span>
+              <h2 cmsText="testimonials.title"></h2>
+              <p cmsText="testimonials.text"></p>
+              <a class="btn-cta-testimonials" routerLink="/contacto" cmsText="testimonials.cta"></a>
+            </div>
+            <div class="testimonials-carousel">
+              <div class="testimonial-track" [ngStyle]="{'transform': 'translateX(-' + (currentTestimonialSlide * 50) + '%)'}">
+                <div class="testimonial-card" *ngFor="let item of testimonialItems(); let i = index">
+                  <div class="testimonial-bubble">
+                    <div class="quote-icon"><i class="bi bi-quote"></i></div>
+                    <p [cmsText]="'testimonials.items.' + i + '.text'"></p>
+                  </div>
+                  <div class="client-info">
+                    <div class="client-avatar">
+                      <img [src]="item['logo']" [alt]="item['client']" [cmsImage]="'testimonials.items.' + i + '.logo'">
+                    </div>
+                    <div class="client-details">
+                      <h4 [cmsText]="'testimonials.items.' + i + '.client'"></h4>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+      }
+    }
+  }
 </div>

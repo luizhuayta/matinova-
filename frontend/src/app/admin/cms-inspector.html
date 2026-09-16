@@ -1,0 +1,344 @@
+@if (!rootPath()) {
+  <div class="insp-search">
+    <label class="sr-only" for="cms-search">Buscar en el contenido</label>
+    <i class="bi bi-search" aria-hidden="true"></i>
+    <input
+      id="cms-search"
+      type="search"
+      placeholder="Buscar título, foto, botón…"
+      [ngModel]="query()"
+      (ngModelChange)="query.set($event)">
+  </div>
+}
+
+<div class="insp" [class.nested]="!!rootPath()">
+  @if (visibleFields().length === 0) {
+    <p class="empty">No hay nada con ese nombre. Borra la búsqueda o prueba otra palabra.</p>
+  }
+
+  @for (field of visibleFields(); track field.path) {
+    <div
+      [id]="id(field.path)"
+      (focusin)="onFocus(field.path)"
+      [class.cms-field-active]="selection.selectedPath() === field.path">
+    @switch (field.kind) {
+      @case ('bool') {
+        <label class="switch-row">
+          <span>{{ field.label }}</span>
+          <input
+            type="checkbox"
+            role="switch"
+            [attr.aria-checked]="bool(field.path)"
+            [checked]="bool(field.path)"
+            (change)="setBool(field.path, $any($event.target).checked)">
+        </label>
+        @if (field.hint) {
+          <details class="help">
+            <summary aria-label="Ayuda">?</summary>
+            <p>{{ field.hint }}</p>
+          </details>
+        }
+      }
+      @case ('number') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-n'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-n'"
+            type="number"
+            min="0"
+            [ngModel]="num(field.path)"
+            (ngModelChange)="setNum(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('image') {
+        <div class="box field">
+          <span class="lbl">{{ field.label }}</span>
+          <app-cms-image-field [path]="field.path" />
+        </div>
+      }
+      @case ('rich') {
+        <div class="box field">
+          <span class="lbl">{{ field.label }}</span>
+          <details class="help">
+            <summary aria-label="Ayuda">?</summary>
+            <p>Puedes poner negrita, listas y enlaces.</p>
+          </details>
+          <app-cms-rich-field [path]="field.path" />
+        </div>
+      }
+      @case ('area') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <textarea
+            [id]="id(field.path) + '-i'"
+            [attr.rows]="field.rows || 5"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)"></textarea>
+          @if (lengthNote(field); as note) {
+            <p class="len-note">{{ note }}</p>
+          }
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('url') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-i'"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('email') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-i'"
+            type="email"
+            inputmode="email"
+            autocomplete="email"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('tel') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-i'"
+            type="tel"
+            inputmode="tel"
+            autocomplete="tel"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('link') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-i'"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            placeholder="/contacto o https://"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('embed') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-i'"
+            type="url"
+            inputmode="url"
+            autocomplete="off"
+            placeholder="https://www.youtube.com/embed/…"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          } @else {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>Pega el enlace del video de YouTube.</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('select') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <select
+            [id]="id(field.path) + '-i'"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)">
+            @for (opt of field.options || []; track opt.value) {
+              <option [value]="opt.value">{{ opt.label }}</option>
+            }
+          </select>
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('color') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-i'"
+            type="color"
+            [ngModel]="str(field.path) || '#0066ff'"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('text') {
+        <div class="box field">
+          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+          <input
+            [id]="id(field.path) + '-i'"
+            type="text"
+            [ngModel]="str(field.path)"
+            (ngModelChange)="setStr(field.path, $event)"
+            (blur)="end(field.path)">
+          @if (lengthNote(field); as note) {
+            <p class="len-note">{{ note }}</p>
+          }
+          @if (field.hint) {
+            <details class="help">
+              <summary aria-label="Ayuda">?</summary>
+              <p>{{ field.hint }}</p>
+            </details>
+          }
+        </div>
+      }
+      @case ('strings') {
+        <section class="box stack">
+          <header class="box-head">
+            <i class="bi" [ngClass]="icon(field.kind)" aria-hidden="true"></i>
+            <h3>{{ field.label }}</h3>
+            <span class="count">{{ strings(field.path).length }}</span>
+          </header>
+          @for (item of strings(field.path); track $index) {
+            <div class="string-row">
+              <input
+                type="text"
+                [attr.aria-label]="field.label + ' ' + ($index + 1)"
+                [ngModel]="item"
+                (ngModelChange)="setStringItem(field.path, $index, $event)"
+                (blur)="end(field.path + '.' + $index)">
+              <button type="button" class="icon-btn" (click)="cms.removeListItem(field.path, $index)" aria-label="Quitar">
+                <i class="bi bi-trash" aria-hidden="true"></i>
+              </button>
+            </div>
+          }
+          @if (strings(field.path).length === 0) {
+            <p class="empty">Aún no hay elementos.</p>
+          }
+          <button type="button" class="admin-btn-ghost add" (click)="cms.addStringItem(field.path)">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            {{ add(field.label) }}
+          </button>
+        </section>
+      }
+      @case ('list') {
+        <section class="box stack">
+          <header class="box-head">
+            <i class="bi" [ngClass]="icon(field.kind)" aria-hidden="true"></i>
+            <h3>{{ field.label }}</h3>
+            <span class="count">{{ list(field.path).length }}</span>
+          </header>
+          <div class="list-items" cdkDropList (cdkDropListDropped)="dropList(field.path, $event)">
+          @for (item of list(field.path); track $index; let i = $index) {
+            <details class="item" [open]="i === 0" cdkDrag>
+              <summary>
+                <button type="button" class="drag-handle" cdkDragHandle aria-label="Arrastrar" (click)="$event.preventDefault()">
+                  <i class="bi bi-grip-vertical" aria-hidden="true"></i>
+                </button>
+                @if (thumb(item); as src) {
+                  <img [src]="src" alt="">
+                }
+                <span class="item-title">
+                  {{ itemTitle(item, i) }}
+                </span>
+                <span class="item-actions">
+                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.moveListItem(field.path, i, i - 1)" [disabled]="i === 0" aria-label="Subir">
+                    <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.moveListItem(field.path, i, i + 1)" [disabled]="i === list(field.path).length - 1" aria-label="Bajar">
+                    <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.duplicateListItem(field.path, i)" aria-label="Duplicar">
+                    <i class="bi bi-copy" aria-hidden="true"></i>
+                  </button>
+                  <button type="button" class="icon-btn" (click)="$event.preventDefault(); cms.removeListItem(field.path, i)" aria-label="Quitar">
+                    <i class="bi bi-trash" aria-hidden="true"></i>
+                  </button>
+                </span>
+              </summary>
+              <app-cms-inspector [rootPath]="field.path + '.' + i" />
+            </details>
+          }
+          </div>
+          @if (list(field.path).length === 0) {
+            <p class="empty">Aún no hay {{ field.label.toLowerCase() }}.</p>
+          }
+          <button type="button" class="admin-btn-ghost add" (click)="cms.addListItem(field.path)">
+            <i class="bi bi-plus-lg" aria-hidden="true"></i>
+            {{ add(field.label) }}
+          </button>
+        </section>
+      }
+      @case ('group') {
+        <details class="box group" open>
+          <summary>
+            <i class="bi" [ngClass]="icon(field.kind)" aria-hidden="true"></i>
+            <span>{{ field.label }}</span>
+            <i class="bi bi-chevron-down chev" aria-hidden="true"></i>
+          </summary>
+          <app-cms-inspector [rootPath]="field.path" />
+        </details>
+      }
+    }
+    </div>
+  }
+</div>

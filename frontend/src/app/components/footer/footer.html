@@ -1,62 +1,54 @@
 <footer class="footer">
   <div class="footer-grid">
     <div class="footer-col">
-      <img src="logo.svg" alt="Matt Innova Solution" class="footer-logo">
-      <p class="footer-desc">
-        Innovamos y transformamos tu negocio con soluciones tecnológicas de vanguardia.
-      </p>
+      <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="footer-logo" cmsImage="logo" cmsScope="site">
+      <p class="footer-desc" cmsText="footer.desc" cmsScope="site"></p>
       <div class="social-links">
-        <a href="https://www.youtube.com/@mattinnovasolution" target="_blank" rel="noopener noreferrer" aria-label="Matt Innova Solution en YouTube"><i class="bi bi-youtube"></i></a>
-        <a href="https://www.facebook.com/share/1ENnqk4FuT/" target="_blank" rel="noopener noreferrer" aria-label="Matt Innova Solution en Facebook"><i class="bi bi-facebook"></i></a>
-        <a href="https://www.linkedin.com/company/mattinnovasolution/" target="_blank" rel="noopener noreferrer" aria-label="Matt Innova Solution en LinkedIn"><i class="bi bi-linkedin"></i></a>
-        <a href="https://www.instagram.com/mattinnovasolution?igsh=eHRqdTU5NTJzcHg0" target="_blank" rel="noopener noreferrer" aria-label="Matt Innova Solution en Instagram"><i class="bi bi-instagram"></i></a>
+        <a [href]="footer()['youtube']" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        <a [href]="footer()['facebook']" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a [href]="footer()['linkedin']" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
+        <a [href]="footer()['instagram']" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
       </div>
     </div>
-
     <div class="footer-col">
-      <h3>Enlaces Rápidos</h3>
+      <h3 cmsText="footer.quickTitle" cmsScope="site"></h3>
       <ul>
-        <li><a routerLink="/"><i class="bi bi-chevron-right"></i> Inicio</a></li>
-        <li><a routerLink="/acerca-de"><i class="bi bi-chevron-right"></i> Acerca de</a></li>
-        <li><a routerLink="/servicios"><i class="bi bi-chevron-right"></i> Servicios</a></li>
-        <li><a href="https://misacademyonline.com/" target="_blank" rel="noopener noreferrer"><i class="bi bi-chevron-right"></i> MIS Academy</a></li>
-        <li><a routerLink="/contacto"><i class="bi bi-chevron-right"></i> Contacto</a></li>
+        <li><a routerLink="/"><i class="bi bi-chevron-right"></i> <span cmsText="nav.inicio" cmsScope="site"></span></a></li>
+        <li><a routerLink="/acerca-de"><i class="bi bi-chevron-right"></i> <span cmsText="nav.acerca" cmsScope="site"></span></a></li>
+        <li><a routerLink="/servicios"><i class="bi bi-chevron-right"></i> <span cmsText="nav.servicios" cmsScope="site"></span></a></li>
+        <li><a [href]="nav()['academyUrl']" target="_blank" rel="noopener noreferrer"><i class="bi bi-chevron-right"></i> <span cmsText="nav.academy" cmsScope="site"></span></a></li>
+        <li><a routerLink="/contacto"><i class="bi bi-chevron-right"></i> <span cmsText="nav.contacto" cmsScope="site"></span></a></li>
       </ul>
     </div>
-
     <div class="footer-col">
-      <h3>Enlaces Populares</h3>
+      <h3 cmsText="footer.popularTitle" cmsScope="site"></h3>
       <ul>
-        <li><a routerLink="/servicios/saas"><i class="bi bi-chevron-right"></i> SAAS</a></li>
-        <li><a routerLink="/servicios/hardware"><i class="bi bi-chevron-right"></i> Hardware</a></li>
-        <li><a routerLink="/servicios/software"><i class="bi bi-chevron-right"></i> Software</a></li>
-        <li><a routerLink="/servicios/consultoria"><i class="bi bi-chevron-right"></i> Consultoría</a></li>
-        <li><a routerLink="/servicios/soluciones-ti"><i class="bi bi-chevron-right"></i> Soluciones TI</a></li>
+        <li *ngFor="let item of navServices(); let i = index">
+          <a [routerLink]="item['path']"><i class="bi bi-chevron-right"></i> <span [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></span></a>
+        </li>
       </ul>
     </div>
-
     <div class="footer-col">
-      <h3>Ponerse en Contacto</h3>
-      <p class="tagline">Soluciones TI que Transforman</p>
+      <h3 cmsText="footer.contactTitle" cmsScope="site"></h3>
+      <p class="tagline" cmsText="footer.tagline" cmsScope="site"></p>
       <ul class="contact-info">
-        <li><i class="bi bi-geo-alt-fill"></i> Urb. Libertad - Calle Las Moras</li>
-        <li><i class="bi bi-telephone-fill"></i> (+51) 992 422 219</li>
-        <li><i class="bi bi-envelope-fill"></i> contacto&#64;mattinnovasolution.com</li>
+        <li><i class="bi bi-geo-alt-fill"></i> <span cmsText="footer.address" cmsScope="site"></span></li>
+        <li><i class="bi bi-telephone-fill"></i> <span cmsText="footer.phone" cmsScope="site"></span></li>
+        <li><i class="bi bi-envelope-fill"></i> <span cmsText="footer.email" cmsScope="site"></span></li>
         <li>
           <a routerLink="/libro-reclamaciones" class="libro-link" aria-label="Ir al libro de reclamaciones">
-            <img src="libro.jpg" alt="Libro de reclamaciones" class="libro-image">
+            <img [src]="footer()['libroImage'] || 'libro.jpg'" alt="Libro de reclamaciones" class="libro-image" cmsImage="footer.libroImage" cmsScope="site">
           </a>
         </li>
       </ul>
     </div>
   </div>
-
   <div class="footer-bottom">
-    <p>©2026. Matt Innova Solution - Soluciones TI que Transforman</p>
+    <p cmsText="footer.copyright" cmsScope="site"></p>
     <div class="legal-links">
-      <a routerLink="/privacidad">Política de Privacidad</a>
+      <a routerLink="/privacidad" cmsText="footer.privacy" cmsScope="site"></a>
       <span>|</span>
-      <a routerLink="/terminos">Términos y Condiciones</a>
+      <a routerLink="/terminos" cmsText="footer.terms" cmsScope="site"></a>
     </div>
   </div>
 </footer>

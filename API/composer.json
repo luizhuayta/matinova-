@@ -1,0 +1,6 @@
+{
+  "name": "mattinnova/api",
+  "require": {
+    "phpmailer/phpmailer": "^6.9"
+  }
+}

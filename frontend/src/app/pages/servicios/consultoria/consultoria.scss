@@ -1,3 +1,5 @@
+@use '../../../../styles/bp' as *;
+
 // HERO
 .hero {
   width: 100%;
@@ -130,7 +132,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 20px;
 
-  @media (max-width: 768px) {
+  @include down(768px) {
     grid-template-columns: 1fr;
   }
 }
@@ -178,7 +180,7 @@
 }
 
 /* SECCION MOVIL */
-@media (max-width: 768px) {
+@include down(768px) {
 
   body, html {
     overflow-x: hidden;

@@ -1,0 +1,32 @@
+<main class="login-split" lang="es">
+  <aside class="login-brand">
+    <img src="logo.svg" alt="Matt Innova Solution" class="login-logo">
+    <h1>Panel de la web</h1>
+    <p>Cambia textos, fotos y mensajes tal como se ven en el sitio público.</p>
+  </aside>
+
+  <section class="login-form-wrap">
+    <form class="login-card" (ngSubmit)="submit()" novalidate>
+      <h2>Entrar</h2>
+      <p class="login-help">Usa tu usuario del panel.</p>
+
+      <div class="admin-field">
+        <label for="admin-user">Usuario</label>
+        <input id="admin-user" name="username" type="text" [(ngModel)]="username" autocomplete="username" required autofocus>
+      </div>
+
+      <div class="admin-field">
+        <label for="admin-pass">Contraseña</label>
+        <input id="admin-pass" name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required>
+      </div>
+
+      @if (error) {
+        <p class="admin-banner error" role="alert">{{ error }}</p>
+      }
+
+      <button type="submit" class="admin-btn-primary" [disabled]="loading" [attr.aria-busy]="loading">
+        {{ loading ? 'Entrando…' : 'Entrar' }}
+      </button>
+    </form>
+  </section>
+</main>

@@ -1,0 +1,46 @@
+services:
+  db:
+    image: docker.io/library/mariadb:11
+    environment:
+      MYSQL_ROOT_PASSWORD: mattlocal
+      MYSQL_DATABASE: mattinnova_cms
+      MYSQL_USER: matt
+      MYSQL_PASSWORD: mattlocal
+    ports:
+      - "3307:3306"
+    volumes:
+      - mattinnova-db:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./API
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./API:/app
+    command: ["php", "-S", "0.0.0.0:8000", "-t", "/app", "/app/router.php"]
+    environment:
+      APP_ORIGIN: http://127.0.0.1:4200
+      ADMIN_USER: admin
+      ADMIN_PASSWORD: admin123
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_NAME: mattinnova_cms
+      DB_USER: matt
+      DB_PASSWORD: mattlocal
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-465}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASSWORD: ${SMTP_PASSWORD:-}
+      SMTP_FROM: ${SMTP_FROM:-notificaciones@mattinnovasolution.com}
+      SMTP_FROM_NAME: ${SMTP_FROM_NAME:-Matt Innova Solution}
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  mattinnova-db:

@@ -1,3 +1,5 @@
+@use '../../../styles/bp' as *;
+
 /* ===== FOOTER MODERNIZADO - ESTILO INSTITUCIONAL ===== */
 * {
   margin: 0;
@@ -321,7 +323,7 @@ body {
 }
 
 /* Responsive */
-@media (max-width: 992px) {
+@include down(992px) {
   .footer-grid {
     grid-template-columns: 1fr 1fr;
     gap: 2.5rem;
@@ -334,7 +336,7 @@ body {
   }
 }
 
-@media (max-width: 600px) {
+@include down(600px) {
   .footer-grid {
     grid-template-columns: 1fr;
   }

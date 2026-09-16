@@ -1,71 +1,71 @@
-<!-- Loading Screen -->
-@if (showLoading()) {
-  <div class="loading-screen">
-    <div class="loading-content">
-      <div class="logo-animation">
-        <img src="logo.svg" alt="Matt Innova Solution" class="loading-logo">
-      </div>
-      <div class="founder-section">
-        <img src="taya.jpg" alt="Ing. Pedro Alex Taya Yactayo - CEO & Founder" class="founder-image">
-        <div class="founder-info">
-          <h3 class="founder-name">Ing. Pedro Alex Taya Yactayo</h3>
-          <p class="founder-role">CEO & Founder</p>
-        </div>
-      </div>
-      <div class="loading-tagline">SOLUCIONES TI QUE TRANSFORMAN</div>
-      <div class="loading-spinner"></div>
-    </div>
-  </div>
-}
-
-<app-header></app-header>
-
-<!-- Banner de CTA Superior -->
-@if (showCtaBanner()) {
-  <div class="cta-banner">
-    <div class="container">
-      <div class="cta-content">
-        <p class="cta-text">¿Necesitas una solución web para tu negocio?</p>
-        <div class="cta-actions">
-          <a href="mailto:contacto@mattinnovasolution.com" class="cta-email">
-            <i class="bi bi-envelope-fill"></i>
-            contacto@mattinnovasolution.com
-          </a>
-          <a routerLink="/contacto" class="cta-button">
-            Contáctanos
-          </a>
-          <button class="cta-close" (click)="closeCtaBanner()">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-}
-
-<div class="router-transition">
+@if (isAdmin()) {
   <router-outlet></router-outlet>
-</div>
+} @else {
+  @if (showSplash()) {
+    <div class="loading-screen">
+      <div class="loading-content">
+        <div class="logo-animation">
+          <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="loading-logo" cmsImage="logo" cmsScope="site">
+        </div>
+        <div class="founder-section">
+          <img [src]="site()['founderImage'] || 'taya.jpg'" [alt]="site()['founderName'] || ''" class="founder-image" cmsImage="founderImage" cmsScope="site">
+          <div class="founder-info">
+            <h3 class="founder-name" cmsText="founderName" cmsScope="site"></h3>
+            <p class="founder-role" cmsText="founderRole" cmsScope="site"></p>
+          </div>
+        </div>
+        <div class="loading-tagline" cmsText="splashTagline" cmsScope="site"></div>
+        <div class="loading-spinner"></div>
+      </div>
+    </div>
+  }
 
-<app-footer></app-footer>
-<app-chatbot></app-chatbot>
-<app-whatsapp-bubble></app-whatsapp-bubble>
-<app-accessibility></app-accessibility>
+  <app-header></app-header>
 
-<!-- Banner de Cookies -->
-@if (showCookieBanner()) {
-  <div class="cookie-banner">
-    <div class="container">
-      <div class="cookie-content">
-        <p class="cookie-text">
-          Usamos cookies para asegurar que te damos la mejor experiencia en nuestra web.
-          Si continúas usando este sitio, asumiremos que estás de acuerdo con ello.
-        </p>
-        <div class="cookie-actions">
-          <button class="cookie-accept" (click)="acceptCookies()">Aceptar</button>
-          <button class="cookie-reject" (click)="rejectCookies()">Rechazar</button>
+  @if (showCta()) {
+    <div class="cta-banner">
+      <div class="container">
+        <div class="cta-content">
+          <p class="cta-text" cmsText="ctaText" cmsScope="site"></p>
+          <div class="cta-actions">
+            <a [href]="'mailto:' + (site()['ctaEmail'] || '')" class="cta-email">
+              <i class="bi bi-envelope-fill"></i>
+              <span cmsText="ctaEmail" cmsScope="site"></span>
+            </a>
+            <a routerLink="/contacto" class="cta-button" cmsText="ctaButton" cmsScope="site"></a>
+            <button class="cta-close" type="button" (click)="closeCtaBanner()" aria-label="Cerrar aviso">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
         </div>
       </div>
     </div>
+  }
+
+  <div class="router-transition">
+    <router-outlet></router-outlet>
   </div>
+
+  <app-footer></app-footer>
+  @if (showChat()) {
+    <app-chatbot></app-chatbot>
+  }
+  @if (showWhatsapp()) {
+    <app-whatsapp-bubble></app-whatsapp-bubble>
+  }
+  <app-accessibility></app-accessibility>
+
+  @if (showCookies()) {
+    <div class="cookie-banner">
+      <div class="container">
+        <div class="cookie-content">
+          <p class="cookie-text" cmsText="cookieText" cmsScope="site"></p>
+          <div class="cookie-actions">
+            <button class="cookie-accept" type="button" (click)="acceptCookies()" cmsText="cookieAccept" cmsScope="site"></button>
+            <button class="cookie-reject" type="button" (click)="rejectCookies()" cmsText="cookieReject" cmsScope="site"></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
 }

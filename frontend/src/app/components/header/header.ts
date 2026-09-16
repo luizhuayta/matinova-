@@ -1,80 +1,36 @@
 import { CommonModule } from '@angular/common';
-import { Component, HostListener, AfterViewInit } from '@angular/core';
-import { Router, RouterModule, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Component, computed, inject } from '@angular/core';
+import { Router, RouterModule } from '@angular/router';
+import { CmsContentService } from '../../cms/cms-content.service';
+import { CmsEditorService } from '../../cms/cms-editor.service';
+import { CmsTextDirective } from '../../cms/cms-text.directive';
+import { CmsImageDirective } from '../../cms/cms-image.directive';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, CmsTextDirective, CmsImageDirective],
   templateUrl: './header.html',
   styleUrls: ['./header.scss']
 })
-export class Header implements AfterViewInit {
+export class Header {
+  private cms = inject(CmsContentService);
+  editor = inject(CmsEditorService);
+  private router = inject(Router);
   isMobileMenuOpen = false;
-  isScrolled = false;
-  isTransparent = false;
   logoClass = '';
+  site = computed(() => this.cms.site());
+  nav = computed(() => (this.site()['nav'] as Record<string, string>) ?? {});
+  navServices = computed(() => (this.site()['navServices'] as Array<Record<string, string>>) ?? []);
+  showClients = computed(() => this.site()['showClientsToggle'] !== false);
 
-  constructor(private router: Router) {
-    // Check initial scroll position
-    this.checkScroll();
-  }
-
-  ngAfterViewInit() {
-    // Escuchar navegación para animar el logo
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd)
-    ).subscribe(() => {
-      this.animateLogo();
-    });
-  }
-
-  animateLogo() {
-    // Remover y re-agregar la clase para reiniciar la animación
-    this.logoClass = '';
-    setTimeout(() => {
-      this.logoClass = 'logo-entrance';
-    }, 10);
-  }
-
-  @HostListener('window:scroll', [])
-  onWindowScroll() {
-    this.checkScroll();
-  }
-
-  checkScroll() {
-    this.isScrolled = window.scrollY > 50;
-    const header = document.querySelector('.main-header');
-    if (header) {
-      if (this.isScrolled) {
-        header.classList.add('scrolled');
-      } else {
-        header.classList.remove('scrolled');
-      }
-    }
-  }
-
-  toggleMobileMenu() {
-    this.isMobileMenuOpen = !this.isMobileMenuOpen;
-  }
-
-  closeMobileMenu() {
-    this.isMobileMenuOpen = false;
-  }
-
+  toggleMobileMenu() { this.isMobileMenuOpen = !this.isMobileMenuOpen; }
+  closeMobileMenu() { this.isMobileMenuOpen = false; }
   navigateTo(path: string) {
     this.router.navigate([path]);
     this.closeMobileMenu();
   }
-
   toggleTransparency() {
-    this.isTransparent = !this.isTransparent;
-    const body = document.body;
-    if (this.isTransparent) {
-      body.classList.add('transparency-mode');
-    } else {
-      body.classList.remove('transparency-mode');
-    }
+    document.body.classList.toggle('transparency-mode');
   }
 }

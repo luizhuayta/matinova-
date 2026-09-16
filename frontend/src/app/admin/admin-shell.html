@@ -1,0 +1,46 @@
+<div class="admin-shell">
+  <aside class="admin-nav">
+    <a routerLink="/admin" class="brand">
+      <img src="logo.svg" alt="">
+      <span>
+        <strong>Matt Innova</strong>
+        <small>Panel</small>
+      </span>
+    </a>
+    <nav aria-label="Menú del panel">
+      <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">
+        <i class="bi bi-house" aria-hidden="true"></i>
+        Inicio
+      </a>
+      <a routerLink="/admin/paginas" routerLinkActive="active">
+        <i class="bi bi-file-earmark-text" aria-hidden="true"></i>
+        Páginas
+      </a>
+      <a routerLink="/admin/mensajes" routerLinkActive="active">
+        <i class="bi bi-inbox" aria-hidden="true"></i>
+        Mensajes
+      </a>
+      <a routerLink="/admin/archivos" routerLinkActive="active">
+        <i class="bi bi-images" aria-hidden="true"></i>
+        Imágenes
+      </a>
+    </nav>
+    <div class="nav-foot">
+      <a class="site-link" href="/" target="_blank" rel="noopener">
+        <i class="bi bi-box-arrow-up-right" aria-hidden="true"></i>
+        <span>Ver la web</span>
+      </a>
+      <div class="user">
+        <span class="avatar" aria-hidden="true">{{ initial() }}</span>
+        <div>
+          <p>{{ auth.username() }}</p>
+          <small>{{ auth.role() === 'editor' ? 'Editor' : 'Administrador' }}</small>
+          <button type="button" (click)="auth.logout()">Salir</button>
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="admin-main">
+    <router-outlet />
+  </div>
+</div>

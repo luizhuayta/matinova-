@@ -1,0 +1,9 @@
+@mixin down($max) {
+  @media (max-width: $max) {
+    @content;
+  }
+
+  @container cms-preview (max-width: #{$max}) {
+    @content;
+  }
+}

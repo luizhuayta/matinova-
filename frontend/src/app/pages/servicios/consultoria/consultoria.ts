@@ -1,22 +1,17 @@
+import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { RouterLink } from '@angular/router';
+import { CmsTextDirective } from '../../../cms/cms-text.directive';
+import { CmsImageDirective } from '../../../cms/cms-image.directive';
+import { useCmsPage } from '../../../cms/use-cms-page';
 
 @Component({
   selector: 'app-consultoria',
   standalone: true,
-  imports: [RouterModule],
+  imports: [CommonModule, RouterLink, CmsTextDirective, CmsImageDirective],
   templateUrl: './consultoria.html',
   styleUrls: ['./consultoria.scss'],
 })
 export class Consultoria {
-
-  constructor(private router: Router) {}
-
-  irChat() {
-    this.router.navigate(['/chat']);
-  }
-
-  irContacto() {
-    this.router.navigate(['/contacto']);
-  }
+  ctx = useCmsPage('servicios-consultoria');
 }

@@ -1,112 +1,35 @@
 <main class="softwarePage">
-
   <section class="hero">
-    <img 
-      src="/software-banner.png" 
-      alt="Software Banner"
-      class="heroImage"
-    />
+    <img [src]="ctx.page()['heroImage']" [alt]="ctx.page()['heroAlt'] || ''" class="heroImage" cmsImage="heroImage">
   </section>
-
   <section class="reasons">
     <div class="container">
       <div class="serviceContent">
-        
         <div>
-          <img 
-            src="/software.png" 
-            alt="Persona programando"
-            class="serviceImage"
-          />
+          <img [src]="ctx.page()['image']" [alt]="ctx.page()['imageAlt'] || ''" class="serviceImage" cmsImage="image">
         </div>
-
         <div class="serviceRight">
-          <div class="serviceLabel">SERVICIO</div>
-          <h2>Software</h2>
-          <p>
-            El software es el corazón de cualquier operación digital. En Matt Innova Solution, 
-            desarrollamos e implementamos soluciones de software a medida, 
-            optimizadas para mejorar la eficiencia y productividad de tu empresa. Ya sea 
-            un sistema de gestión empresarial, aplicaciones personalizadas o plataformas 
-            de e-commerce, tenemos la experiencia para llevar tu visión a la realidad.
-          </p>
-
-          <!-- Angular -->
-          <a routerLink="/contacto" class="contactBtn">
-            Contáctanos
-          </a>
+          <div class="serviceLabel" cmsText="label"></div>
+          <h2 cmsText="title"></h2>
+          <p cmsText="text"></p>
+          <a routerLink="/contacto" class="contactBtn" cmsText="cta"></a>
         </div>
-
       </div>
     </div>
   </section>
-
-  <!-- RAZONES -->
   <section class="reasonsToChoose">
     <div class="container">
-
       <div class="reasonsHeader">
-        <p class="reasonsSubtitle">RAZONES POR LAS CUALES</p>
-        <h2 class="reasonsTitle">Debes Elegirnos</h2>
+        <p class="reasonsSubtitle" cmsText="reasonsSubtitle"></p>
+        <h2 class="reasonsTitle" cmsText="reasonsTitle"></h2>
       </div>
-
       <div class="reasonsCards">
-
-        <div class="reasonCard">
-          <img src="/microsoft3651.png" alt="Microsoft 365"/>
-          <h3>Microsoft 365</h3>
-          <p>
-            Nuestros profesionales son expertos en Microsoft 365 y cuentan con 
-            experiencia en proyectos de implementación de ecosistemas colaborativos digitales.
-          </p>
+        <div class="reasonCard" *ngFor="let reason of ctx.reasons(); let i = index">
+          <img [src]="reason['img']" [alt]="reason['title']" [cmsImage]="'reasons.' + i + '.img'">
+          <h3 [cmsText]="'reasons.' + i + '.title'"></h3>
+          <p [cmsText]="'reasons.' + i + '.text'"></p>
         </div>
-
-        <div class="reasonCard">
-          <img src="/dspace.jpg" alt="Repositorio"/>
-          <h3>Repositorio de Investigación</h3>
-          <p>
-            Ofrecemos instalación de DSpace en VPS, cumpliendo normativas RENATI y 
-            CONCYTEC, con personalización, búsquedas avanzadas SOLR, y estadísticas AWStat.
-          </p>
-        </div>
-
-        <div class="reasonCard">
-          <img src="/erp.jpg" alt="ERP"/>
-          <h3>Software ERP</h3>
-          <p>
-            Ofrecemos software de ERP de gestión comercial, multiempresa, multiusuario 
-            y multisucursales. Todo lo que necesitas para comenzar a vender y crecer de inmediato.
-          </p>
-        </div>
-
-        <div class="reasonCard">
-          <img src="ecommerce.jpeg" alt="Ecommerce"/>
-          <h3>Pagina Ecommerce para tu negocio</h3>
-          <p>
-            Diseñamos y desarrollamos tu tienda virtual a medida. Incluye hosting, dominio, pasarelas de pago seguras y un panel autoadministrable para que gestiones tus productos y vendas en línea sin complicaciones.
-          </p>
-        </div>
-
-        <div class="reasonCard">
-          <img src="/windows.png" alt="Server 2022"/>
-          <h3>Windows Server 2022</h3>
-          <p>
-            Protegemos contra amenazas con un servidor de núcleo seguro y gestionamos cargas críticas 
-            con 48 TB de memoria y 2048 núcleos. Administra con Windows Admin Center y Azure Arc.
-          </p>
-        </div>
-
-        <div class="reasonCard">
-          <img src="/windows-server-azure-arc.png" alt="Azure Arc"/>
-          <h3>Windows Server y Azure Arc</h3>
-          <p>
-            Extendemos tu centro de datos a Azure para mejorar la eficiencia. Administramos servidores 
-            y modernizamos aplicaciones con Azure Kubernetes Service en Azure Stack HCI.
-          </p>
-        </div>
-
       </div>
     </div>
   </section>
-
 </main>

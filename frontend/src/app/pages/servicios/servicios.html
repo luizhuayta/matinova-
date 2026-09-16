@@ -1,74 +1,27 @@
 <main class="serviciosPage">
   <section class="hero">
-    <img src="/carousel.jpg" alt="Servicios Banner" class="heroImage" />
+    <img [src]="ctx.page()['heroImage'] || '/carousel.jpg'" [alt]="ctx.page()['heroTitle'] || 'Servicios'" class="heroImage" cmsImage="heroImage">
     <div class="heroOverlay">
-      <h1>Nuestros Servicios</h1>
-      <p>Soluciones tecnológicas integrales para tu empresa</p>
+      <h1 cmsText="heroTitle"></h1>
+      <p cmsText="heroText"></p>
     </div>
   </section>
-
-  <router-outlet></router-outlet>
 
   <section class="servicesGrid">
     <div class="container">
       <div class="servicesHeader">
-        <p class="servicesSubtitle">CONOCE NUESTROS</p>
-        <h2 class="servicesTitle">Servicios</h2>
+        <p class="servicesSubtitle" cmsText="subtitle"></p>
+        <h2 class="servicesTitle" cmsText="title"></h2>
       </div>
-
       <div class="servicesCards">
-        <div class="serviceCard" [routerLink]="['/servicios/software']">
+        <div class="serviceCard" *ngFor="let card of ctx.cards(); let i = index" [routerLink]="[card['path']]">
           <div class="card-image-wrapper">
-            <img src="/software.png" alt="Software" />
+            <img [src]="card['img']" [alt]="card['title']" [cmsImage]="'cards.' + i + '.img'">
           </div>
           <div class="card-body">
-            <h3>Software</h3>
-            <p>Desarrollo e implementación de soluciones de software a medida.</p>
-            <a class="serviceLink" [routerLink]="['/servicios/software']">Ver más →</a>
-          </div>
-        </div>
-
-        <div class="serviceCard" [routerLink]="['/servicios/hardware']">
-          <div class="card-image-wrapper">
-            <img src="/imac.jpg" alt="Hardware" />
-          </div>
-          <div class="card-body">
-            <h3>Hardware</h3>
-            <p>Suministro e instalación de equipos.</p>
-            <a class="serviceLink" [routerLink]="['/servicios/hardware']">Ver más →</a>
-          </div>
-        </div>
-
-        <div class="serviceCard" [routerLink]="['/servicios/consultoria']">
-          <div class="card-image-wrapper">
-            <img src="/about-image.jpg" alt="Consultoría" />
-          </div>
-          <div class="card-body">
-            <h3>Consultoría</h3>
-            <p>Asesoramiento experto para tu negocio.</p>
-            <a class="serviceLink" [routerLink]="['/servicios/consultoria']">Ver más →</a>
-          </div>
-        </div>
-
-        <div class="serviceCard" [routerLink]="['/servicios/saas']">
-          <div class="card-image-wrapper">
-            <img src="/saas.jpg" alt="SaaS" />
-          </div>
-          <div class="card-body">
-            <h3>SaaS</h3>
-            <p>Soluciones en la nube seguras.</p>
-            <a class="serviceLink" [routerLink]="['/servicios/saas']">Ver más →</a>
-          </div>
-        </div>
-
-        <div class="serviceCard" [routerLink]="['/servicios/soluciones-ti']">
-          <div class="card-image-wrapper">
-            <img src="/imagen.jpg" alt="Soluciones TI" />
-          </div>
-          <div class="card-body">
-            <h3>Soluciones TI</h3>
-            <p>Infraestructura tecnológica completa.</p>
-            <a class="serviceLink" [routerLink]="['/servicios/soluciones-ti']">Ver más →</a>
+            <h3 [cmsText]="'cards.' + i + '.title'"></h3>
+            <p [cmsText]="'cards.' + i + '.text'"></p>
+            <a class="serviceLink" [routerLink]="[card['path']]" [cmsText]="'cards.' + i + '.link'"></a>
           </div>
         </div>
       </div>
@@ -78,9 +31,9 @@
   <section class="ctaSection">
     <div class="container">
       <div class="ctaContent">
-        <h2>¿Listo para transformar tu negocio?</h2>
-        <p>Contáctanos y descubre cómo podemos ayudarte.</p>
-        <a [routerLink]="['/contacto']" class="ctaBtn">Contáctanos</a>
+        <h2 cmsText="ctaTitle"></h2>
+        <p cmsText="ctaText"></p>
+        <a routerLink="/contacto" class="ctaBtn" cmsText="ctaButton"></a>
       </div>
     </div>
   </section>

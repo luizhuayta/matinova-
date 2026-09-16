@@ -1,3 +1,5 @@
+@use '../../../styles/bp' as *;
+
 /* ===== HEADER DESIGN MODERNIZADO - UX OPTIMIZADA ===== */
 * {
   margin: 0;
@@ -313,7 +315,7 @@ body {
 }
 
 /* VERSION MOVIL */
-@media (max-width: 992px) {
+@include down(992px) {
   .navbar {
     padding: 12px 20px;
     height: 64px;
@@ -406,7 +408,7 @@ body {
   }
 }
 
-@media (max-width: 480px) {
+@include down(480px) {
   .navbar {
     padding: 10px 16px;
   }

@@ -1,38 +1,29 @@
 <div class="top-bar"></div>
-
 <header class="main-header">
   <div class="navbar">
     <div class="logo-container">
       <a routerLink="/">
-        <img src="logo.svg" alt="Matt Innova Solution" class="logo-img" [class.logo-entrance]="logoClass">
+        <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="logo-img" cmsImage="logo" cmsScope="site">
       </a>
     </div>
-
-    <button class="mobile-menu-toggle" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" aria-label="Toggle menu">
-      <span></span>
-      <span></span>
-      <span></span>
+    <button class="mobile-menu-toggle" type="button" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" aria-label="Abrir menú">
+      <span></span><span></span><span></span>
     </button>
-
     <nav class="nav" [class.mobile-open]="isMobileMenuOpen">
       <ul class="nav-list">
-        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="navigateTo('/')">Inicio</a></li>
-        <li><a routerLink="/acerca-de" routerLinkActive="active" (click)="navigateTo('/acerca-de')">Acerca de</a></li>
-        <li><a href="https://misacademyonline.com/" target="_blank" rel="noopener noreferrer">MIS Academy</a></li>
-
+        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="navigateTo('/')" cmsText="nav.inicio" cmsScope="site"></a></li>
+        <li><a routerLink="/acerca-de" routerLinkActive="active" (click)="navigateTo('/acerca-de')" cmsText="nav.acerca" cmsScope="site"></a></li>
+        <li><a [href]="nav()['academyUrl'] || 'https://misacademyonline.com/'" target="_blank" rel="noopener noreferrer" cmsText="nav.academy" cmsScope="site"></a></li>
         <li class="dropdown">
-          <a class="dropbtn">Servicios <i class="bi bi-caret-down-fill"></i></a>
+          <a class="dropbtn"><span cmsText="nav.servicios" cmsScope="site"></span> <i class="bi bi-caret-down-fill"></i></a>
           <div class="dropdown-content">
-            <a routerLink="/servicios/saas" (click)="navigateTo('/servicios/saas')">SAAS</a>
-            <a routerLink="/servicios/hardware" (click)="navigateTo('/servicios/hardware')">Hardware</a>
-            <a routerLink="/servicios/software" (click)="navigateTo('/servicios/software')">Software</a>
-            <a routerLink="/servicios/consultoria" (click)="navigateTo('/servicios/consultoria')">Consultoría</a>
-            <a routerLink="/servicios/soluciones-ti" (click)="navigateTo('/servicios/soluciones-ti')">Soluciones TI</a>
+            <a *ngFor="let item of navServices(); let i = index" [routerLink]="item['path']" (click)="navigateTo(item['path'])" [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></a>
           </div>
         </li>
-
-        <li><a routerLink="/contacto" routerLinkActive="active" (click)="navigateTo('/contacto')">Contacto</a></li>
-        <li><a (click)="toggleTransparency()" class="btn-transparencia">Clientes</a></li>
+        <li><a routerLink="/contacto" routerLinkActive="active" (click)="navigateTo('/contacto')" cmsText="nav.contacto" cmsScope="site"></a></li>
+        @if (showClients()) {
+          <li><a (click)="toggleTransparency()" class="btn-transparencia" cmsText="clientsLabel" cmsScope="site"></a></li>
+        }
       </ul>
     </nav>
   </div>

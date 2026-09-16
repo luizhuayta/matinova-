@@ -1,0 +1,94 @@
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.login-split {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: minmax(280px, 42%) 1fr;
+}
+
+.login-brand {
+  background: var(--admin-ink);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 3rem 3.25rem;
+}
+
+.login-logo {
+  width: 92px;
+  height: auto;
+  background: #fff;
+  border-radius: 14px;
+  padding: 8px;
+  margin-bottom: 1.5rem;
+}
+
+.login-brand h1 {
+  color: #fff;
+  font-size: 2rem;
+  margin: 0 0 0.75rem;
+}
+
+.login-brand p {
+  margin: 0;
+  max-width: 22rem;
+  color: #c5cdd6;
+  font-size: 1.05rem;
+  line-height: 1.55;
+}
+
+.login-form-wrap {
+  display: grid;
+  place-items: center;
+  padding: 2rem 1.25rem;
+  background: var(--admin-paper);
+}
+
+.login-card {
+  width: min(100%, 400px);
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: 16px;
+  padding: 1.75rem 1.5rem 1.6rem;
+  box-shadow: var(--admin-shadow);
+  display: grid;
+  gap: 0.9rem;
+}
+
+.login-card h2 {
+  font-size: 1.35rem;
+}
+
+.login-help {
+  margin: -0.35rem 0 0.2rem;
+}
+
+.login-card .admin-btn-primary {
+  width: 100%;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 800px) {
+  .login-split {
+    grid-template-columns: 1fr;
+  }
+
+  .login-brand {
+    padding: 1.75rem 1.25rem 1.4rem;
+  }
+
+  .login-brand h1 {
+    font-size: 1.5rem;
+  }
+
+  .login-form-wrap {
+    background: var(--admin-paper);
+    place-items: start center;
+    padding: 1.25rem 1rem 2rem;
+  }
+}
+

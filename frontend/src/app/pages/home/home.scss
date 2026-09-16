@@ -1,3 +1,5 @@
+@use '../../../styles/bp' as *;
+
 $blue-primary: #0066ff;
 $dark-bg: #0f1113;
 
@@ -24,6 +26,7 @@ $dark-bg: #0f1113;
 // HERO SECTION
 .hero {
   height: 85vh;
+  height: 85cqh;
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -575,7 +578,7 @@ $dark-bg: #0f1113;
 }
 
 /* SECCION MULTIPLATAFORMA*/
-@media (max-width: 1024px) {
+@include down(1024px) {
   .innovative-grid,
   .testimonials-grid {
     grid-template-columns: 1fr;
@@ -589,7 +592,7 @@ $dark-bg: #0f1113;
   }
 }
 
-@media (max-width: 768px) {
+@include down(768px) {
   .home-wrapper {
     overflow-x: hidden;
   }

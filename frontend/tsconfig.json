@@ -16,7 +16,9 @@
     "module": "esnext",
     "moduleResolution": "bundler",
     "useDefineForClassFields": true,
-    "forceConsistentCasingInFileNames": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true
   },
   "angularCompilerOptions": {
     "enableI18nLegacyMessageIdFormat": false,

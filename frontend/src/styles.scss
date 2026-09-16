@@ -1,3 +1,6 @@
+@use './app/admin/admin-theme.scss';
+@use './styles/bp' as *;
+
 // ============================================
 // SISTEMA DE DISEÑO CENTRALIZADO
 // ============================================
@@ -164,14 +167,101 @@ input, textarea, select {
   padding: 0 $spacing-lg;
 }
 
-@media (max-width: $breakpoint-lg) {
+@include down($breakpoint-lg) {
   .container {
     padding: 0 $spacing-md;
   }
 }
 
-@media (max-width: $breakpoint-sm) {
+@include down($breakpoint-sm) {
   .container {
     padding: 0 $spacing-sm;
   }
+}
+
+.cms-editable {
+  outline: 2px dashed transparent;
+  outline-offset: 4px;
+  cursor: text;
+  position: relative;
+}
+
+.cms-editable:hover,
+.cms-editable:focus,
+.cms-editable.cms-selected,
+.cms-editable-image.cms-selected {
+  outline-color: #2563eb;
+}
+
+.cms-editable-image {
+  outline: 2px dashed #2563eb;
+  outline-offset: 4px;
+  cursor: pointer;
+}
+
+.cms-placeholder {
+  color: #6b7280 !important;
+  font-style: italic;
+  outline-style: dashed !important;
+  outline-color: #93c5fd !important;
+  min-width: 4ch;
+  display: inline-block;
+}
+
+.cms-editable[data-cms-label]:hover::after,
+.cms-editable-image[data-cms-label]:hover::after {
+  content: attr(data-cms-label);
+  position: absolute;
+  z-index: 5;
+  left: 0;
+  top: -1.6rem;
+  background: #0f1113;
+  color: #fff;
+  font-size: 0.72rem;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.35rem 0.45rem;
+  border-radius: 6px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.cms-rich.ql-container {
+  font-size: 1rem;
+  min-height: 240px;
+}
+
+.cms-panel-rich {
+  min-width: 0;
+  background: #fff;
+  border-radius: 10px;
+}
+
+.cms-panel-rich .ql-toolbar.ql-snow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  padding: 6px;
+  border-color: var(--admin-line, #d5dbe3);
+}
+
+.cms-panel-rich .ql-container.ql-snow {
+  min-height: 128px;
+  font-size: 0.92rem;
+  border-color: var(--admin-line, #d5dbe3);
+}
+
+.cms-panel-rich .ql-editor {
+  min-height: 128px;
+  overflow-wrap: anywhere;
+  color: var(--admin-text, #14181f);
+}
+
+.ql-toolbar.ql-snow {
+  border-radius: 8px 8px 0 0;
+}
+
+.ql-container.ql-snow {
+  border-radius: 0 0 8px 8px;
 }

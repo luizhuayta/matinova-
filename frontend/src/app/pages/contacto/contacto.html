@@ -1,93 +1,40 @@
 <div class="contacto-container">
-
-  <!-- LADO IZQUIERDO -->
   <div class="info">
-    <span class="badge">PONERSE EN CONTACTO</span>
-    <h2>Contáctenos para cualquier consulta</h2>
-
-    <div class="card">
-      <div class="icon">
-        <i class="bi bi-geo-alt"></i>
-      </div>
+    <span class="badge" cmsText="badge"></span>
+    <h2 cmsText="title"></h2>
+    <div class="card" *ngFor="let card of cards(); let i = index">
+      <div class="icon"><i class="bi bi-geo-alt"></i></div>
       <div>
-        <h4>Domicilio Legal</h4>
-        <p>Urb. Libertad Mz. Lt.5 Calle Las Moras S/N San Vicente de Cañete</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="icon">
-        <i class="bi bi-envelope"></i>
-      </div>
-      <div>
-        <h4>Envíanos un Correo electrónico</h4>
-        <p>contacto@mattinnovasolution.com</p>
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="icon">
-        <i class="bi bi-whatsapp"></i>
-      </div>
-      <div>
-        <h4>WhatsApp</h4>
-        <p>(+51) 992 422 219</p>
+        <h4 [cmsText]="'cards.' + i + '.title'"></h4>
+        <p [cmsText]="'cards.' + i + '.text'"></p>
       </div>
     </div>
   </div>
 
-  <!-- FORMULARIO -->
   <div class="formulario">
     <form (ngSubmit)="enviar()">
-
-      <div class="fila">
-        <input
-          type="text"
-          placeholder="Su nombre"
-          [(ngModel)]="nombre"
-          name="nombre"
-          required
-        />
-
-        <input
-          type="email"
-          placeholder="Su correo electrónico"
-          [(ngModel)]="email"
-          name="email"
-          required
-        />
-      </div>
-
-      <div class="fila">
-        <input
-          type="tel"
-          placeholder="Teléfono (9 dígitos)"
-          [(ngModel)]="telefono"
-          name="telefono"
-          pattern="[0-9]{9}"
-          maxlength="9"
-          required
-        />
-      </div>
-
-      <input
-        type="text"
-        placeholder="Asunto"
-        [(ngModel)]="asunto"
-        name="asunto"
-        required
-      />
-
-      <textarea
-        placeholder="Mensaje"
-        [(ngModel)]="mensaje"
-        name="mensaje"
-        required
-      ></textarea>
-
-      <button type="submit" [disabled]="isLoading">{{ isLoading ? 'Enviando...' : 'Enviar Mensaje' }}</button>
-
+      @if (show('name') || show('email')) {
+        <div class="fila">
+          @if (show('name')) {
+            <input type="text" [placeholder]="placeholders()['name'] || 'Su nombre'" [(ngModel)]="nombre" name="nombre" required>
+          }
+          @if (show('email')) {
+            <input type="email" [placeholder]="placeholders()['email'] || 'Su correo'" [(ngModel)]="email" name="email" required>
+          }
+        </div>
+      }
+      @if (show('phone')) {
+        <div class="fila">
+          <input type="tel" [placeholder]="placeholders()['phone'] || 'Teléfono'" [(ngModel)]="telefono" name="telefono" maxlength="9">
+        </div>
+      }
+      @if (show('subject')) {
+        <input type="text" [placeholder]="placeholders()['subject'] || 'Asunto'" [(ngModel)]="asunto" name="asunto" required>
+      }
+      @if (show('message')) {
+        <textarea [placeholder]="placeholders()['message'] || 'Mensaje'" [(ngModel)]="mensaje" name="mensaje" required></textarea>
+      }
+      <button type="submit" [disabled]="isLoading">{{ isLoading ? 'Enviando...' : (page()['submitLabel'] || 'Enviar Mensaje') }}</button>
     </form>
   </div>
-
 </div>

@@ -1,6 +1,29 @@
 import { Routes } from '@angular/router';
+import { adminAuthGuard, adminGuestGuard } from './cms/auth.guard';
 
 export const routes: Routes = [
+  {
+    path: 'admin',
+    children: [
+      {
+        path: 'login',
+        canActivate: [adminGuestGuard],
+        loadComponent: () => import('./admin/login').then(m => m.AdminLogin)
+      },
+      {
+        path: '',
+        canActivate: [adminAuthGuard],
+        loadComponent: () => import('./admin/admin-shell').then(m => m.AdminShell),
+        children: [
+          { path: '', loadComponent: () => import('./admin/admin-home').then(m => m.AdminHome) },
+          { path: 'paginas', loadComponent: () => import('./admin/admin-pages').then(m => m.AdminPages) },
+          { path: 'paginas/:slug', loadComponent: () => import('./admin/page-editor').then(m => m.PageEditor) },
+          { path: 'mensajes', loadComponent: () => import('./admin/admin-messages').then(m => m.AdminMessages) },
+          { path: 'archivos', loadComponent: () => import('./admin/admin-media').then(m => m.AdminMedia) },
+        ]
+      }
+    ]
+  },
   {
     path: '',
     loadComponent: () => import('./pages/home/home').then(m => m.Home)

@@ -1,3 +1,5 @@
+@use '../../../styles/bp' as *;
+
 .contacto-container {
   display: flex;
   gap: 40px;
@@ -123,7 +125,7 @@ button:hover {
 }
 
 /* RESPONSIVE */
-@media (max-width: 768px) {
+@include down(768px) {
   .contacto-container {
     flex-direction: column;
     padding: 30px;

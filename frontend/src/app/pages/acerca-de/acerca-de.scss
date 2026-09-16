@@ -1,3 +1,5 @@
+@use '../../../styles/bp' as *;
+
 /* ===== ACERCA DE - DISEÑO MODERNO ===== */
 .acerca-container {
   width: 100%;
@@ -8,6 +10,7 @@
 .about-hero {
   position: relative;
   height: 60vh;
+  height: 60cqh;
   min-height: 400px;
   background: linear-gradient(135deg, #1e3a8a 0%, #0f172a 100%);
   display: flex;
@@ -538,7 +541,7 @@
 }
 
 /* Responsive */
-@media (max-width: 1024px) {
+@include down(1024px) {
   .stats-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -561,7 +564,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@include down(768px) {
   .about-hero {
     height: auto;
     min-height: 300px;

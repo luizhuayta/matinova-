@@ -1,3 +1,5 @@
+@use '../../../styles/bp' as *;
+
 .serviciosPage {
   .hero {
     position: relative;
@@ -161,7 +163,7 @@
 
 /* SECCION MOVIL */
 
-@media (max-width: 768px) {
+@include down(768px) {
   body, html {
     overflow-x: hidden;
     position: relative;

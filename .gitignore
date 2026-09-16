@@ -1,1 +1,7 @@
 node_modules
+API/.env
+API/vendor
+API/uploads/*
+!API/uploads/.gitkeep
+API/tmp
+

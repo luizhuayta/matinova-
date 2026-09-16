@@ -1,0 +1,7 @@
+# No ejecutar scripts legacy si Apache sirve este directorio.
+<Files "contacto.php">
+  Require all denied
+</Files>
+<Files "reclamaciones.php">
+  Require all denied
+</Files>
