@@ -9,11 +9,12 @@ import { cmsControlId, JsonMap, getByPath } from '../cms/cms.models';
 import { schemaFieldsAt, schemaForSlug, inspectorRootSchema } from '../cms/cms-schema';
 import { CmsImageField } from './cms-image-field';
 import { CmsRichField } from './cms-rich-field';
+import { CmsFieldRow } from './cms-field-row';
 
 @Component({
   selector: 'app-cms-inspector',
   standalone: true,
-  imports: [NgClass, FormsModule, CmsInspector, CmsImageField, CmsRichField, CdkDropList, CdkDrag, CdkDragHandle],
+  imports: [NgClass, FormsModule, CmsInspector, CmsImageField, CmsRichField, CmsFieldRow, CdkDropList, CdkDrag, CdkDragHandle],
   templateUrl: './cms-inspector.html',
   styleUrl: './cms-inspector.scss',
 })
@@ -132,6 +133,16 @@ export class CmsInspector {
       return '';
     }
     return `Un poco largo, en móvil se cortará (${n}/${max})`;
+  }
+
+  hintOf(field: FieldDesc): string {
+    if (field.kind === 'rich') {
+      return 'Puedes poner negrita, listas y enlaces.';
+    }
+    if (field.kind === 'embed') {
+      return field.hint || 'Pega el enlace del video de YouTube.';
+    }
+    return field.hint ?? '';
   }
 
   private matches(field: FieldDesc, q: string): boolean {

@@ -1,24 +1,22 @@
-import { Directive, ElementRef, HostListener, OnDestroy, OnInit, effect, inject, input } from '@angular/core';
+import { Directive, effect, input } from '@angular/core';
 import type QuillType from 'quill';
-import { CmsContentService } from './cms-content.service';
-import { CmsEditorService } from './cms-editor.service';
-import { CmsSelectionService } from './cms-selection.service';
+import { CmsEditableHost } from './cms-editable-host';
 import { bindQuillPaste, CMS_QUILL_TOOLBAR } from './cms-quill';
 
 @Directive({
   selector: '[cmsRich]',
   standalone: true,
 })
-export class CmsRichDirective implements OnDestroy, OnInit {
-  private el = inject(ElementRef<HTMLElement>);
-  private cms = inject(CmsContentService);
-  private editor = inject(CmsEditorService);
-  private selection = inject(CmsSelectionService);
+export class CmsRichDirective extends CmsEditableHost {
   readonly cmsRich = input.required<string>();
+  protected override hoverEnabled = false;
+  protected override clickMode = 'stop' as const;
+  protected override removeClasses = ['cms-editable', 'cms-rich', 'cms-selected'];
   private quill: QuillType | null = null;
   private applying = false;
 
   constructor() {
+    super();
     effect(() => {
       const path = this.cmsRich();
       const html = this.cms.get<string>(path) ?? '';
@@ -39,22 +37,13 @@ export class CmsRichDirective implements OnDestroy, OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.selection.register(this.cmsRich(), this.el.nativeElement);
+  protected fieldPath(): string {
+    return this.cmsRich();
   }
 
-  ngOnDestroy(): void {
-    this.selection.unregister(this.cmsRich(), this.el.nativeElement);
+  override ngOnDestroy(): void {
     this.unmountQuill();
-  }
-
-  @HostListener('click', ['$event'])
-  onClick(event: Event): void {
-    if (!this.editor.editMode()) {
-      return;
-    }
-    event.stopPropagation();
-    this.selection.selectFromPreview(this.cmsRich());
+    super.ngOnDestroy();
   }
 
   private async mountQuill(): Promise<void> {

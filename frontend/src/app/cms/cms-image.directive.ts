@@ -1,27 +1,23 @@
-import { Directive, ElementRef, HostListener, OnDestroy, OnInit, effect, inject, input } from '@angular/core';
-import { CmsContentService } from './cms-content.service';
-import { CmsEditorService } from './cms-editor.service';
-import { CmsSelectionService } from './cms-selection.service';
+import { Directive, HostListener, effect, input } from '@angular/core';
+import { CmsEditableHost } from './cms-editable-host';
 
 @Directive({
   selector: 'img[cmsImage]',
   standalone: true,
 })
-export class CmsImageDirective implements OnDestroy, OnInit {
-  private el = inject(ElementRef<HTMLImageElement>);
-  private cms = inject(CmsContentService);
-  private editor = inject(CmsEditorService);
-  private selection = inject(CmsSelectionService);
+export class CmsImageDirective extends CmsEditableHost {
   readonly cmsImage = input.required<string>();
   readonly cmsScope = input<'page' | 'site'>('page');
+  protected override removeClasses = ['cms-editable-image', 'cms-selected'];
 
   constructor() {
+    super();
     effect(() => {
       const path = this.cmsImage();
       this.cms.activeContent();
       this.cms.site();
       const value = this.cms.get<string>(path, this.cmsScope());
-      const img = this.el.nativeElement;
+      const img = this.el.nativeElement as HTMLImageElement;
       if (typeof value === 'string' && value) {
         img.src = value;
       }
@@ -38,35 +34,8 @@ export class CmsImageDirective implements OnDestroy, OnInit {
     });
   }
 
-  ngOnInit(): void {
-    this.selection.register(this.cmsImage(), this.el.nativeElement);
-  }
-
-  ngOnDestroy(): void {
-    this.selection.unregister(this.cmsImage(), this.el.nativeElement);
-    this.el.nativeElement.classList.remove('cms-editable-image', 'cms-selected');
-  }
-
-  @HostListener('mouseenter')
-  onEnter(): void {
-    if (this.editor.editMode()) {
-      this.selection.hover(this.cmsImage());
-    }
-  }
-
-  @HostListener('mouseleave')
-  onLeave(): void {
-    this.selection.leave(this.cmsImage());
-  }
-
-  @HostListener('click', ['$event'])
-  onClick(event: Event): void {
-    if (!this.editor.editMode()) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    this.selection.selectFromPreview(this.cmsImage());
+  protected fieldPath(): string {
+    return this.cmsImage();
   }
 
   @HostListener('dragover', ['$event'])

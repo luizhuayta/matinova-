@@ -40,8 +40,7 @@
         }
       }
       @case ('number') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-n'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-n'" [hint]="field.hint || ''">
           <input
             [id]="id(field.path) + '-n'"
             type="number"
@@ -49,53 +48,30 @@
             [ngModel]="num(field.path)"
             (ngModelChange)="setNum(field.path, $event)"
             (blur)="end(field.path)">
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('image') {
-        <div class="box field">
-          <span class="lbl">{{ field.label }}</span>
+        <app-cms-field-row [label]="field.label">
           <app-cms-image-field [path]="field.path" />
-        </div>
+        </app-cms-field-row>
       }
       @case ('rich') {
-        <div class="box field">
-          <span class="lbl">{{ field.label }}</span>
-          <details class="help">
-            <summary aria-label="Ayuda">?</summary>
-            <p>Puedes poner negrita, listas y enlaces.</p>
-          </details>
+        <app-cms-field-row [label]="field.label" [hint]="hintOf(field)">
           <app-cms-rich-field [path]="field.path" />
-        </div>
+        </app-cms-field-row>
       }
       @case ('area') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''" [note]="lengthNote(field)">
           <textarea
             [id]="id(field.path) + '-i'"
             [attr.rows]="field.rows || 5"
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)"></textarea>
-          @if (lengthNote(field); as note) {
-            <p class="len-note">{{ note }}</p>
-          }
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('url') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
             [id]="id(field.path) + '-i'"
             type="url"
@@ -104,17 +80,10 @@
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('email') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
             [id]="id(field.path) + '-i'"
             type="email"
@@ -123,17 +92,10 @@
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('tel') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
             [id]="id(field.path) + '-i'"
             type="tel"
@@ -142,17 +104,10 @@
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('link') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
             [id]="id(field.path) + '-i'"
             type="url"
@@ -162,17 +117,10 @@
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('embed') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="hintOf(field)">
           <input
             [id]="id(field.path) + '-i'"
             type="url"
@@ -182,22 +130,10 @@
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          } @else {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>Pega el enlace del video de YouTube.</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('select') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <select
             [id]="id(field.path) + '-i'"
             [ngModel]="str(field.path)"
@@ -206,50 +142,27 @@
               <option [value]="opt.value">{{ opt.label }}</option>
             }
           </select>
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('color') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''">
           <input
             [id]="id(field.path) + '-i'"
             type="color"
             [ngModel]="str(field.path) || '#0066ff'"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('text') {
-        <div class="box field">
-          <label [attr.for]="id(field.path) + '-i'">{{ field.label }}</label>
+        <app-cms-field-row [label]="field.label" [controlId]="id(field.path) + '-i'" [hint]="field.hint || ''" [note]="lengthNote(field)">
           <input
             [id]="id(field.path) + '-i'"
             type="text"
             [ngModel]="str(field.path)"
             (ngModelChange)="setStr(field.path, $event)"
             (blur)="end(field.path)">
-          @if (lengthNote(field); as note) {
-            <p class="len-note">{{ note }}</p>
-          }
-          @if (field.hint) {
-            <details class="help">
-              <summary aria-label="Ayuda">?</summary>
-              <p>{{ field.hint }}</p>
-            </details>
-          }
-        </div>
+        </app-cms-field-row>
       }
       @case ('strings') {
         <section class="box stack">

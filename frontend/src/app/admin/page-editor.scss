@@ -53,44 +53,6 @@
   align-items: center;
 }
 
-.devices {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  padding: 4px;
-  background: #fff;
-  border: 1px solid var(--admin-line);
-  border-radius: 12px;
-}
-
-.mode-toggle {
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: #fff;
-  border: 1px solid var(--admin-line);
-  border-radius: 12px;
-}
-
-.mode-toggle button,
-.devices button {
-  min-height: 40px;
-  padding: 0 12px;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--admin-muted);
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-}
-
-.mode-toggle button.active,
-.devices button.active {
-  background: var(--admin-blue-btn);
-  color: #fff;
-}
-
 .save-state {
   margin: 0;
   min-width: 11.5rem;
@@ -272,7 +234,4 @@
 
 .revisions .hint {
   margin: 6px 0;
-  font-size: 0.8rem;
-  color: var(--admin-muted);
-  overflow-wrap: anywhere;
 }

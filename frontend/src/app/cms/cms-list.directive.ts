@@ -1,20 +1,17 @@
-import { Directive, ElementRef, OnDestroy, OnInit, inject, input } from '@angular/core';
-import { CmsSelectionService } from './cms-selection.service';
+import { Directive, input } from '@angular/core';
+import { CmsEditableHost } from './cms-editable-host';
 
 @Directive({
   selector: '[cmsList]',
   standalone: true,
 })
-export class CmsListDirective implements OnInit, OnDestroy {
-  private el = inject(ElementRef<HTMLElement>);
-  private selection = inject(CmsSelectionService);
+export class CmsListDirective extends CmsEditableHost {
   readonly cmsList = input.required<string>();
+  protected override hoverEnabled = false;
+  protected override clickMode = 'off' as const;
+  protected override removeClasses: string[] = [];
 
-  ngOnInit(): void {
-    this.selection.register(this.cmsList(), this.el.nativeElement);
-  }
-
-  ngOnDestroy(): void {
-    this.selection.unregister(this.cmsList(), this.el.nativeElement);
+  protected fieldPath(): string {
+    return this.cmsList();
   }
 }
