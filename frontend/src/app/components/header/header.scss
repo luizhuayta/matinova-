@@ -225,6 +225,29 @@ body {
   border-bottom: 3px solid #ff6600;
 }
 
+.nav-list li.lang {
+  display: flex;
+  gap: 2px;
+  margin-left: 6px;
+}
+
+.nav-list li.lang button {
+  border: 0;
+  background: transparent;
+  color: #1e3a8a;
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.nav-list li.lang button.active {
+  color: #ea580c;
+  background: rgba(249, 115, 22, 0.12);
+}
+
 /* Botón de transparencia */
 .btn-transparencia {
   background: linear-gradient(135deg, #f97316, #ea580c);
@@ -310,8 +333,15 @@ body {
   padding-left: 24px;
 }
 
-.dropdown:hover .dropdown-content {
+.dropdown:hover .dropdown-content,
+.dropdown.open .dropdown-content {
   display: block;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: rgba(30, 58, 138, 0.12);
+  margin: 4px 0;
 }
 
 /* VERSION MOVIL */
@@ -345,7 +375,9 @@ body {
     border-top: 3px solid #f97316;
 
     &.mobile-open {
-      max-height: 600px;
+      max-height: min(80vh, 920px);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
     }
   }
 
@@ -403,8 +435,16 @@ body {
     text-align: center;
   }
 
-  .dropdown:hover .dropdown-content {
+  .dropdown:hover .dropdown-content,
+  .dropdown.open .dropdown-content {
     display: block;
+  }
+
+  .nav-list li a,
+  .dropbtn,
+  .btn-transparencia {
+    min-height: 44px;
+    font-size: 16px;
   }
 }
 

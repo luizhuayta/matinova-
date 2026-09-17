@@ -15,8 +15,9 @@ function db(): PDO
     $pass = cfg('DB_PASSWORD', 'mattlocal');
 
     $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $name);
+    $retries = in_array($host, ['db', 'mysql', 'mariadb'], true) ? 30 : 1;
     $last = null;
-    for ($i = 0; $i < 30; $i++) {
+    for ($i = 0; $i < $retries; $i++) {
         try {
             $pdo = new PDO($dsn, $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
@@ -25,7 +26,9 @@ function db(): PDO
             return $pdo;
         } catch (PDOException $e) {
             $last = $e;
-            sleep(1);
+            if ($i < $retries - 1) {
+                sleep(1);
+            }
         }
     }
     throw $last ?? new RuntimeException('No se pudo conectar a MariaDB');

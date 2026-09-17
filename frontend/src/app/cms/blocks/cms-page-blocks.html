@@ -1,0 +1,37 @@
+<div class="cms-blocks">
+@for (block of visible(); track block.id) {
+  <div
+    class="cms-block"
+    [class.is-hidden]="!!block.hidden && editor.editMode()"
+    [class.w-half]="widthClass(block) === 'w-half'"
+    [class.w-third]="widthClass(block) === 'w-third'"
+    [ngStyle]="layoutStyle(block)">
+    @switch (group(block.type)) {
+      @case ('home') {
+        <app-home-style-block [block]="block" [index]="realIndex(block.id)" />
+      }
+      @case ('about') {
+        <app-about-style-block [block]="block" [index]="realIndex(block.id)" />
+      }
+      @case ('listing') {
+        <app-listing-style-block [block]="block" [index]="realIndex(block.id)" />
+      }
+      @case ('service') {
+        <app-service-style-block [block]="block" [index]="realIndex(block.id)" />
+      }
+      @case ('legal') {
+        <app-legal-style-block [block]="block" [index]="realIndex(block.id)" />
+      }
+      @case ('contact') {
+        <app-contact-form-block [block]="block" [index]="realIndex(block.id)" />
+      }
+      @case ('extra') {
+        <app-extra-style-block [block]="block" [index]="realIndex(block.id)" />
+      }
+      @case ('claims') {
+        <app-libro-reclamaciones [prefix]="claimsPrefix(block.id)" />
+      }
+    }
+  </div>
+}
+</div>

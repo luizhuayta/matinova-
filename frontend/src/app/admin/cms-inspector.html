@@ -174,6 +174,75 @@
             (blur)="end(field.path)">
         </app-cms-field-row>
       }
+      @case ('blocks') {
+        <section class="stack">
+          <header class="box-head">
+            <h3>{{ field.label }}</h3>
+            <span class="count">{{ blocks().length }}</span>
+          </header>
+          @if (field.hint) {
+            <p class="hint">{{ field.hint }}</p>
+          }
+          @if (hasTestimonials()) {
+            <button type="button" class="admin-btn-ghost add" (click)="cms.migrateTestimonialsToClients()">
+              Crear sección de clientes desde opiniones
+            </button>
+          }
+          <div class="list-items" cdkDropList (cdkDropListDropped)="dropList('blocks', $event)">
+            @for (item of blocks(); track item.id; let i = $index) {
+              <details class="item" [open]="i === 0" cdkDrag>
+                <summary>
+                  <button type="button" class="drag-handle" cdkDragHandle aria-label="Arrastrar" (click)="$event.preventDefault()">
+                    <i class="bi bi-grip-vertical" aria-hidden="true"></i>
+                  </button>
+                  <span class="item-title">{{ blockLabel(item.type) }}</span>
+                  <span class="item-actions">
+                    <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.moveListItem('blocks', i, i - 1)" [disabled]="i === 0" aria-label="Subir">
+                      <i class="bi bi-chevron-up" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.moveListItem('blocks', i, i + 1)" [disabled]="i === blocks().length - 1" aria-label="Bajar">
+                      <i class="bi bi-chevron-down" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.duplicateBlock(i)" aria-label="Duplicar">
+                      <i class="bi bi-copy" aria-hidden="true"></i>
+                    </button>
+                    <button type="button" class="admin-icon-btn" (click)="$event.preventDefault(); cms.removeBlock(i)" aria-label="Quitar">
+                      <i class="bi bi-trash" aria-hidden="true"></i>
+                    </button>
+                  </span>
+                </summary>
+                <label class="switch-row">
+                  <span>Ocultar en la web</span>
+                  <input type="checkbox" role="switch" [checked]="!!item.hidden" (change)="setBool('blocks.' + i + '.hidden', $any($event.target).checked)">
+                </label>
+                <label class="layout-row">
+                  <span>Ancho</span>
+                  <select class="admin-control" [ngModel]="layoutWidth(item)" (ngModelChange)="setStr('blocks.' + i + '.layout.width', $event)">
+                    <option value="full">Completo</option>
+                    <option value="half">Mitad</option>
+                    <option value="third">Tercio</option>
+                  </select>
+                </label>
+                <label class="layout-row">
+                  <span>Fondo</span>
+                  <input class="admin-control" type="text" [ngModel]="layoutBg(item)" (ngModelChange)="setStr('blocks.' + i + '.layout.background', $event)" placeholder="#fff o url()">
+                </label>
+                <label class="layout-row">
+                  <span>Espaciado</span>
+                  <input class="admin-control" type="text" [ngModel]="layoutPad(item)" (ngModelChange)="setStr('blocks.' + i + '.layout.padding', $event)" placeholder="2rem 0">
+                </label>
+                <app-cms-inspector [rootPath]="'blocks.' + i + '.props'" />
+              </details>
+            }
+          </div>
+          @if (blocks().length === 0) {
+            <p class="empty">Aún no hay secciones. Añade la primera.</p>
+          }
+          <button type="button" class="admin-btn-ghost add" (click)="openPicker()">
+            Añadir sección
+          </button>
+        </section>
+      }
       @case ('strings') {
         <section class="stack">
           <header class="box-head">
@@ -261,3 +330,34 @@
     </div>
   }
 </div>
+
+@if (pickerOpen() && !rootPath()) {
+  <div class="picker-backdrop" (click)="pickerOpen.set(false)">
+    <div class="picker" (click)="$event.stopPropagation()" role="dialog" aria-label="Añadir sección">
+      <header class="picker-head">
+        <h3>Añadir sección</h3>
+        <button type="button" class="admin-icon-btn" (click)="pickerOpen.set(false)" aria-label="Cerrar">
+          <i class="bi bi-x-lg" aria-hidden="true"></i>
+        </button>
+      </header>
+      <input
+        class="admin-control"
+        type="search"
+        placeholder="Buscar banner, clientes, texto…"
+        [ngModel]="pickerQuery()"
+        (ngModelChange)="pickerQuery.set($event)">
+      @for (category of categories(); track category) {
+        <h4 class="picker-cat">{{ category }}</h4>
+        <div class="picker-grid">
+          @for (item of catalogBy(category); track item.type) {
+            <button type="button" class="picker-card" (click)="addBlock(item.type)">
+              <i class="bi {{ item.icon }}" aria-hidden="true"></i>
+              <strong>{{ item.label }}</strong>
+              <small>{{ item.description }}</small>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

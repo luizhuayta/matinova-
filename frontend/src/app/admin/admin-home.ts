@@ -9,9 +9,11 @@ import { AdminPageList } from './admin-page-list';
   imports: [AdminPageList],
   template: `
     <section class="dash">
-      <header class="dash-head">
-        <h1>Páginas</h1>
-        <p class="admin-lead">Textos, fotos y listas de la web.</p>
+      <header class="page-head">
+        <div class="grow">
+          <h1>Páginas</h1>
+          <p class="admin-lead">Textos, fotos y listas de la web.</p>
+        </div>
       </header>
 
       @if (loading()) {
@@ -28,8 +30,7 @@ import { AdminPageList } from './admin-page-list';
     </section>
   `,
   styles: [`
-    .dash { max-width: 820px; }
-    .dash-head { margin-bottom: 0.35rem; }
+    .dash { max-width: 860px; }
   `],
 })
 export class AdminHome implements OnInit {

@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CmsPageSummary, PAGE_LABELS, PAGE_META, groupPages } from '../cms/cms.models';
 
@@ -15,6 +15,7 @@ import { CmsPageSummary, PAGE_LABELS, PAGE_META, groupPages } from '../cms/cms.m
         </div>
         <div class="page-grid">
           @for (page of group.pages; track page.slug) {
+            <div class="card-wrap">
             <a class="page-card accent-{{ accentFor(group.title) }}" [routerLink]="['/admin/paginas', page.slug]">
               <span class="page-top">
                 <span class="page-icon"><i class="bi {{ icon(page) }}" aria-hidden="true"></i></span>
@@ -26,6 +27,12 @@ import { CmsPageSummary, PAGE_LABELS, PAGE_META, groupPages } from '../cms/cms.m
               </span>
               <span class="card-cta">Editar <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
             </a>
+            @if (!page.protected && page.slug !== 'sitio') {
+              <button type="button" class="del" (click)="remove.emit(page)" aria-label="Eliminar página">
+                <i class="bi bi-trash" aria-hidden="true"></i>
+              </button>
+            }
+            </div>
           }
         </div>
       </div>
@@ -51,6 +58,20 @@ import { CmsPageSummary, PAGE_LABELS, PAGE_META, groupPages } from '../cms/cms.m
       grid-template-columns: repeat(auto-fill, minmax(min(100%, 215px), 1fr));
       gap: 12px;
       margin-top: 0.65rem;
+    }
+    .card-wrap { position: relative; }
+    .del {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      z-index: 2;
+      width: 32px;
+      height: 32px;
+      border: 1px solid var(--admin-line);
+      border-radius: 999px;
+      background: var(--admin-surface);
+      color: var(--admin-danger);
+      cursor: pointer;
     }
     .page-card {
       position: relative;
@@ -170,6 +191,7 @@ import { CmsPageSummary, PAGE_LABELS, PAGE_META, groupPages } from '../cms/cms.m
 })
 export class AdminPageList {
   readonly pages = input.required<CmsPageSummary[]>();
+  readonly remove = output<CmsPageSummary>();
 
   groups() {
     return groupPages(this.pages());

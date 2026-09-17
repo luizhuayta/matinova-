@@ -1,0 +1,47 @@
+<main class="softwarePage">
+  @switch (block().type) {
+    @case ('serviceHero') {
+      <section class="hero">
+        <img [src]="props()['heroImage']" [alt]="props()['heroAlt'] || ''" class="heroImage" [cmsImage]="path('heroImage')">
+      </section>
+      <section class="reasons">
+        <div class="container">
+          <div class="serviceContent">
+            <div>
+              <img [src]="props()['image']" [alt]="props()['imageAlt'] || ''" class="serviceImage" [cmsImage]="path('image')">
+            </div>
+            <div class="serviceRight">
+              <div class="serviceLabel" [cmsText]="path('label')"></div>
+              <h2 [cmsText]="path('title')"></h2>
+              <p [cmsText]="path('text')"></p>
+              @if (internal(ctaLink())) {
+                <a [routerLink]="ctaLink()" class="contactBtn" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+              } @else {
+                <a [href]="ctaLink()" class="contactBtn" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+    @case ('reasons') {
+      <section class="reasonsToChoose">
+        <div class="container">
+          <div class="reasonsHeader">
+            <p class="reasonsSubtitle" [cmsText]="path('subtitle')"></p>
+            <h2 class="reasonsTitle" [cmsText]="path('title')"></h2>
+          </div>
+          <div class="reasonsCards" [cmsList]="path('items')">
+            @for (reason of reasons(); track $index) {
+              <div class="reasonCard">
+                <img [src]="reason['img']" [alt]="reason['title']" [cmsImage]="path('items.' + $index + '.img')">
+                <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
+                <p [cmsText]="path('items.' + $index + '.text')"></p>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  }
+</main>

@@ -1,13 +1,13 @@
 <div class="libro-container">
   <div class="libro-header">
     <div class="logo-legal">
-      <img [src]="page()['logo'] || 'logo.svg'" [alt]="page()['company'] || 'Matt Innova Solution'" class="legal-logo-img" cmsImage="logo">
+      <img [src]="props()['logo'] || 'logo.svg'" [alt]="props()['company'] || 'Matt Innova Solution'" class="legal-logo-img" [cmsImage]="path('logo')">
     </div>
     <div class="header-text">
-      <h2 cmsText="title"></h2>
-      <p class="company-info" cmsText="company"></p>
-      <p class="company-ruc">RUC: <span cmsText="ruc"></span></p>
-      <p class="subtitle" cmsText="subtitle"></p>
+      <h2 [cmsText]="path('title')"></h2>
+      <p class="company-info" [cmsText]="path('company')"></p>
+      <p class="company-ruc">RUC: <span [cmsText]="path('ruc')"></span></p>
+      <p class="subtitle" [cmsText]="path('subtitle')"></p>
     </div>
   </div>
 
@@ -125,12 +125,12 @@
     </fieldset>
 
     <div class="legal-disclaimer">
-      <p cmsText="disclaimer1"></p>
-      <p cmsText="disclaimer2"></p>
+      <p [cmsText]="path('disclaimer1')"></p>
+      <p [cmsText]="path('disclaimer2')"></p>
     </div>
 
     <button type="submit" class="btn-submit" [disabled]="!reclamacionesForm.valid || isLoading">
-      {{ isLoading ? 'Enviando...' : (page()['submitLabel'] || 'Enviar Reclamación Virtual') }}
+      {{ isLoading ? 'Enviando...' : (props()['submitLabel'] || 'Enviar Reclamación Virtual') }}
     </button>
   </form>
 </div>

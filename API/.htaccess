@@ -1,7 +1,21 @@
-# No ejecutar scripts legacy si Apache sirve este directorio.
-<Files "contacto.php">
+RewriteEngine On
+RewriteBase /api/
+
+<Files ".env">
   Require all denied
 </Files>
-<Files "reclamaciones.php">
+<FilesMatch "\.(sql|md|log)$">
   Require all denied
-</Files>
+</FilesMatch>
+
+RewriteRule ^tests/ - [F]
+RewriteRule ^vendor/ - [F]
+RewriteRule ^tmp/ - [F]
+RewriteRule ^uploads/.*\.(php|phtml|phar)$ - [F]
+RewriteRule ^(schema\.sql|composer\.(json|lock)|Dockerfile|entrypoint\.sh|router\.php)$ - [F]
+
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^uploads/ - [L]
+
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteRule ^ index.php [L]

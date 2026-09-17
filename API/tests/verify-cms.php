@@ -1,9 +1,11 @@
 <?php
 declare(strict_types=1);
 
+require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../sanitize.php';
 require __DIR__ . '/../cms-schema.php';
 require __DIR__ . '/../cms-doc.php';
+require __DIR__ . '/../redirects.php';
 
 $failed = 0;
 function expect(bool $ok, string $label): void
@@ -29,8 +31,9 @@ expect(!str_contains((string) $tree['body'], 'script'), 'limpia body en JSON');
 expect($tree['title'] === 'Hola', 'no toca título plano');
 
 $migrated = migrate_cms_document(['title' => 'Inicio'], 'inicio');
-expect(($migrated['schemaVersion'] ?? 0) >= 2, 'migración schemaVersion');
-expect(isset($migrated['sections'][0]['type']), 'migración sections en inicio');
+expect(($migrated['schemaVersion'] ?? 0) >= 5, 'migración schemaVersion');
+expect(isset($migrated['blocks'][0]['type']), 'migración blocks en inicio');
+expect(($migrated['blocks'][0]['type'] ?? '') === 'hero', 'primer bloque de inicio es hero');
 expect(isset($migrated['decorativeImagePaths']) && is_array($migrated['decorativeImagePaths']), 'migración decorativeImagePaths');
 
 $bad = validate_cms_payload(['showSplash' => 'si']);
@@ -43,7 +46,7 @@ $magic = normalize_inicio_sections(['sections' => [['type' => 'magic'], ['type' 
 $types = array_column($magic['sections'], 'type');
 expect(!in_array('magic', $types, true) && in_array('hero', $types, true), 'rechaza sección magic');
 
-$inicioOk = [
+$legacy = [
     'sections' => [
         ['type' => 'hero', 'hidden' => false],
         ['type' => 'about', 'hidden' => true],
@@ -55,29 +58,78 @@ $inicioOk = [
     'about' => ['image' => '', 'imageAlt' => ''],
     'decorativeImagePaths' => [],
 ];
+$inicioOk = migrate_cms_document($legacy, 'inicio');
 expect(validate_cms_guards($inicioOk, 'inicio') === null, 'inicio válido pasa guards');
 
 $hiddenAll = $inicioOk;
-$hiddenAll['sections'] = [
-    ['type' => 'hero', 'hidden' => true],
-    ['type' => 'about', 'hidden' => true],
-];
+foreach ($hiddenAll['blocks'] as $i => $block) {
+    $hiddenAll['blocks'][$i]['hidden'] = true;
+}
 $hiddenErr = validate_cms_guards($hiddenAll, 'inicio');
-expect(($hiddenErr['field'] ?? '') === 'sections', 'no se pueden ocultar todas las secciones');
+expect(($hiddenErr['field'] ?? '') === 'blocks', 'no se pueden ocultar todas las secciones');
 
 $noSlides = $inicioOk;
-$noSlides['slides'] = [];
+$noSlides['blocks'][0]['props']['slides'] = [];
 $slidesErr = validate_cms_guards($noSlides, 'inicio');
-expect(($slidesErr['field'] ?? '') === 'slides', 'mínimo un banner');
+expect(str_starts_with((string) ($slidesErr['field'] ?? ''), 'blocks.0.props.slides'), 'mínimo un banner');
 
 $needsAlt = $inicioOk;
-$needsAlt['about'] = ['image' => '/api/uploads/foto.jpg', 'imageAlt' => ''];
+foreach ($needsAlt['blocks'] as $i => $block) {
+    if (($block['type'] ?? '') === 'about') {
+        $needsAlt['blocks'][$i]['props']['image'] = '/api/uploads/foto.jpg';
+        $needsAlt['blocks'][$i]['props']['imageAlt'] = '';
+        $aboutPath = "blocks.$i.props.image";
+        break;
+    }
+}
 $altErr = validate_cms_guards($needsAlt, 'inicio');
-expect(($altErr['field'] ?? '') === 'about.imageAlt', 'alt obligatorio si hay imagen');
+expect(($altErr['field'] ?? '') === ($aboutPath ?? '') . 'Alt', 'alt obligatorio si hay imagen');
 
 $decorative = $needsAlt;
-$decorative['decorativeImagePaths'] = ['about.image'];
+$decorative['decorativeImagePaths'] = [$aboutPath ?? 'blocks.1.props.image'];
 expect(validate_cms_guards($decorative, 'inicio') === null, 'imagen decorativa no exige alt');
+
+$badType = $inicioOk;
+$badType['blocks'][] = ['id' => 'x', 'type' => 'magic', 'hidden' => false, 'props' => []];
+$badTypeErr = validate_cms_guards($badType, 'inicio');
+expect(str_contains((string) ($badTypeErr['field'] ?? ''), 'type'), 'bloque inválido rechazado');
+
+$blank = cms_blank_page_document('Clientes', 'clients');
+expect(($blank['blocks'][0]['type'] ?? '') === 'listingHero', 'plantilla clientes banner');
+expect(($blank['blocks'][1]['type'] ?? '') === 'clients', 'plantilla clientes');
+expect(($blank['blocks'][2]['type'] ?? '') === 'cta', 'plantilla clientes cta');
+expect(($blank['blocks'][1]['props']['layout'] ?? '') === 'paneles', 'plantilla clientes usa paneles');
+expect(validate_cms_guards($blank, 'clientes') === null, 'clientes paneles pasa guards');
+$customCat = $blank;
+if (!isset($customCat['blocks'][1]['props']['items'][0]) || !is_array($customCat['blocks'][1]['props']['items'][0])) {
+    $customCat['blocks'][1]['props']['items'][0] = ['name' => 'X', 'alt' => 'X'];
+}
+$customCat['blocks'][1]['props']['layout'] = 'mosaico';
+$customCat['blocks'][1]['props']['items'][0]['category'] = 'otro';
+expect(validate_cms_guards($customCat, 'clientes') === null, 'layout y category sin enum no rechazan');
+
+$svc = migrate_cms_document([
+    'title' => 'Software',
+    'heroImage' => '/software-banner.png',
+    'heroAlt' => 'Banner',
+    'image' => '/software.png',
+    'imageAlt' => 'Software',
+    'label' => 'SERVICIO',
+    'text' => 'Desarrollo a medida.',
+    'cta' => 'Contáctanos',
+    'reasonsSubtitle' => 'RAZONES',
+    'reasonsTitle' => 'Debes elegirnos',
+    'reasons' => [['img' => '/erp.jpg', 'alt' => 'ERP', 'title' => 'ERP', 'text' => 'Gestión comercial.']],
+], 'servicios-software');
+expect(($svc['blocks'][0]['type'] ?? '') === 'serviceHero', 'migración servicio a serviceHero');
+expect(($svc['blocks'][1]['type'] ?? '') === 'reasons', 'migración servicio a reasons');
+expect(validate_cms_guards($svc, 'servicios-software') === null, 'página de servicio migrada pasa guards');
+expect(cms_valid_slug('nueva-pagina') === true, 'slug válido');
+expect(cms_valid_slug('Sitio') === false, 'slug con mayúsculas inválido');
+expect(in_array('admin', cms_reserved_slugs(), true), 'admin reservado');
+expect(cms_page_path_for('inicio') === '/', 'path de inicio');
+expect(cms_page_path_for('servicios-saas') === '/servicios/saas', 'path de servicio');
+expect(cms_page_path_for('casos-exito') === '/casos-exito', 'path de página nueva');
 
 $missing = cms_version_guard(4, null);
 expect(($missing['status'] ?? 0) === 400 && ($missing['body']['field'] ?? '') === 'version', 'versión ausente es 400');
@@ -91,5 +143,55 @@ expect(cms_doc_not_found_message('inicio') === 'Página no encontrada', '404 pá
 expect(cms_doc_save_conflict_message('sitio') === 'Alguien guardó el sitio antes. Recarga para no pisar cambios.', '409 save sitio');
 expect(cms_doc_save_conflict_message('inicio') === 'Alguien guardó esta página antes. Recarga para no pisar cambios.', '409 save página');
 expect(cms_doc_publish_conflict_message() === 'Alguien publicó o guardó antes. Recarga para no pisar cambios.', '409 publish');
+
+define('CHATBOT_AS_LIBRARY', true);
+require __DIR__ . '/../chatbot.php';
+require __DIR__ . '/../chatbot-ai.php';
+$cfg = ai_default_config();
+expect($cfg['enabled'] === false, 'IA deshabilitada por defecto');
+$public = ai_public_config(['enabled' => true, 'provider' => 'openrouter', 'model' => 'x', 'baseUrl' => 'https://openrouter.ai/api/v1', 'apiKey' => 'sk-secret-value']);
+expect(empty($public['apiKey']) && ($public['keyConfigured'] ?? false) === true, 'la API key no se expone');
+expect(ai_is_ready($cfg) === false, '/bot-ai sin key no está listo');
+$classic = chatbot_classic_reply('hola');
+expect(str_contains($classic, 'MENU PRINCIPAL') || str_contains($classic, 'Matt Innova'), 'bot clásico responde saludo');
+$hello = chatbot_classic_result('hola');
+expect(is_array($hello['links'] ?? null) && $hello['links'] !== [], 'saludo incluye links');
+$reclamo = chatbot_classic_result('quiero un reclamo');
+expect(str_contains(strtolower((string) $reclamo['reply']), 'reclam'), 'bot clásico deriva a reclamos');
+$reclamoPaths = array_column($reclamo['links'] ?? [], 'path');
+expect(cms_normalize_locale('en') === 'en', 'locale en');
+expect(cms_normalize_locale('fr') === 'es', 'locale fallback es');
+expect(cms_public_path('/contacto', 'en') === '/en/contacto', 'path público en');
+expect(cms_public_path('/', 'en') === '/en', 'home en');
+expect(cms_hmac_signature('{}', 'secret') === 'sha256=' . hash_hmac('sha256', '{}', 'secret'), 'firma hmac');
+expect((cms_schema_for_slug('contacto')['kind'] ?? '') === 'contact', 'schema explícito contacto');
+expect((cms_schema_for_slug('acerca-de')['kind'] ?? '') === 'about', 'schema explícito acerca-de');
+expect((cms_default_layout()['width'] ?? '') === 'full', 'layout por defecto');
+expect(cms_normalize_redirect_path('/vieja/') === '/vieja', 'normaliza redirect');
+$erp = chatbot_classic_result('precio del erp');
+expect(in_array('/contacto', array_column($erp['links'] ?? [], 'path'), true), 'precios derivan a contacto');
+$clientes = chatbot_classic_result('quiero ver sus clientes');
+expect(in_array('/clientes', array_column($clientes['links'] ?? [], 'path'), true), 'clientes derivan a /clientes');
+$bye = chatbot_classic_result('adios');
+expect(str_contains(strtolower((string) $bye['reply']), 'hasta'), 'despedida del bot clásico');
+$thanks = chatbot_classic_result('gracias');
+expect(str_contains(strtolower((string) $thanks['reply']), 'de nada'), 'gracias es cortesía');
+expect(!str_contains(strtolower((string) $thanks['reply']), 'hasta pronto'), 'gracias no cierra la conversación');
+$iaKept = migrate_cms_document(['chatbotMode' => 'ia', 'schemaVersion' => 5], 'sitio');
+expect(($iaKept['chatbotMode'] ?? '') === 'ia', 'publicar sitio conserva modo ia');
+$modeFilled = migrate_cms_document(['schemaVersion' => 5], 'sitio');
+expect(in_array($modeFilled['chatbotMode'] ?? '', ['ia', 'clasico'], true), 'sitio siempre tiene chatbotMode');
+$plazo = chatbot_classic_result('cuanto tardan un desarrollo');
+expect(str_contains(strtolower((string) $plazo['reply']), 'semana') || str_contains(strtolower((string) $plazo['reply']), 'sprint'), 'plazos de desarrollo');
+$hire = chatbot_classic_result('quiero contratar sus servicios');
+expect(in_array('/contacto', array_column($hire['links'] ?? [], 'path'), true), 'contratar deriva a contacto');
+$aiCtx = chatbot_ai_context();
+expect(str_contains($aiCtx, '/clientes'), 'contexto IA incluye /clientes');
+require_once __DIR__ . '/../clients-catalog.php';
+expect(count(cms_clients_catalog_items()) >= 50, 'catalogo de clientes cargado');
+expect(cms_clients_content_is_placeholder(['blocks' => []]) === true, 'pagina clientes vacia es placeholder');
+expect(cms_clients_content_is_placeholder(['blocks' => [['type' => 'clients', 'props' => ['items' => [['name' => 'A'], ['name' => 'B']]]]]]) === false, 'clientes con 2 items no es placeholder');
+$fromText = chatbot_links_from_text('Mira /contacto y /servicios/software');
+expect(count($fromText) === 2, 'extrae rutas del texto de IA');
 
 exit($failed > 0 ? 1 : 0);

@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 import { CmsApiService } from './cms-api.service';
 import { CmsContentService } from './cms-content.service';
 import { CmsHistoryService } from './cms-history.service';
+import { pageBlocks } from './block-registry';
 
 const INICIO_DOC = {
   sections: [
@@ -28,52 +29,50 @@ function makeCms(http: { put?: () => Observable<unknown> } = {}): CmsContentServ
 describe('CmsContentService', () => {
   it('deshace y rehace un cambio de texto', () => {
     const cms = makeCms();
-    cms.set('heroCta', 'Contactar');
-    expect(cms.get('heroCta')).toBe('Contactar');
+    cms.set('blocks.0.props.cta', 'Contactar');
+    expect(cms.get('blocks.0.props.cta')).toBe('Contactar');
     expect(cms.canUndo()).toBe(true);
     cms.undo();
-    expect(cms.get('heroCta')).toBe('Ver más');
+    expect(cms.get('blocks.0.props.cta')).toBe('Ver más');
     expect(cms.canRedo()).toBe(true);
     cms.redo();
-    expect(cms.get('heroCta')).toBe('Contactar');
+    expect(cms.get('blocks.0.props.cta')).toBe('Contactar');
   });
 
   it('no deja ocultar todas las secciones de inicio', () => {
     const cms = makeCms();
-    cms.set('sections.0.hidden', true);
-    cms.set('sections.1.hidden', true);
-    expect(cms.get('sections.1.hidden')).toBe(false);
+    const blocks = pageBlocks(cms.activeContent());
+    expect(blocks.length).toBeGreaterThan(1);
+    cms.set('blocks.0.hidden', true);
+    cms.set('blocks.1.hidden', true);
+    expect(cms.get('blocks.1.hidden')).toBe(false);
     expect(cms.conflict()).toBe('Deja al menos una parte de la página visible.');
   });
 
   it('enumera cambios pendientes en español', () => {
     const cms = makeCms();
-    cms.set('heroCta', 'Ir');
-    cms.set('slides.0.title', 'Nuevo');
+    cms.set('blocks.0.props.cta', 'Ir');
+    cms.set('blocks.0.props.slides.0.title', 'Nuevo');
     const lines = cms.changeLines().map((row) => row.text);
-    expect(lines).toContain('Cambiaste botón del banner');
+    expect(lines.some((line) => line.toLowerCase().includes('botón'))).toBe(true);
     expect(lines).toContain('Cambiaste el titular de la portada');
   });
 
   it('quita un ítem con toast y lo restaura con undoRemove', () => {
     const cms = makeCms();
-    cms.removeListItem('slides', 0);
-    expect((cms.get<unknown[]>('slides') ?? []).length).toBe(1);
-    expect(cms.conflict()).toBe('Debe quedar al menos un elemento.');
+    cms.removeListItem('blocks.0.props.slides', 0);
+    expect((cms.get<unknown[]>('blocks.0.props.slides') ?? []).length).toBe(0);
 
     const withTwo = makeCms();
-    withTwo.replaceContent({
-      ...INICIO_DOC,
-      slides: [
-        { title: 'Uno', badge: '', image: '' },
-        { title: 'Dos', badge: '', image: '' },
-      ],
-    });
-    withTwo.removeListItem('slides', 1);
-    expect((withTwo.get<unknown[]>('slides') ?? []).map((item) => (item as { title: string }).title)).toEqual(['Uno']);
+    withTwo.set('blocks.0.props.slides', [
+      { title: 'Uno', badge: '', image: '' },
+      { title: 'Dos', badge: '', image: '' },
+    ]);
+    withTwo.removeListItem('blocks.0.props.slides', 1);
+    expect((withTwo.get<unknown[]>('blocks.0.props.slides') ?? []).map((item) => (item as { title: string }).title)).toEqual(['Uno']);
     expect(withTwo.removeToast()).toBe('Eliminado — Deshacer');
     withTwo.undoRemove();
-    expect((withTwo.get<unknown[]>('slides') ?? []).map((item) => (item as { title: string }).title)).toEqual([
+    expect((withTwo.get<unknown[]>('blocks.0.props.slides') ?? []).map((item) => (item as { title: string }).title)).toEqual([
       'Uno',
       'Dos',
     ]);
@@ -94,6 +93,19 @@ describe('CmsContentService', () => {
     });
     await expect(cms.save()).rejects.toBeTruthy();
     expect(cms.conflict()).toBe('Alguien guardó esta página antes. Recarga para no pisar cambios.');
+  });
+
+  it('añade un bloque de clientes y migra opiniones', () => {
+    const cms = makeCms();
+    cms.addBlock('clients');
+    expect(pageBlocks(cms.activeContent()).some((item) => item.type === 'clients')).toBe(true);
+
+    const fromOpinions = makeCms();
+    fromOpinions.addBlock('testimonials');
+    fromOpinions.migrateTestimonialsToClients();
+    const after = pageBlocks(fromOpinions.activeContent()).map((item) => item.type);
+    expect(after).toContain('testimonials');
+    expect(after.filter((type) => type === 'clients').length).toBe(1);
   });
 
   it('expone el campo que falló en un 400', async () => {

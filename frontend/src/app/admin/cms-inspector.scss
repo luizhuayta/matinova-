@@ -268,3 +268,79 @@ input[type='color'].admin-control {
   padding: 4px;
   min-height: 40px;
 }
+
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(20, 24, 31, 0.45);
+  padding: 1rem;
+}
+
+.picker {
+  width: min(720px, 100%);
+  max-height: min(80vh, 720px);
+  overflow: auto;
+  padding: 1rem;
+  border-radius: 12px;
+  background: var(--admin-surface);
+  box-shadow: var(--admin-shadow);
+}
+
+.picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.picker-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.picker-cat {
+  margin: 1rem 0 0.5rem;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--admin-muted);
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 8px;
+}
+
+.picker-card {
+  display: grid;
+  gap: 4px;
+  text-align: left;
+  padding: 0.8rem;
+  border: 1px solid var(--admin-line);
+  border-radius: 8px;
+  background: var(--admin-paper);
+  cursor: pointer;
+}
+
+.picker-card:hover {
+  border-color: var(--admin-ink);
+}
+
+.picker-card i {
+  font-size: 1.2rem;
+}
+
+.picker-card strong {
+  font-size: 0.875rem;
+}
+
+.picker-card small {
+  color: var(--admin-muted);
+  font-size: 0.75rem;
+  line-height: 1.35;
+}

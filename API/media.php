@@ -3,6 +3,13 @@ declare(strict_types=1);
 
 function handle_media(string $path, string $method): void
 {
+    if ($path === '/media/crop' && $method === 'POST') {
+        require_admin();
+        require_csrf();
+        rate_limit('cms_media', 20, 60);
+        json_out(cms_media_crop(json_input()));
+    }
+
     if ($path === '/media' && $method === 'GET') {
         require_admin();
         $rows = db()->query('SELECT id, original_name, url, mime, size_bytes, width, height, variants, created_at FROM media ORDER BY id DESC')->fetchAll();
@@ -161,5 +168,75 @@ function compress_image(string $tmp, string $originalName): array
         'width' => (int) $mainInfo[0],
         'height' => (int) $mainInfo[1],
         'variants' => $variants,
+    ];
+}
+
+function cms_media_crop(array $input): array
+{
+    $url = (string) ($input['url'] ?? '');
+    $x = (int) ($input['x'] ?? 0);
+    $y = (int) ($input['y'] ?? 0);
+    $w = (int) ($input['w'] ?? 0);
+    $h = (int) ($input['h'] ?? 0);
+    if ($w < 8 || $h < 8) {
+        json_out(['message' => 'El recorte es demasiado pequeño.'], 400);
+    }
+    $name = basename(parse_url($url, PHP_URL_PATH) ?: '');
+    $srcPath = __DIR__ . '/uploads/' . $name;
+    if ($name === '' || !is_file($srcPath) || str_contains($name, '..')) {
+        json_out(['message' => 'No se encontró esa imagen en el servidor.'], 400);
+    }
+    $info = @getimagesize($srcPath);
+    if ($info === false) {
+        json_out(['message' => 'Ese archivo no parece una imagen'], 400);
+    }
+    $srcW = (int) $info[0];
+    $srcH = (int) $info[1];
+    $x = max(0, min($x, $srcW - 1));
+    $y = max(0, min($y, $srcH - 1));
+    $w = max(8, min($w, $srcW - $x));
+    $h = max(8, min($h, $srcH - $y));
+    $src = match ($info[2]) {
+        IMAGETYPE_JPEG => imagecreatefromjpeg($srcPath),
+        IMAGETYPE_PNG => imagecreatefrompng($srcPath),
+        IMAGETYPE_WEBP => function_exists('imagecreatefromwebp') ? imagecreatefromwebp($srcPath) : null,
+        IMAGETYPE_GIF => imagecreatefromgif($srcPath),
+        default => null,
+    };
+    if (!$src) {
+        json_out(['message' => 'No se pudo leer la imagen'], 400);
+    }
+    $crop = imagecrop($src, ['x' => $x, 'y' => $y, 'width' => $w, 'height' => $h]);
+    imagedestroy($src);
+    if (!$crop) {
+        json_out(['message' => 'No se pudo recortar la imagen'], 400);
+    }
+    $tmp = tempnam(sys_get_temp_dir(), 'cms-crop-');
+    $webp = function_exists('imagewebp');
+    if ($webp) {
+        imagewebp($crop, $tmp, 82);
+    } else {
+        imagejpeg($crop, $tmp, 82);
+    }
+    imagedestroy($crop);
+    $saved = compress_image($tmp, 'crop-' . $name);
+    @unlink($tmp);
+    $stmt = db()->prepare('INSERT INTO media (original_name, stored_name, url, mime, size_bytes, width, height, variants) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+    $stmt->execute([
+        'crop-' . $name,
+        $saved['stored'],
+        $saved['url'],
+        $saved['mime'],
+        $saved['size'],
+        $saved['width'],
+        $saved['height'],
+        json_encode($saved['variants']),
+    ]);
+    return [
+        'id' => (int) db()->lastInsertId(),
+        'url' => $saved['url'],
+        'width' => $saved['width'],
+        'height' => $saved['height'],
+        'variants' => $saved['variants'],
     ];
 }

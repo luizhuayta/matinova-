@@ -3,9 +3,10 @@ import { CdkDrag, CdkDragDrop, CdkDragHandle, CdkDropList } from '@angular/cdk/d
 import { FormsModule } from '@angular/forms';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsSelectionService } from '../cms/cms-selection.service';
-import { FieldDesc, addLabel, describeObject, itemImage, itemTitle } from '../cms/cms-fields';
-import { cmsControlId, JsonMap, getByPath } from '../cms/cms.models';
+import { FieldDesc, addLabel, itemImage, itemTitle } from '../cms/cms-fields';
+import { cmsControlId } from '../cms/cms.models';
 import { schemaFieldsAt, schemaForSlug, inspectorRootSchema } from '../cms/cms-schema';
+import { BLOCK_CATALOG, BLOCK_TYPES, CmsBlock, pageBlocks } from '../cms/block-registry';
 import { CmsImageField } from './cms-image-field';
 import { CmsRichField } from './cms-rich-field';
 import { CmsFieldRow } from './cms-field-row';
@@ -23,19 +24,31 @@ export class CmsInspector {
   readonly rootPath = input('');
   readonly query = signal('');
   private typing = signal(new Set<string>());
+  readonly pickerOpen = signal(false);
+  readonly pickerQuery = signal('');
+  readonly insertAt = signal<number | null>(null);
   fields = computed(() => {
     this.cms.activeContent();
     const path = this.rootPath();
     const slug = this.cms.currentSlug();
-    const schema = path ? schemaForSlug(slug) : inspectorRootSchema(slug, this.cms.activeContent());
+    const content = this.cms.activeContent();
+    const blockMatch = path.match(/^blocks\.(\d+)(?:\.(props(?:\.(.*))?))?$/);
+    if (blockMatch) {
+      const blocks = pageBlocks(content);
+      const block = blocks[Number(blockMatch[1])];
+      const schema = BLOCK_CATALOG[block?.type ?? '']?.schema ?? [];
+      const rest = blockMatch[3] ?? '';
+      const base = `blocks.${blockMatch[1]}.props`;
+      return schemaFieldsAt(schema, rest).map((field) => ({
+        ...field,
+        path: field.path.startsWith(base) ? field.path : `${base}.${field.path}`,
+      }));
+    }
+    const schema = path ? schemaForSlug(slug) : inspectorRootSchema(slug, content);
     if (schema) {
       return schemaFieldsAt(schema, path);
     }
-    const value = path ? getByPath(this.cms.activeContent(), path) : this.cms.activeContent();
-    if (!value || typeof value !== 'object' || Array.isArray(value)) {
-      return [] as FieldDesc[];
-    }
-    return describeObject(value as JsonMap, path);
+    return [] as FieldDesc[];
   });
   visibleFields = computed(() => {
     const all = this.fields();
@@ -159,5 +172,59 @@ export class CmsInspector {
     } catch {
       return false;
     }
+  }
+
+  blocks(): CmsBlock[] {
+    return pageBlocks(this.cms.activeContent());
+  }
+
+  catalog() {
+    const q = this.pickerQuery().trim().toLowerCase();
+    const all = BLOCK_TYPES;
+    if (!q) {
+      return all;
+    }
+    return all.filter((item) =>
+      `${item.label} ${item.category} ${item.description}`.toLowerCase().includes(q)
+    );
+  }
+
+  categories(): string[] {
+    return [...new Set(this.catalog().map((item) => item.category))];
+  }
+
+  catalogBy(category: string) {
+    return this.catalog().filter((item) => item.category === category);
+  }
+
+  openPicker(index: number | null = null): void {
+    this.insertAt.set(index);
+    this.pickerQuery.set('');
+    this.pickerOpen.set(true);
+  }
+
+  addBlock(type: string): void {
+    this.cms.addBlock(type, this.insertAt() ?? undefined);
+    this.pickerOpen.set(false);
+  }
+
+  blockLabel(type: string): string {
+    return BLOCK_CATALOG[type]?.label || type;
+  }
+
+  layoutWidth(item: CmsBlock): string {
+    return item.layout?.width || 'full';
+  }
+
+  layoutBg(item: CmsBlock): string {
+    return item.layout?.background || '';
+  }
+
+  layoutPad(item: CmsBlock): string {
+    return item.layout?.padding || '';
+  }
+
+  hasTestimonials(): boolean {
+    return this.blocks().some((item) => item.type === 'testimonials');
   }
 }

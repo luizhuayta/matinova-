@@ -1,0 +1,189 @@
+<div class="home-wrapper">
+  @switch (block().type) {
+    @case ('hero') {
+      <section class="hero" [ngStyle]="{'background-image': 'url(' + heroImage() + ')'}">
+        <div class="hero-overlay">
+          <div class="slider-indicators" [cmsList]="path('slides')">
+            @for (slide of slides(); track $index) {
+              <div class="dot" [class.active]="currentSlide === $index" (click)="setSlide($index)"></div>
+            }
+          </div>
+          <div class="container hero-content">
+            <span class="badge" [cmsText]="path('slides.' + currentSlide + '.badge')"></span>
+            <h1 [cmsText]="path('slides.' + currentSlide + '.title')"></h1>
+            @if (internal(linkOf())) {
+              <a class="btn-primary" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            } @else if (linkOf()) {
+              <a class="btn-primary" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            }
+            @if (editor.editMode()) {
+              <img class="cms-hero-pick" [cmsImage]="path('slides.' + currentSlide + '.image')" [src]="heroImage()" alt="Foto del banner">
+            }
+          </div>
+        </div>
+      </section>
+    }
+    @case ('about') {
+      <section class="about container">
+        <div class="about-grid">
+          <div class="about-img">
+            <img [src]="props()['image'] || 'about-image.jpg'" [alt]="props()['imageAlt'] || ''" [cmsImage]="path('image')">
+          </div>
+          <div class="about-text">
+            <span class="section-tag" [cmsText]="path('tag')"></span>
+            <h2 [cmsText]="path('title')"></h2>
+            <p [cmsText]="path('text')"></p>
+            @if (features().length) {
+              <div class="features-list">
+                @for (feature of features(); track $index) {
+                  <div class="feature-item">
+                    <span class="feature-icon">✓</span>
+                    <span [cmsText]="featurePath($index)"></span>
+                  </div>
+                }
+              </div>
+            }
+            @if (internal(linkOf())) {
+              <a class="btn-read-more" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            } @else if (linkOf()) {
+              <a class="btn-read-more" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            }
+          </div>
+        </div>
+      </section>
+    }
+    @case ('contactCards') {
+      <section class="contact-section container">
+        <div class="contact-grid">
+          @for (card of items(); track $index) {
+            <div class="info-card">
+              <div class="icon-box"><i class="bi" [class]="card['icon'] || 'bi-geo-alt-fill'"></i></div>
+              <div class="text-box">
+                <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
+                <p [cmsText]="path('items.' + $index + '.text')"></p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+    @case ('services') {
+      <hr class="section-divider">
+      <section class="services-main container">
+        <span class="section-tag" [cmsText]="path('tag')"></span>
+        <h2 class="title-left" [cmsText]="path('title')"></h2>
+        <div class="services-grid" [cmsList]="path('cards')">
+          @for (card of serviceCards(); track $index) {
+            <div class="service-card">
+              <div class="card-img">
+                <img [src]="card['img']" [alt]="card['alt'] || card['title']" [cmsImage]="path('cards.' + $index + '.img')">
+              </div>
+              <div class="card-body">
+                <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
+                <p [cmsText]="path('cards.' + $index + '.text')"></p>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+    @case ('innovative') {
+      <hr class="section-divider">
+      <section class="innovative-services">
+        <div class="container innovative-grid">
+          <div class="innovative-intro">
+            <span class="section-tag-light" [cmsText]="path('tag')"></span>
+            <h2 [cmsText]="path('title')"></h2>
+            <p [cmsText]="path('text')"></p>
+            @if (internal(linkOf())) {
+              <a class="btn-discover" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            } @else if (linkOf()) {
+              <a class="btn-discover" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            }
+          </div>
+          <div class="innovative-carousel-viewport">
+            <div class="innovative-items" [cmsList]="path('items')" [ngStyle]="{'transform': 'translateX(-' + (currentServiceSlide * 33.33) + '%)'}">
+              @for (service of items(); track $index) {
+                <div class="mini-card">
+                  <div class="card-img">
+                    <img [src]="service['img']" [alt]="service['title']" [cmsImage]="path('items.' + $index + '.img')">
+                  </div>
+                  <div class="card-info">
+                    <h4 [cmsText]="path('items.' + $index + '.title')"></h4>
+                    <p [cmsText]="path('items.' + $index + '.desc')"></p>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="service-indicators">
+              @for (service of items(); track $index) {
+                @if ($index < serviceSlideCount()) {
+                  <div
+                    class="service-dot"
+                    [class.active]="currentServiceSlide === $index"
+                    (click)="setServiceSlide($index)"
+                  ></div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+    @case ('testimonials') {
+      <hr class="section-divider">
+      <section class="testimonials-section">
+        <div class="container testimonials-grid">
+          <div class="testimonials-intro">
+            <span class="section-tag" [cmsText]="path('tag')"></span>
+            <h2 [cmsText]="path('title')"></h2>
+            <p [cmsText]="path('text')"></p>
+            @if (internal(linkOf())) {
+              <a class="btn-cta-testimonials" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            } @else if (linkOf()) {
+              <a class="btn-cta-testimonials" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            }
+          </div>
+          <div class="testimonials-carousel">
+            <div class="testimonial-track" [cmsList]="path('items')" [ngStyle]="{'transform': 'translateX(-' + (currentTestimonialSlide * 50) + '%)'}">
+              @for (item of items(); track $index) {
+                <div class="testimonial-card">
+                  <div class="testimonial-bubble">
+                    <div class="quote-icon"><i class="bi bi-quote"></i></div>
+                    <p [cmsText]="path('items.' + $index + '.text')"></p>
+                    <div class="rating" aria-label="Valoración">
+                      @for (star of stars(item); track $index) {
+                        <i class="bi bi-star-fill"></i>
+                      }
+                    </div>
+                  </div>
+                  <div class="client-info">
+                    <div class="client-avatar">
+                      <img [src]="item['logo']" [alt]="item['client']" [cmsImage]="path('items.' + $index + '.logo')">
+                    </div>
+                    <div class="client-details">
+                      <h4 [cmsText]="path('items.' + $index + '.client')"></h4>
+                      <span class="client-role">{{ item['role'] || 'Cliente Satisfecho' }}</span>
+                      <span class="client-company">{{ item['company'] || 'Matt Innova Solution' }}</span>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+            <div class="testimonial-indicators">
+              @for (item of items(); track $index) {
+                @if ($index < testimonialSlideCount()) {
+                  <div
+                    class="dot"
+                    [class.active]="currentTestimonialSlide === $index"
+                    (click)="setTestimonialSlide($index)"
+                  ></div>
+                }
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+  }
+</div>

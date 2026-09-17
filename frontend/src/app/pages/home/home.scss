@@ -509,13 +509,22 @@ $dark-bg: #0f1113;
         margin-bottom: 25px;
         min-height: 50px;
         display: flex;
-        align-items: center;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
 
         p {
           font-size: 15px;
           color: #555;
           margin: 0;
           line-height: 1.5;
+        }
+
+        .rating {
+          display: flex;
+          gap: 4px;
+          color: #f5b301;
+          i { font-size: 14px; }
         }
 
         &::after {
@@ -552,9 +561,14 @@ $dark-bg: #0f1113;
             margin: 0;
           }
           span {
+            display: block;
             font-size: 13px;
             color: #999;
             font-style: italic;
+          }
+          .client-company {
+            font-style: normal;
+            color: #777;
           }
         }
       }

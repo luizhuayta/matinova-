@@ -6,12 +6,16 @@ import { CmsHistoryService } from './cms-history.service';
 import { blankFromSchema, humanChangeLine, itemFieldsAt, migrateCmsDocument, minListLength, schemaForSlug } from './cms-schema';
 import {
   CmsDocResponse,
+  CmsMenuItem,
+  CmsPageSummary,
   ImageMeta,
   JsonMap,
-  SLUG_PATHS,
+  pathForSlug,
+  registerPageRoutes,
   getByPath,
   setByPath,
 } from './cms.models';
+import { BLOCK_CATALOG, CmsBlock, makeBlock, pageBlocks } from './block-registry';
 
 @Injectable({ providedIn: 'root' })
 export class CmsContentService {
@@ -22,6 +26,8 @@ export class CmsContentService {
 
   readonly site = signal<JsonMap>({});
   readonly pages = signal<Record<string, JsonMap>>({});
+  readonly pageList = signal<CmsPageSummary[]>([]);
+  readonly menuItems = signal<CmsMenuItem[]>([]);
   readonly currentSlug = signal('inicio');
   readonly dirty = signal(false);
   readonly saving = signal(false);
@@ -97,10 +103,8 @@ export class CmsContentService {
       this.undoHistory.push({ slug, path, scope, before, after: value });
     }
     this.applyValue(slug, path, value, scope);
-    if (slug === 'inicio') {
-      const sections = (slug === this.currentSlug() ? this.get<Array<{ hidden?: boolean }>>('sections') : null)
-        ?? ((this.pages()[slug]?.['sections'] as Array<{ hidden?: boolean }>) ?? null);
-      const list = Array.isArray(sections) ? sections : [];
+    if (slug !== 'sitio') {
+      const list = pageBlocks(this.pages()[slug] ?? {});
       if (list.length > 0 && list.every((item) => !!item?.hidden)) {
         this.applyValue(slug, path, before, scope);
         if (record) {
@@ -118,7 +122,7 @@ export class CmsContentService {
   addListItem(path: string): void {
     const list = [...(this.get<unknown[]>(path) ?? [])];
     const schema = schemaForSlug(this.currentSlug());
-    const itemFields = itemFieldsAt(schema, path);
+    const itemFields = itemFieldsAt(schema, path, this.activeContent());
     if (itemFields) {
       list.push(blankFromSchema(itemFields));
     } else {
@@ -134,6 +138,110 @@ export class CmsContentService {
     }
     list.splice(index + 1, 0, structuredClone(list[index]));
     this.set(path, list);
+  }
+
+  addBlock(type: string, index?: number): void {
+    if (!BLOCK_CATALOG[type]) {
+      return;
+    }
+    const list = [...pageBlocks(this.activeContent())];
+    const block = makeBlock(type);
+    if (index == null || index < 0 || index > list.length) {
+      list.push(block);
+    } else {
+      list.splice(index, 0, block);
+    }
+    this.set('blocks', list);
+  }
+
+  duplicateBlock(index: number): void {
+    const list = [...pageBlocks(this.activeContent())];
+    if (!list[index]) {
+      return;
+    }
+    const copy: CmsBlock = { ...structuredClone(list[index]), id: makeBlock(list[index].type).id };
+    list.splice(index + 1, 0, copy);
+    this.set('blocks', list);
+  }
+
+  removeBlock(index: number): void {
+    const list = [...pageBlocks(this.activeContent())];
+    if (list.length <= 1) {
+      this.conflict.set('Debe quedar al menos un elemento.');
+      return;
+    }
+    const visible = list.filter((item, i) => i === index ? false : !item.hidden);
+    if (visible.length < 1) {
+      this.conflict.set('Deja al menos una parte de la página visible.');
+      return;
+    }
+    this.removeListItem('blocks', index);
+  }
+
+  migrateTestimonialsToClients(): void {
+    const list = [...pageBlocks(this.activeContent())];
+    const source = list.find((item) => item.type === 'testimonials');
+    if (!source) {
+      return;
+    }
+    const items = ((source.props['items'] as Array<Record<string, string>>) ?? []).map((item) => ({
+      logo: item['logo'] ?? '',
+      name: item['client'] ?? '',
+      url: '',
+      alt: item['client'] ?? '',
+      text: item['text'] ?? '',
+    }));
+    list.push(
+      makeBlock('clients', {
+        title: source.props['title'] ?? 'Clientes',
+        text: source.props['text'] ?? '',
+        layout: 'logos-grid',
+        items: items.map((item) => ({ ...item, category: 'empresas', subcategory: '', icon: '' })),
+      })
+    );
+    this.set('blocks', list);
+  }
+
+  async createPage(body: { title: string; slug?: string; template?: string; showInMenu?: boolean }): Promise<CmsPageSummary> {
+    const res = await this.api.createPage(body);
+    const catalog = await this.api.getPagesCatalog();
+    this.pageList.set(catalog.pages);
+    this.menuItems.set(catalog.menu);
+    registerPageRoutes(catalog.pages);
+    if (res.content) {
+      this.writeRoot(res.page.slug, migrateCmsDocument(res.content, res.page.slug));
+      this.versions.update((map) => ({ ...map, [res.page.slug]: res.version }));
+    }
+    return res.page;
+  }
+
+  async deletePage(slug: string): Promise<void> {
+    await this.api.deletePage(slug);
+    const next = { ...this.pages() };
+    delete next[slug];
+    this.pages.set(next);
+    const catalog = await this.api.getPagesCatalog();
+    this.pageList.set(catalog.pages);
+    this.menuItems.set(catalog.menu);
+    registerPageRoutes(catalog.pages);
+  }
+
+  async updatePageMeta(
+    slug: string,
+    body: { title?: string; slug?: string; showInMenu?: boolean; menuOrder?: number; path?: string }
+  ): Promise<CmsPageSummary> {
+    const res = await this.api.updatePageMeta(slug, body);
+    const catalog = await this.api.getPagesCatalog();
+    this.pageList.set(catalog.pages);
+    this.menuItems.set(catalog.menu);
+    registerPageRoutes(catalog.pages);
+    if (res.page.slug !== slug && this.pages()[slug]) {
+      const next = { ...this.pages() };
+      next[res.page.slug] = next[slug];
+      delete next[slug];
+      this.pages.set(next);
+    }
+    return res.page;
   }
 
   addStringItem(path: string): void {
@@ -230,13 +338,16 @@ export class CmsContentService {
 
   async loadAll(): Promise<void> {
     const preview = this.previewQuery();
-    const [site, list] = await Promise.all([this.api.getSite(preview), this.api.getPages()]);
+    const [site, catalog] = await Promise.all([this.api.getSite(preview), this.api.getPagesCatalog()]);
     this.writeDoc('sitio', site);
+    this.pageList.set(catalog.pages);
+    this.menuItems.set(catalog.menu);
+    registerPageRoutes(catalog.pages);
     const pageMap: Record<string, JsonMap> = {};
     const versions: Record<string, number> = { ...this.versions(), sitio: site.version };
     const drafts: Record<string, boolean> = { ...this.hasDraft(), sitio: !!site.hasDraft };
     await Promise.all(
-      list
+      catalog.pages
         .filter((p) => p.slug !== 'sitio')
         .map(async (p) => {
           const full = await this.api.getPage(p.slug, preview);
@@ -264,7 +375,11 @@ export class CmsContentService {
   }
 
   async listPages() {
-    return this.api.getPages();
+    const catalog = await this.api.getPagesCatalog();
+    this.pageList.set(catalog.pages);
+    this.menuItems.set(catalog.menu);
+    registerPageRoutes(catalog.pages);
+    return catalog.pages;
   }
 
   async save(): Promise<void> {
@@ -320,11 +435,19 @@ export class CmsContentService {
   async createPreviewLink(): Promise<string> {
     const slug = this.currentSlug();
     const res = await this.api.createPreviewToken(slug);
-    return res.url || `${SLUG_PATHS[slug] || '/'}?preview=`;
+    return res.url || `${pathForSlug(slug)}?preview=`;
   }
 
   async uploadImage(file: File): Promise<string> {
     const res = await this.api.uploadMedia(file);
+    if (res.width && res.height) {
+      this.imageMeta.update((map) => ({ ...map, [res.url]: { width: res.width!, height: res.height! } }));
+    }
+    return res.url;
+  }
+
+  async cropImage(url: string, box: { x: number; y: number; w: number; h: number }): Promise<string> {
+    const res = await this.api.cropMedia({ url, ...box });
     if (res.width && res.height) {
       this.imageMeta.update((map) => ({ ...map, [res.url]: { width: res.width!, height: res.height! } }));
     }
@@ -350,8 +473,20 @@ export class CmsContentService {
     await this.api.deleteMedia(id);
   }
 
-  async listMessages() {
-    return this.api.listMessages();
+  async listMessages(params?: { kind?: string; q?: string; status?: string; page?: number; limit?: number }) {
+    return this.api.listMessages(params);
+  }
+
+  patchMessage(id: number, body: { status: string }) {
+    return this.api.patchMessage(id, body);
+  }
+
+  getAiConfig() {
+    return this.api.getAiConfig();
+  }
+
+  saveAiConfig(body: Parameters<CmsApiService['saveAiConfig']>[0]) {
+    return this.api.saveAiConfig(body);
   }
 
   private applySaveResponse(slug: string, res: CmsDocResponse): void {
@@ -390,10 +525,11 @@ export class CmsContentService {
   }
 
   private writeRoot(slug: string, content: JsonMap): void {
+    const next = slug === 'sitio' ? content : migrateCmsDocument(content, slug);
     if (slug === 'sitio') {
-      this.site.set(content);
+      this.site.set(next);
     } else {
-      this.pages.set({ ...this.pages(), [slug]: content });
+      this.pages.set({ ...this.pages(), [slug]: next });
     }
   }
 

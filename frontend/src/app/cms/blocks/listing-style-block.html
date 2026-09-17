@@ -1,0 +1,52 @@
+<main class="serviciosPage" [class.clientesPage]="isClientes()">
+  @switch (block().type) {
+    @case ('listingHero') {
+      <section class="hero">
+        <img [src]="props()['image'] || '/carousel.jpg'" [alt]="props()['title'] || 'Banner'" class="heroImage" [cmsImage]="path('image')">
+        <div class="heroOverlay">
+          <h1 [cmsText]="path('title')"></h1>
+          <p [cmsText]="path('text')"></p>
+        </div>
+      </section>
+    }
+    @case ('serviceCards') {
+      <section class="servicesGrid">
+        <div class="container">
+          <div class="servicesHeader">
+            <p class="servicesSubtitle" [cmsText]="path('subtitle')"></p>
+            <h2 class="servicesTitle" [cmsText]="path('title')"></h2>
+          </div>
+          <div class="servicesCards" [cmsList]="path('cards')">
+            @for (card of cards(); track $index) {
+              <div class="serviceCard" [routerLink]="[card['path'] || '/']">
+                <div class="card-image-wrapper">
+                  <img [src]="card['img']" [alt]="card['title']" [cmsImage]="path('cards.' + $index + '.img')">
+                </div>
+                <div class="card-body">
+                  <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
+                  <p [cmsText]="path('cards.' + $index + '.text')"></p>
+                  <a class="serviceLink" [routerLink]="[card['path'] || '/']" [cmsText]="path('cards.' + $index + '.link')"></a>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+    @case ('cta') {
+      <section class="ctaSection">
+        <div class="container">
+          <div class="ctaContent">
+            <h2 [cmsText]="path('title')"></h2>
+            <p [cmsText]="path('text')"></p>
+            @if (internal(ctaLink())) {
+              <a [routerLink]="ctaLink()" class="ctaBtn" [cmsText]="path('button')" [cmsLink]="path('link')"></a>
+            } @else {
+              <a [href]="ctaLink()" class="ctaBtn" [cmsText]="path('button')" [cmsLink]="path('link')"></a>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  }
+</main>

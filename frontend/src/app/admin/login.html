@@ -1,23 +1,52 @@
 <main class="login-split">
   <aside class="login-brand">
-    <img src="logo.svg" alt="Matt Innova Solution" class="login-logo">
-    <h1>Panel de la web</h1>
-    <p>Cambia textos, fotos y mensajes tal como se ven en el sitio público.</p>
+    <div class="brand-inner">
+      <img src="logo.svg" alt="Matt Innova Solution" class="login-logo">
+      <p class="brand-kicker"><span class="brand-dot" aria-hidden="true"></span>Matt Innova · CMS</p>
+      <h1>Panel de la web</h1>
+      <p>Cambia textos, fotos y mensajes tal como se ven en el sitio público.</p>
+      <ul class="login-points">
+        <li>
+          <i class="bi bi-type" aria-hidden="true"></i>
+          <span><strong>Textos y fotos</strong><small>Edita tal como se ve en la web</small></span>
+        </li>
+        <li>
+          <i class="bi bi-chat-dots" aria-hidden="true"></i>
+          <span><strong>Mensajes</strong><small>Contacto y libro de reclamaciones</small></span>
+        </li>
+        <li>
+          <i class="bi bi-eye" aria-hidden="true"></i>
+          <span><strong>Vista previa</strong><small>Revisa antes de publicar</small></span>
+        </li>
+      </ul>
+    </div>
+    <p class="brand-foot"><i class="bi bi-lock" aria-hidden="true"></i> Acceso solo para el equipo.</p>
   </aside>
 
   <section class="login-form-wrap">
     <form class="login-card" (ngSubmit)="submit()" novalidate>
-      <h2>Entrar</h2>
-      <p class="login-help">Usa tu usuario del panel.</p>
+      <div class="login-card-head">
+        <span class="login-badge"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>
+        <div>
+          <h2>Entrar</h2>
+          <p class="login-help">Usa tu usuario del panel.</p>
+        </div>
+      </div>
 
       <div class="admin-field">
         <label for="admin-user">Usuario</label>
-        <input id="admin-user" class="admin-control" name="username" type="text" [(ngModel)]="username" autocomplete="username" required autofocus>
+        <div class="login-input">
+          <i class="bi bi-person" aria-hidden="true"></i>
+          <input id="admin-user" class="admin-control" name="username" type="text" [(ngModel)]="username" autocomplete="username" required autofocus>
+        </div>
       </div>
 
       <div class="admin-field">
         <label for="admin-pass">Contraseña</label>
-        <input id="admin-pass" class="admin-control" name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required>
+        <div class="login-input">
+          <i class="bi bi-key" aria-hidden="true"></i>
+          <input id="admin-pass" class="admin-control" name="password" type="password" [(ngModel)]="password" autocomplete="current-password" required>
+        </div>
       </div>
 
       @if (error) {
@@ -25,7 +54,11 @@
       }
 
       <button type="submit" class="admin-btn-primary" [disabled]="loading" [attr.aria-busy]="loading">
-        {{ loading ? 'Entrando…' : 'Entrar' }}
+        @if (loading) {
+          <span class="btn-spin" aria-hidden="true"></span> Entrando…
+        } @else {
+          Entrar <i class="bi bi-arrow-right" aria-hidden="true"></i>
+        }
       </button>
     </form>
   </section>

@@ -1,4 +1,5 @@
 import { Component, inject, input, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsEditorService } from '../cms/cms-editor.service';
 import { altPathForImage } from '../cms/cms-schema';
@@ -7,6 +8,7 @@ import { CmsMediaItem } from '../cms/cms.models';
 @Component({
   selector: 'app-cms-image-field',
   standalone: true,
+  imports: [FormsModule],
   template: `
     <div class="image-field">
       <div class="preview" [class.empty]="!url()">
@@ -26,6 +28,7 @@ import { CmsMediaItem } from '../cms/cms.models';
         </label>
         <button type="button" class="admin-btn-ghost" (click)="openLibrary()">Elegir</button>
         @if (url()) {
+          <button type="button" class="admin-btn-ghost" (click)="openCrop()">Recortar</button>
           <button type="button" class="admin-btn-ghost" (click)="clear()">Quitar</button>
         }
       </div>
@@ -42,6 +45,26 @@ import { CmsMediaItem } from '../cms/cms.models';
         </label>
       }
     </div>
+
+    @if (cropOpen()) {
+      <div class="picker" role="dialog" aria-label="Recortar imagen" (click)="cropOpen.set(false)">
+        <div class="picker-card crop-card" (click)="$event.stopPropagation()">
+          <header>
+            <h3>Recortar al hueco</h3>
+            <button type="button" class="admin-btn-ghost" (click)="cropOpen.set(false)">Cerrar</button>
+          </header>
+          <p class="micro">Ajusta el recorte. El ratio sigue el hueco ({{ ratioLabel() }}).</p>
+          <div class="crop-preview">
+            <img [src]="url()" alt="" (load)="onCropLoad($event)">
+            <div class="crop-box" [style.left.%]="crop().x" [style.top.%]="crop().y" [style.width.%]="crop().w" [style.height.%]="crop().h"></div>
+          </div>
+          <label>Horizontal <input type="range" min="0" max="80" [ngModel]="crop().x" (ngModelChange)="setCrop('x', $event)"></label>
+          <label>Vertical <input type="range" min="0" max="80" [ngModel]="crop().y" (ngModelChange)="setCrop('y', $event)"></label>
+          <label>Tamaño <input type="range" min="20" max="100" [ngModel]="crop().w" (ngModelChange)="setCrop('w', $event)"></label>
+          <button type="button" class="admin-btn-primary" (click)="applyCrop()" [disabled]="cropping()">{{ cropping() ? 'Recortando…' : 'Aplicar recorte' }}</button>
+        </div>
+      </div>
+    }
 
     @if (libraryOpen()) {
       <div class="picker" role="dialog" aria-label="Elegir imagen" (click)="libraryOpen.set(false)">
@@ -132,18 +155,31 @@ import { CmsMediaItem } from '../cms/cms.models';
     .micro { color: var(--admin-muted); }
     .alt-label { font-size: 0.8125rem; font-weight: 600; }
     .switch-row { display: flex; gap: 8px; align-items: center; font-size: 0.8125rem; }
+    .crop-preview { position: relative; background: #111; border-radius: 8px; overflow: hidden; }
+    .crop-preview img { height: auto; max-height: 280px; object-fit: contain; }
+    .crop-box { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 999px rgba(0,0,0,.45); pointer-events: none; }
   `],
 })
 export class CmsImageField {
   private cms = inject(CmsContentService);
   private editor = inject(CmsEditorService);
   readonly path = input.required<string>();
+  readonly aspectRatio = input(16 / 9);
   libraryOpen = signal(false);
+  cropOpen = signal(false);
+  cropping = signal(false);
   items = signal<CmsMediaItem[]>([]);
   busy = signal(false);
+  crop = signal({ x: 10, y: 10, w: 80, h: 45 });
+  natural = signal({ w: 0, h: 0 });
 
   url(): string {
     return this.cms.get<string>(this.path()) ?? '';
+  }
+
+  ratioLabel(): string {
+    const ratio = this.aspectRatio();
+    return `${ratio.toFixed(2)}:1`;
   }
 
   altPath(): string | null {
@@ -227,5 +263,45 @@ export class CmsImageField {
 
   clear(): void {
     this.cms.set(this.path(), '');
+  }
+
+  openCrop(): void {
+    this.cropOpen.set(true);
+  }
+
+  onCropLoad(event: Event): void {
+    const img = event.target as HTMLImageElement;
+    this.natural.set({ w: img.naturalWidth, h: img.naturalHeight });
+    this.setCrop('w', this.crop().w);
+  }
+
+  setCrop(key: 'x' | 'y' | 'w', value: number): void {
+    const ratio = this.aspectRatio();
+    const next = { ...this.crop(), [key]: Number(value) };
+    next.h = Math.min(100, next.w * (1 / ratio) * (this.natural().w && this.natural().h ? this.natural().w / this.natural().h : 1));
+    if (next.x + next.w > 100) next.x = Math.max(0, 100 - next.w);
+    if (next.y + next.h > 100) next.y = Math.max(0, 100 - next.h);
+    this.crop.set(next);
+  }
+
+  async applyCrop(): Promise<void> {
+    const nat = this.natural();
+    if (!nat.w || !nat.h) {
+      return;
+    }
+    const box = this.crop();
+    this.cropping.set(true);
+    try {
+      const url = await this.cms.cropImage(this.url(), {
+        x: Math.round((box.x / 100) * nat.w),
+        y: Math.round((box.y / 100) * nat.h),
+        w: Math.round((box.w / 100) * nat.w),
+        h: Math.round((box.h / 100) * nat.h),
+      });
+      this.cms.set(this.path(), url);
+      this.cropOpen.set(false);
+    } finally {
+      this.cropping.set(false);
+    }
   }
 }

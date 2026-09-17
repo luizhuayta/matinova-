@@ -4,27 +4,27 @@
       <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="footer-logo" cmsImage="logo" cmsScope="site">
       <p class="footer-desc" cmsText="footer.desc" cmsScope="site"></p>
       <div class="social-links">
-        <a [href]="footer()['youtube']" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
-        <a [href]="footer()['facebook']" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
-        <a [href]="footer()['linkedin']" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn"><i class="bi bi-linkedin"></i></a>
-        <a [href]="footer()['instagram']" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a [href]="footer()['youtube']" target="_blank" rel="noopener noreferrer" aria-label="YouTube" cmsLink="footer.youtube" cmsScope="site"><i class="bi bi-youtube"></i></a>
+        <a [href]="footer()['facebook']" target="_blank" rel="noopener noreferrer" aria-label="Facebook" cmsLink="footer.facebook" cmsScope="site"><i class="bi bi-facebook"></i></a>
+        <a [href]="footer()['linkedin']" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" cmsLink="footer.linkedin" cmsScope="site"><i class="bi bi-linkedin"></i></a>
+        <a [href]="footer()['instagram']" target="_blank" rel="noopener noreferrer" aria-label="Instagram" cmsLink="footer.instagram" cmsScope="site"><i class="bi bi-instagram"></i></a>
       </div>
     </div>
     <div class="footer-col">
       <h3 cmsText="footer.quickTitle" cmsScope="site"></h3>
       <ul>
-        <li><a routerLink="/"><i class="bi bi-chevron-right"></i> <span cmsText="nav.inicio" cmsScope="site"></span></a></li>
-        <li><a routerLink="/acerca-de"><i class="bi bi-chevron-right"></i> <span cmsText="nav.acerca" cmsScope="site"></span></a></li>
-        <li><a routerLink="/servicios"><i class="bi bi-chevron-right"></i> <span cmsText="nav.servicios" cmsScope="site"></span></a></li>
-        <li><a [href]="nav()['academyUrl']" target="_blank" rel="noopener noreferrer"><i class="bi bi-chevron-right"></i> <span cmsText="nav.academy" cmsScope="site"></span></a></li>
-        <li><a routerLink="/contacto"><i class="bi bi-chevron-right"></i> <span cmsText="nav.contacto" cmsScope="site"></span></a></li>
+        <li><a [routerLink]="pathOf('/')"><i class="bi bi-chevron-right"></i> <span cmsText="nav.inicio" cmsScope="site"></span></a></li>
+        <li><a [routerLink]="pathOf('/acerca-de')"><i class="bi bi-chevron-right"></i> <span cmsText="nav.acerca" cmsScope="site"></span></a></li>
+        <li><a [routerLink]="pathOf('/servicios')"><i class="bi bi-chevron-right"></i> <span cmsText="nav.servicios" cmsScope="site"></span></a></li>
+        <li><a [href]="nav()['academyUrl']" target="_blank" rel="noopener noreferrer" cmsLink="nav.academyUrl" cmsScope="site"><i class="bi bi-chevron-right"></i> <span cmsText="nav.academy" cmsScope="site"></span></a></li>
+        <li><a [routerLink]="pathOf('/contacto')"><i class="bi bi-chevron-right"></i> <span cmsText="nav.contacto" cmsScope="site"></span></a></li>
       </ul>
     </div>
     <div class="footer-col">
       <h3 cmsText="footer.popularTitle" cmsScope="site"></h3>
       <ul>
         <li *ngFor="let item of navServices(); let i = index">
-          <a [routerLink]="item['path']"><i class="bi bi-chevron-right"></i> <span [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></span></a>
+          <a [routerLink]="pathOf(item['path'])"><i class="bi bi-chevron-right"></i> <span [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></span></a>
         </li>
       </ul>
     </div>
@@ -36,7 +36,7 @@
         <li><i class="bi bi-telephone-fill"></i> <span cmsText="footer.phone" cmsScope="site"></span></li>
         <li><i class="bi bi-envelope-fill"></i> <span cmsText="footer.email" cmsScope="site"></span></li>
         <li>
-          <a routerLink="/libro-reclamaciones" class="libro-link" aria-label="Ir al libro de reclamaciones">
+          <a [routerLink]="pathOf('/libro-reclamaciones')" class="libro-link" aria-label="Ir al libro de reclamaciones">
             <img [src]="footer()['libroImage'] || 'libro.jpg'" alt="Libro de reclamaciones" class="libro-image" cmsImage="footer.libroImage" cmsScope="site">
           </a>
         </li>
@@ -46,9 +46,9 @@
   <div class="footer-bottom">
     <p cmsText="footer.copyright" cmsScope="site"></p>
     <div class="legal-links">
-      <a routerLink="/privacidad" cmsText="footer.privacy" cmsScope="site"></a>
+      <a [routerLink]="pathOf('/privacidad')" cmsText="footer.privacy" cmsScope="site"></a>
       <span>|</span>
-      <a routerLink="/terminos" cmsText="footer.terms" cmsScope="site"></a>
+      <a [routerLink]="pathOf('/terminos')" cmsText="footer.terms" cmsScope="site"></a>
     </div>
   </div>
 </footer>

@@ -7,9 +7,18 @@ import { CmsMediaItem } from '../cms/cms.models';
   selector: 'app-admin-media',
   standalone: true,
   template: `
-    <section>
-      <h1>Imágenes y archivos</h1>
-      <p class="admin-lead">Puedes subir una foto pesada del celular. El sistema la achica solo.</p>
+    <section class="wrap">
+      <header class="page-head">
+        <div class="grow">
+          <h1>Imágenes y archivos</h1>
+          <p class="admin-lead">Puedes subir una foto pesada del celular. El sistema la achica solo.</p>
+        </div>
+        @if (!loading() && items().length > 0) {
+          <div class="head-actions">
+            <span class="pill neutral admin-num">{{ items().length }} archivo{{ items().length === 1 ? '' : 's' }}</span>
+          </div>
+        }
+      </header>
 
       @if (toast()) {
         <p class="admin-banner info" role="status">
@@ -64,36 +73,45 @@ import { CmsMediaItem } from '../cms/cms.models';
     </section>
   `,
   styles: [`
+    .wrap { max-width: 960px; }
+    .admin-banner.info { margin-bottom: 0.9rem; }
     .drop {
       display: grid;
       place-items: center;
-      gap: 0.3rem;
-      margin: 1.1rem 0 1.25rem;
-      min-height: 120px;
-      padding: 1.15rem;
-      border: 1px dashed var(--admin-line);
-      border-radius: var(--admin-radius);
+      gap: 0.35rem;
+      margin: 0 0 1.1rem;
+      min-height: 150px;
+      padding: 1.6rem 1.15rem;
+      border: 2px dashed var(--admin-line);
+      border-radius: 14px;
       background: var(--admin-surface);
       text-align: center;
       cursor: pointer;
       color: var(--admin-muted);
+      transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
     }
-    .drop i { font-size: 1.4rem; color: var(--admin-ink); }
-    .drop strong { color: var(--admin-text); font-size: 0.9375rem; }
+    .drop i { font-size: 1.8rem; color: var(--admin-ink); }
+    .drop strong { color: var(--admin-text); font-size: 0.95rem; }
     .drop span { font-size: 0.8125rem; }
-    .drop.over, .drop:hover { border-color: var(--admin-ink); background: #ece8e2; }
+    .drop.over {
+      border-color: var(--admin-ink);
+      background: #ece8e2;
+    }
+    .drop:hover { border-color: var(--admin-ink); }
     .drop.busy { opacity: 0.7; pointer-events: none; }
     .drop input { display: none; }
     .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(188px, 1fr)); gap: 12px; }
     figure {
       background: var(--admin-surface);
       border: 1px solid var(--admin-line);
-      border-radius: var(--admin-radius);
+      border-radius: 13px;
       padding: 10px;
       margin: 0;
       display: grid;
       gap: 8px;
+      transition: border-color 160ms ease, box-shadow 160ms ease, transform 160ms ease;
     }
+    figure:hover { border-color: #b7b1a9; box-shadow: var(--admin-shadow); transform: translateY(-2px); }
     img { width: 100%; height: 140px; object-fit: cover; border-radius: var(--admin-radius-ctrl); background: #ece8e2; }
     figcaption { display: grid; gap: 2px; min-height: 2.6rem; }
     figcaption strong {

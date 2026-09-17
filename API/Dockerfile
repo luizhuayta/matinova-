@@ -1,9 +1,9 @@
 FROM php:8.3-cli
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype6-dev unzip git \
+    libpng-dev libjpeg62-turbo-dev libwebp-dev libfreetype6-dev libcurl4-openssl-dev unzip git \
     && docker-php-ext-configure gd --with-jpeg --with-webp --with-freetype \
-    && docker-php-ext-install gd pdo pdo_mysql \
+    && docker-php-ext-install gd pdo pdo_mysql curl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

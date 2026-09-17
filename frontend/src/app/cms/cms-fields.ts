@@ -14,7 +14,8 @@ export type FieldKind =
   | 'strings'
   | 'select'
   | 'color'
-  | 'embed';
+  | 'embed'
+  | 'blocks';
 
 export interface FieldDesc {
   key: string;
@@ -87,11 +88,6 @@ const FIELD_LABELS: Record<string, string> = {
 };
 
 const IMAGE_KEYS = /^(logo|img|image|photo|banner|heroImage|founderImage|aboutImage|libroImage)$/i;
-const RICH_KEYS = /^(body)$/i;
-const AREA_KEYS = /^(text|desc|message|tagline|splashTagline|aboutText|cookieText|videosText|teamText|heroText|ctaText)$/i;
-const URL_KEYS = /^(path|link|url|href|embed|academyUrl|heroCtaLink|linkedin|github|youtube|facebook|instagram)$/i;
-const EMAIL_KEYS = /(^email$|Email$)/;
-const TEL_KEYS = /^(phone|whatsappNumber|tel)$/i;
 
 const FIELD_HINTS: Record<string, string> = {
   whatsappNumber: 'Código de país y número, sin el signo +.',
@@ -120,6 +116,10 @@ const ADD_LABELS: Record<string, string> = {
   Comentarios: 'Añadir comentario',
   Motivos: 'Añadir motivo',
   'Servicios del menú': 'Añadir servicio',
+  Clientes: 'Añadir cliente',
+  Fases: 'Añadir fase',
+  Preguntas: 'Añadir pregunta',
+  Fotos: 'Añadir foto',
 };
 
 export function fieldLabel(key: string): string {
@@ -172,6 +172,7 @@ export function fieldIcon(kind: FieldKind): string {
     case 'image':
       return 'bi-image';
     case 'list':
+    case 'blocks':
     case 'strings':
       return 'bi-card-list';
     case 'group':
@@ -200,53 +201,6 @@ export function fieldIcon(kind: FieldKind): string {
     default:
       return 'bi-input-cursor-text';
   }
-}
-
-export function describeObject(obj: Record<string, unknown>, prefix = ''): FieldDesc[] {
-  return Object.entries(obj)
-    .filter(([key]) => key !== 'schemaVersion' && key !== 'decorativeImagePaths')
-    .map(([key, value]) => {
-    const path = prefix ? `${prefix}.${key}` : key;
-    const label = fieldLabel(key);
-    const hint = fieldHint(key);
-    if (typeof value === 'boolean') {
-      return { key, path, label, kind: 'bool' as const, hint };
-    }
-    if (typeof value === 'number') {
-      return { key, path, label, kind: 'number' as const, hint };
-    }
-    if (Array.isArray(value)) {
-      const kind = value.every((item) => item == null || typeof item === 'string' || typeof item === 'number')
-        ? 'strings'
-        : 'list';
-      return { key, path, label, kind, hint };
-    }
-    if (value && typeof value === 'object') {
-      return { key, path, label, kind: 'group' as const, hint };
-    }
-    if (typeof value === 'string' && isImageField(key, value)) {
-      return { key, path, label, kind: 'image' as const, hint };
-    }
-    if (typeof value === 'string' && (RICH_KEYS.test(key) || /<[a-z][\s\S]*>/i.test(value))) {
-      return { key, path, label, kind: 'rich' as const, hint };
-    }
-    if (typeof value === 'string' && EMAIL_KEYS.test(key)) {
-      return { key, path, label, kind: 'email' as const, hint };
-    }
-    if (typeof value === 'string' && TEL_KEYS.test(key)) {
-      return { key, path, label, kind: 'tel' as const, hint };
-    }
-    if (typeof value === 'string' && URL_KEYS.test(key)) {
-      return { key, path, label, kind: 'url' as const, hint };
-    }
-    if (typeof value === 'string' && (AREA_KEYS.test(key) || value.length > 120)) {
-      return { key, path, label, kind: 'area' as const, hint, rows: 5 };
-    }
-    if (typeof value === 'string' && value.length > 36) {
-      return { key, path, label, kind: 'area' as const, hint, rows: 2 };
-    }
-    return { key, path, label, kind: 'text' as const, hint };
-  });
 }
 
 export function itemImage(item: unknown): string | null {

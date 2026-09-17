@@ -3,6 +3,22 @@
     <div class="editor-title">
       <a class="back admin-link" routerLink="/admin/paginas">Páginas</a>
       <h1>{{ title() }}</h1>
+      @if (!isSitio() && canEditSlug()) {
+        <label class="slug-edit">
+          Ruta
+          <input class="admin-control" [ngModel]="slugDraft()" (ngModelChange)="slugDraft.set($event)" maxlength="80">
+          <button type="button" class="admin-btn-ghost" (click)="saveSlug()">Cambiar URL</button>
+        </label>
+        <p class="slug-hint">Si cambias la ruta, la anterior redirige (301) a la nueva.</p>
+      }
+      <label class="locale-edit">
+        Idioma
+        <select class="admin-control" [ngModel]="locales.locale()" (ngModelChange)="changeLocale($event)">
+          @for (item of localeOptions; track item.id) {
+            <option [value]="item.id">{{ item.label }}</option>
+          }
+        </select>
+      </label>
     </div>
     <div class="editor-actions">
       <div class="admin-seg" role="group" aria-label="Modo de la vista" data-tour="mode">
@@ -103,7 +119,7 @@
               @if (isSitio()) {
                 <div class="sitio-hint">Así se ve el menú y el pie. Cambia logo, textos y WhatsApp en el panel.</div>
               } @else if (preview(); as cmp) {
-                <ng-container [ngComponentOutlet]="cmp"></ng-container>
+                <ng-container [ngComponentOutlet]="cmp" [ngComponentOutletInputs]="{ slug: slug() }"></ng-container>
               }
               @if (!isLibro()) {
                 <app-footer></app-footer>
@@ -129,6 +145,12 @@
         @if (isLibro()) {
           <p class="hint">Los datos del reclamo los pide la ley; no se pueden quitar.</p>
         }
+        @if (!isSitio()) {
+          <label class="switch-row menu-toggle">
+            <span>Mostrar en el menú</span>
+            <input type="checkbox" [checked]="inMenu()" (change)="toggleMenu($any($event.target).checked)">
+          </label>
+        }
       </header>
       @if (changeLines().length > 0) {
         <details class="changes" open>
@@ -144,6 +166,9 @@
       }
       @if (showRevisions()) {
         <div class="revisions">
+          @if (canRestore() && redirects().length) {
+            <p class="hint">Redirecciones: @for (item of redirects(); track item.id; let last = $last) { {{ item.from_path }} → {{ item.to_path }}@if (!last) {; } }</p>
+          }
           @if (revisions().length === 0) {
             <p class="empty">Aún no hay revisiones. Publica para crear la primera.</p>
           }
@@ -151,7 +176,9 @@
             <details>
               <summary>{{ item.created_at }} · {{ item.author || 'admin' }}</summary>
               <p class="hint">Diferencias: {{ revisionDiff(item).join(', ') || 'sin diferencias' }}</p>
-              <button type="button" class="admin-btn-ghost" (click)="restore(item)">Restaurar a borrador</button>
+              @if (canRestore()) {
+                <button type="button" class="admin-btn-ghost" (click)="restore(item)">Restaurar a borrador</button>
+              }
             </details>
           }
         </div>

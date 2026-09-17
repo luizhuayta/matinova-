@@ -1,9 +1,10 @@
 import { Component, computed, inject } from '@angular/core';
 import { CmsContentService } from '../../cms/cms-content.service';
+import { CmsLinkDirective } from '../../cms/cms-link.directive';
 
 @Component({
   selector: 'app-whatsapp-bubble',
-  imports: [],
+  imports: [CmsLinkDirective],
   templateUrl: './whatsapp-bubble.html',
   styleUrl: './whatsapp-bubble.scss',
 })

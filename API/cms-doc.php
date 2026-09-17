@@ -16,9 +16,6 @@ function decode_json_col(mixed $raw): array
 function cms_prepare_document(array $content, string $slug): array
 {
     $content = migrate_cms_document($content, $slug);
-    if ($slug === 'inicio') {
-        $content = normalize_inicio_sections($content);
-    }
     return sanitize_cms_tree($content);
 }
 
@@ -56,18 +53,30 @@ function cms_doc_publish_conflict_message(): string
 
 function cms_doc_read(string $slug): ?array
 {
+    $locale = cms_request_locale();
     if (cms_doc_is_site($slug)) {
-        $row = db()->query('SELECT content, draft, version, updated_at FROM site_settings WHERE id = 1')->fetch() ?: null;
+        $stmt = db()->prepare('SELECT content, draft, version, updated_at, locale FROM site_settings WHERE locale = ?');
+        $stmt->execute([$locale]);
+        $row = $stmt->fetch() ?: null;
+        if (!$row && $locale !== 'es') {
+            $stmt->execute(['es']);
+            $row = $stmt->fetch() ?: null;
+        }
         if (!$row) {
             return null;
         }
         $row['slug'] = 'sitio';
         $row['title'] = 'Apariencia del sitio';
+        $row['locale'] = cms_normalize_locale((string) ($row['locale'] ?? $locale));
         return $row;
     }
-    $stmt = db()->prepare('SELECT slug, title, content, draft, version, updated_at FROM pages WHERE slug = ?');
-    $stmt->execute([$slug]);
+    $stmt = db()->prepare('SELECT slug, locale, title, content, draft, version, updated_at, path, show_in_menu, menu_order FROM pages WHERE slug = ? AND locale = ?');
+    $stmt->execute([$slug, $locale]);
     $row = $stmt->fetch();
+    if (!$row && $locale !== 'es') {
+        $stmt->execute([$slug, 'es']);
+        $row = $stmt->fetch();
+    }
     return $row ?: null;
 }
 
@@ -97,6 +106,12 @@ function cms_doc_payload(string $slug): array
     if (!cms_doc_is_site($slug)) {
         $payload['slug'] = $row['slug'];
         $payload['title'] = $row['title'];
+        $payload['path'] = cms_page_path_for((string) $row['slug'], isset($row['path']) ? (string) $row['path'] : null);
+        $payload['show_in_menu'] = (int) ($row['show_in_menu'] ?? 0) === 1;
+        $payload['menu_order'] = (int) ($row['menu_order'] ?? 0);
+        $payload['locale'] = cms_normalize_locale((string) ($row['locale'] ?? cms_request_locale()));
+    } else {
+        $payload['locale'] = cms_normalize_locale((string) ($row['locale'] ?? cms_request_locale()));
     }
     if (admin_logged_in()) {
         $payload['hasDraft'] = $draft !== [];
@@ -130,36 +145,60 @@ function cms_doc_reject_bad_inicio_sections(array $content): void
 function cms_doc_write_draft(string $slug, array $prepared, int $next, int $current): int
 {
     $json = json_encode($prepared, JSON_UNESCAPED_UNICODE);
+    $locale = cms_request_locale();
     if (cms_doc_is_site($slug)) {
-        $upd = db()->prepare('UPDATE site_settings SET draft = ?, version = ? WHERE id = 1 AND version = ?');
-        $upd->execute([$json, $next, $current]);
+        cms_ensure_site_locale($locale);
+        $upd = db()->prepare('UPDATE site_settings SET draft = ?, version = ? WHERE locale = ? AND version = ?');
+        $upd->execute([$json, $next, $locale, $current]);
         return $upd->rowCount();
     }
-    $upd = db()->prepare('UPDATE pages SET draft = ?, version = ? WHERE slug = ? AND version = ?');
-    $upd->execute([$json, $next, $slug, $current]);
+    $upd = db()->prepare('UPDATE pages SET draft = ?, version = ? WHERE slug = ? AND locale = ? AND version = ?');
+    $upd->execute([$json, $next, $slug, $locale, $current]);
     return $upd->rowCount();
 }
 
 function cms_doc_write_publish(string $slug, array $prepared, int $ver, int $current): int
 {
     $json = json_encode($prepared, JSON_UNESCAPED_UNICODE);
+    $locale = cms_request_locale();
     if (cms_doc_is_site($slug)) {
-        $upd = db()->prepare('UPDATE site_settings SET content = ?, draft = NULL, version = ? WHERE id = 1 AND version = ?');
-        $upd->execute([$json, $ver, $current]);
+        cms_ensure_site_locale($locale);
+        $upd = db()->prepare('UPDATE site_settings SET content = ?, draft = NULL, version = ? WHERE locale = ? AND version = ?');
+        $upd->execute([$json, $ver, $locale, $current]);
         return $upd->rowCount();
     }
-    $upd = db()->prepare('UPDATE pages SET content = ?, draft = NULL, version = ? WHERE slug = ? AND version = ?');
-    $upd->execute([$json, $ver, $slug, $current]);
+    $upd = db()->prepare('UPDATE pages SET content = ?, draft = NULL, version = ? WHERE slug = ? AND locale = ? AND version = ?');
+    $upd->execute([$json, $ver, $slug, $locale, $current]);
     return $upd->rowCount();
+}
+
+function cms_ensure_site_locale(string $locale): void
+{
+    $locale = cms_normalize_locale($locale);
+    $stmt = db()->prepare('SELECT locale FROM site_settings WHERE locale = ?');
+    $stmt->execute([$locale]);
+    if ($stmt->fetch()) {
+        return;
+    }
+    $src = db()->prepare('SELECT content, draft, version FROM site_settings WHERE locale = ?');
+    $src->execute(['es']);
+    $row = $src->fetch();
+    $content = $row['content'] ?? json_encode(new stdClass(), JSON_UNESCAPED_UNICODE);
+    $draft = $row['draft'] ?? null;
+    $ins = db()->prepare('INSERT INTO site_settings (locale, content, draft, version) VALUES (?, ?, ?, 1)');
+    $ins->execute([$locale, $content, $draft]);
 }
 
 function cms_doc_read_meta(string $slug): array
 {
+    $locale = cms_request_locale();
     if (cms_doc_is_site($slug)) {
-        return db()->query('SELECT updated_at, version FROM site_settings WHERE id = 1')->fetch() ?: [];
+        $stmt = db()->prepare('SELECT updated_at, version FROM site_settings WHERE locale = ?');
+        $stmt->execute([$locale]);
+        return $stmt->fetch() ?: [];
     }
-    $fresh = db()->prepare('SELECT updated_at, version FROM pages WHERE slug = ?');
-    $fresh->execute([$slug]);
+    $fresh = db()->prepare('SELECT updated_at, version FROM pages WHERE slug = ? AND locale = ?');
+    $fresh->execute([$slug, $locale]);
     return $fresh->fetch() ?: [];
 }
 
@@ -172,6 +211,8 @@ function cms_doc_save_draft(string $slug): never
         json_out($err, 400);
     }
     /** @var array $content */
+    /** @var array $content */
+    $content = migrate_cms_document($content, $slug);
     if (cms_doc_is_site($slug)) {
         $guard = validate_cms_guards($content, 'sitio');
         if ($guard) {
@@ -180,10 +221,12 @@ function cms_doc_save_draft(string $slug): never
     }
 
     if (cms_doc_is_site($slug)) {
-        $row = db()->query('SELECT version, content, draft, updated_at FROM site_settings WHERE id = 1')->fetch();
+        $stmt = db()->prepare('SELECT version, content, draft, updated_at FROM site_settings WHERE locale = ?');
+        $stmt->execute([cms_request_locale()]);
+        $row = $stmt->fetch();
     } else {
-        $stmt = db()->prepare('SELECT version, content, draft FROM pages WHERE slug = ?');
-        $stmt->execute([$slug]);
+        $stmt = db()->prepare('SELECT version, content, draft FROM pages WHERE slug = ? AND locale = ?');
+        $stmt->execute([$slug, cms_request_locale()]);
         $row = $stmt->fetch();
     }
     if (!$row) {
@@ -204,9 +247,13 @@ function cms_doc_save_draft(string $slug): never
             'content' => cms_prepare_document($shown, $slug),
         ], 409);
     }
-    if ($slug === 'inicio') {
-        cms_doc_reject_bad_inicio_sections($content);
-        $content = normalize_inicio_sections($content);
+    if (cms_doc_is_site($slug)) {
+        $stored = decode_json_col($row['draft'] ?? '');
+        if ($stored === []) {
+            $stored = decode_json_col($row['content']);
+        }
+        $raw = is_array($input['content'] ?? null) ? $input['content'] : [];
+        $content['chatbotMode'] = cms_resolve_chatbot_mode($raw, is_array($stored) ? $stored : []);
     }
     if (!cms_doc_is_site($slug)) {
         $guard = validate_cms_guards($content, $slug);
@@ -263,6 +310,12 @@ function cms_doc_publish(string $slug): never
     if (cms_doc_write_publish($slug, $next, $ver, $current) === 0) {
         json_out(['message' => cms_doc_publish_conflict_message()], 409);
     }
+    cms_dispatch_webhooks('publish', [
+        'slug' => $slug,
+        'locale' => cms_request_locale(),
+        'version' => $ver,
+        'path' => cms_lookup_page_path($slug),
+    ]);
     json_out(['ok' => true, 'version' => $ver, 'content' => $next]);
 }
 

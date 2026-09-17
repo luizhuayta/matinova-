@@ -2,7 +2,7 @@ import { Injectable, effect, inject } from '@angular/core';
 import { Meta, Title } from '@angular/platform-browser';
 import { CmsContentService } from './cms-content.service';
 import { CmsEditorService } from './cms-editor.service';
-import { JsonMap, SLUG_PATHS } from './cms.models';
+import { JsonMap, pathForSlug } from './cms.models';
 
 @Injectable({ providedIn: 'root' })
 export class CmsSeoService {
@@ -34,7 +34,7 @@ export class CmsSeoService {
     );
     const description = String(seo['description'] || siteSeo['description'] || footer['desc'] || '');
     const image = String(seo['image'] || siteSeo['image'] || site['logo'] || 'logo.svg');
-    const path = SLUG_PATHS[slug] || '/';
+    const path = pathForSlug(slug);
     const origin = typeof location !== 'undefined' ? location.origin : '';
     const url = origin + path;
     const imageUrl = image.startsWith('http') ? image : `${origin}/${image.replace(/^\//, '')}`;

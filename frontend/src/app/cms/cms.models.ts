@@ -6,6 +6,20 @@ export interface CmsPageSummary {
   slug: string;
   title: string;
   updated_at?: string | null;
+  version?: number;
+  path?: string | null;
+  show_in_menu?: boolean;
+  menu_order?: number;
+  protected?: boolean;
+  locale?: string;
+}
+
+export interface CmsMenuItem {
+  slug: string;
+  title: string;
+  path: string;
+  menu_order?: number;
+  locale?: string;
 }
 
 export interface CmsMessage {
@@ -14,6 +28,8 @@ export interface CmsMessage {
   subject: string;
   payload: JsonMap;
   ticket?: string | null;
+  status?: 'pendiente' | 'atendido' | string;
+  mail_sent?: number | boolean;
   created_at: string;
 }
 
@@ -42,6 +58,7 @@ export const PAGE_LABELS: Record<string, string> = {
   privacidad: 'Privacidad',
   terminos: 'Términos',
   'libro-reclamaciones': 'Libro de reclamaciones',
+  clientes: 'Clientes',
   sitio: 'Apariencia del sitio',
 };
 
@@ -59,11 +76,12 @@ export const PAGE_META: Record<string, { icon: string; blurb: string }> = {
   privacidad: { icon: 'bi-shield-check', blurb: 'Texto legal' },
   terminos: { icon: 'bi-file-text', blurb: 'Texto legal' },
   'libro-reclamaciones': { icon: 'bi-journal-text', blurb: 'Textos y correo del libro' },
+  clientes: { icon: 'bi-building', blurb: 'Logos, casos y fases' },
 };
 
 export const PAGE_GROUPS: { title: string; slugs: string[] }[] = [
   { title: 'Apariencia', slugs: ['sitio'] },
-  { title: 'Páginas', slugs: ['inicio', 'acerca-de', 'contacto'] },
+  { title: 'Páginas', slugs: ['inicio', 'acerca-de', 'contacto', 'clientes'] },
   { title: 'Servicios', slugs: ['servicios', 'servicios-software', 'servicios-hardware', 'servicios-saas', 'servicios-consultoria', 'servicios-soluciones-ti'] },
   { title: 'Legal', slugs: ['privacidad', 'terminos', 'libro-reclamaciones'] },
 ];
@@ -185,8 +203,47 @@ export const SLUG_PATHS: Record<string, string> = {
   privacidad: '/privacidad',
   terminos: '/terminos',
   'libro-reclamaciones': '/libro-reclamaciones',
+  clientes: '/clientes',
   sitio: '/',
 };
+
+let extraRouteSlugs: Record<string, string> = {};
+
+export function registerPageRoutes(pages: CmsPageSummary[]): void {
+  extraRouteSlugs = {};
+  for (const page of pages) {
+    if (!page.slug || page.slug === 'sitio') {
+      continue;
+    }
+    const path = page.path || SLUG_PATHS[page.slug] || `/${page.slug}`;
+    extraRouteSlugs[path] = page.slug;
+  }
+}
+
+export function pathForSlug(slug: string): string {
+  if (slug === 'sitio') {
+    return '/';
+  }
+  for (const [path, value] of Object.entries(extraRouteSlugs)) {
+    if (value === slug) {
+      return path;
+    }
+  }
+  return extraRouteSlugs[`/${slug}`] ? `/${slug}` : SLUG_PATHS[slug] || `/${slug}`;
+}
+
+const ROUTE_SLUGS: Record<string, string> = Object.fromEntries(
+  Object.entries(SLUG_PATHS)
+    .filter(([slug]) => slug !== 'sitio')
+    .map(([slug, path]) => [path, slug])
+);
+
+export function slugFromRoute(url: string): string | null {
+  if (url === '/' || url === '') {
+    return 'inicio';
+  }
+  return extraRouteSlugs[url] ?? ROUTE_SLUGS[url] ?? null;
+}
 
 export interface CmsDocResponse {
   content: JsonMap;
@@ -196,6 +253,10 @@ export interface CmsDocResponse {
   slug?: string;
   title?: string;
   schemaVersion?: number;
+  path?: string;
+  show_in_menu?: boolean;
+  menu_order?: number;
+  locale?: string;
 }
 
 export interface CmsRevision {
@@ -232,17 +293,4 @@ export function changedPaths(before: unknown, after: unknown, prefix = ''): stri
     }
   }
   return out;
-}
-
-const ROUTE_SLUGS: Record<string, string> = Object.fromEntries(
-  Object.entries(SLUG_PATHS)
-    .filter(([slug]) => slug !== 'sitio')
-    .map(([slug, path]) => [path, slug])
-);
-
-export function slugFromRoute(url: string): string | null {
-  if (url === '/' || url === '') {
-    return 'inicio';
-  }
-  return ROUTE_SLUGS[url] ?? null;
 }

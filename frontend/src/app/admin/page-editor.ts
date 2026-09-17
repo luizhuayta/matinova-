@@ -1,13 +1,16 @@
 import { NgComponentOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Type, ViewChild, computed, effect, inject, signal } from '@angular/core';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 import { AuthService } from '../cms/auth.service';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsEditorService, PreviewDevice } from '../cms/cms-editor.service';
 import { CmsSelectionService } from '../cms/cms-selection.service';
+import { LocaleService, CMS_LOCALES } from '../cms/locale.service';
+import { CmsApiService } from '../cms/cms-api.service';
 import { labelForPath } from '../cms/cms-schema';
-import { CmsRevision, PAGE_LABELS, SLUG_PATHS, changedPaths } from '../cms/cms.models';
+import { CmsRevision, PAGE_LABELS, changedPaths, pathForSlug } from '../cms/cms.models';
 import { CmsInspector } from './cms-inspector';
 import { AdminTour } from './admin-tour';
 import { Header } from '../components/header/header';
@@ -21,25 +24,10 @@ const DEVICE_HEIGHT: Record<PreviewDevice, number> = {
 
 const BEZEL = 24;
 
-const PAGE_LOADERS: Record<string, () => Promise<Type<unknown>>> = {
-  inicio: () => import('../pages/home/home').then((m) => m.Home),
-  'acerca-de': () => import('../pages/acerca-de/acerca-de').then((m) => m.AcercaDe),
-  servicios: () => import('../pages/servicios/servicios').then((m) => m.Servicios),
-  'servicios-software': () => import('../pages/servicios/software/software').then((m) => m.Software),
-  'servicios-hardware': () => import('../pages/servicios/hardware/hardware').then((m) => m.Hardware),
-  'servicios-saas': () => import('../pages/servicios/saas/saas').then((m) => m.Saas),
-  'servicios-consultoria': () => import('../pages/servicios/consultoria/consultoria').then((m) => m.Consultoria),
-  'servicios-soluciones-ti': () => import('../pages/servicios/soluciones-ti/soluciones-ti').then((m) => m.SolucionesTi),
-  contacto: () => import('../pages/contacto/contacto').then((m) => m.Contacto),
-  privacidad: () => import('../pages/privacidad/privacidad').then((m) => m.Privacidad),
-  terminos: () => import('../pages/terminos/terminos').then((m) => m.Terminos),
-  'libro-reclamaciones': () => import('../components/libro-reclamaciones/libro-reclamaciones').then((m) => m.LibroReclamacionesComponent),
-};
-
 @Component({
   selector: 'app-page-editor',
   standalone: true,
-  imports: [NgComponentOutlet, RouterLink, Header, Footer, CmsInspector, AdminTour],
+  imports: [NgComponentOutlet, RouterLink, Header, Footer, CmsInspector, AdminTour, FormsModule],
   templateUrl: './page-editor.html',
   styleUrl: './page-editor.scss',
 })
@@ -48,10 +36,13 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('previewFrame') previewFrame?: ElementRef<HTMLElement>;
   @ViewChild(AdminTour) tour?: AdminTour;
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   cms = inject(CmsContentService);
   editor = inject(CmsEditorService);
   selection = inject(CmsSelectionService);
   auth = inject(AuthService);
+  locales = inject(LocaleService);
+  private api = inject(CmsApiService);
   slug = signal('inicio');
   error = signal('');
   status = signal('');
@@ -62,7 +53,8 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   showRevisions = signal(false);
   isSitio = computed(() => this.slug() === 'sitio');
   isLibro = computed(() => this.slug() === 'libro-reclamaciones');
-  title = computed(() => PAGE_LABELS[this.slug()] || this.slug());
+  inMenu = computed(() => !!this.cms.pageList().find((page) => page.slug === this.slug())?.show_in_menu);
+  title = computed(() => this.cms.pageList().find((page) => page.slug === this.slug())?.title || PAGE_LABELS[this.slug()] || this.slug());
   deviceWidth = computed(() => this.editor.deviceWidth());
   viewportHeight = computed(() => DEVICE_HEIGHT[this.editor.device()] || this.frameHeight());
   stageWidth = computed(() => {
@@ -74,6 +66,18 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     return Math.max(320, Math.round(this.viewportHeight() * this.scale() + extra));
   });
   canPublish = computed(() => this.auth.role() === 'admin');
+  canRestore = computed(() => this.auth.role() === 'admin');
+  canEditSlug = computed(() => {
+    if (this.isSitio()) {
+      return false;
+    }
+    const page = this.cms.pageList().find((item) => item.slug === this.slug());
+    return page ? !page.protected : true;
+  });
+  slugDraft = signal('');
+  slugWarn = signal('');
+  redirects = signal<Array<{ id: number; from_path: string; to_path: string }>>([]);
+  localeOptions = CMS_LOCALES;
   saveState = computed(() => {
     if (this.cms.saving() || this.editor.uploading()) {
       return 'Guardando…';
@@ -126,6 +130,7 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug') || 'inicio';
       this.slug.set(slug);
+      this.slugDraft.set(slug);
       this.cms.useSlug(slug);
       this.selection.slug = slug;
       this.selection.selectedPath.set('');
@@ -188,6 +193,14 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   scaleHeight(): string {
     const locked = DEVICE_HEIGHT[this.editor.device()];
     return locked ? `${locked}px` : 'auto';
+  }
+
+  async toggleMenu(on: boolean): Promise<void> {
+    try {
+      await this.cms.updatePageMeta(this.slug(), { showInMenu: on });
+    } catch {
+      this.error.set('No se pudo actualizar el menú.');
+    }
   }
 
   async save(): Promise<void> {
@@ -263,6 +276,9 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async restore(item: CmsRevision): Promise<void> {
+    if (!this.canRestore()) {
+      return;
+    }
     if (!confirm('¿Restaurar esta revisión al borrador?')) {
       return;
     }
@@ -279,12 +295,49 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   publicPath(): string {
-    return SLUG_PATHS[this.slug()] || '/';
+    return pathForSlug(this.slug());
+  }
+
+  async saveSlug(): Promise<void> {
+    const next = this.slugDraft().trim().toLowerCase();
+    if (!next || next === this.slug()) {
+      return;
+    }
+    if (!confirm('Al cambiar la ruta, la URL anterior redirigirá a la nueva. ¿Continuar?')) {
+      return;
+    }
+    try {
+      const page = await this.cms.updatePageMeta(this.slug(), { slug: next });
+      this.slugWarn.set('');
+      this.redirects.set(await this.api.listRedirects().catch(() => []));
+      await this.router.navigate(['/admin/paginas', page.slug]);
+      this.status.set('Ruta actualizada. La URL anterior redirige aquí.');
+    } catch {
+      this.error.set('No se pudo cambiar la ruta.');
+    }
+  }
+
+  async changeLocale(next: string): Promise<void> {
+    const locale = next === 'en' ? 'en' : 'es';
+    this.locales.locale.set(locale);
+    try {
+      if (locale !== 'es') {
+        await this.api.translatePage(this.slug(), locale);
+      }
+      await this.cms.loadAll();
+      this.cms.useSlug(this.slug());
+    } catch {
+      this.error.set('No se pudo cargar el idioma.');
+    }
   }
 
   private async loadPreview(slug: string): Promise<void> {
-    const loader = PAGE_LOADERS[slug];
-    this.preview.set(loader ? await loader() : null);
+    if (slug === 'sitio') {
+      this.preview.set(null);
+      return;
+    }
+    const mod = await import('../pages/dynamic-page/dynamic-page');
+    this.preview.set(mod.DynamicPage);
   }
 
   private scheduleScale(): void {

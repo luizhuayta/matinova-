@@ -316,6 +316,8 @@ body {
   transform: rotate(90deg);
 }
 
+/* z-index: 9998 máscara a11y, 9999 cookies/WhatsApp, 10000 chat, 10001 toggle a11y, 10002 panel, 10003 guía */
+
 /* ===== BANNER DE COOKIES ===== */
 .cookie-banner {
   position: fixed;
@@ -489,7 +491,6 @@ body {
 
 /* ===== ESTILOS DE ACCESIBILIDAD GLOBALES (AudioEye) - FUERZA BRUTA ===== */
 
-/* Enfoque - Fuerza bruta */
 body.ae-focus a:focus,
 body.ae-focus button:focus,
 body.ae-focus input:focus,
@@ -502,17 +503,15 @@ body.ae-focus *:focus {
   border-color: #ff6600 !important;
 }
 
-/* Cursor grande - Fuerza bruta */
 body.ae-large-cursor,
 body.ae-large-cursor * {
   cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="%23ff6600" stroke-width="3"><path d="M3 3l7.07 16.97 2.51-7.39 7.39-2.51L3 3z"/></svg>') 0 24, auto !important;
 }
 
-/* Destacar enlaces - Fuerza bruta */
-body.ae-highlight-links a,
-body.ae-highlight-links a *,
-body.ae-highlight-links button,
-body.ae-highlight-links button * {
+body.ae-highlight-links a:not(.accessibility-toggle):not(.chat-fab):not(.whatsapp-float),
+body.ae-highlight-links a:not(.accessibility-toggle):not(.chat-fab):not(.whatsapp-float) *:not(.fab-ring):not(.fab-dot),
+body.ae-highlight-links button:not(.accessibility-toggle):not(.chat-fab):not(.whatsapp-float),
+body.ae-highlight-links button:not(.accessibility-toggle):not(.chat-fab):not(.whatsapp-float) *:not(.fab-ring):not(.fab-dot) {
   background-color: rgba(255, 102, 0, 0.3) !important;
   border: 3px solid #ff6600 !important;
   border-radius: 6px !important;
@@ -521,7 +520,6 @@ body.ae-highlight-links button * {
   text-decoration: underline !important;
 }
 
-/* Alto contraste - Fuerza bruta */
 body.ae-high-contrast,
 body.ae-high-contrast *,
 body.ae-high-contrast *::before,
@@ -552,97 +550,76 @@ body.ae-high-contrast h6 {
   border-bottom: 2px solid #ffffff !important;
 }
 
-/* Cambio de color - Fuerza bruta (EXCEPTO botones flotantes) */
 body.ae-color-shift,
 body.ae-color-shift * {
   filter: hue-rotate(180deg) !important;
 }
 
-/* EXCEPCIÓN: No aplicar filtro a botones flotantes */
 body.ae-color-shift .accessibility-toggle,
-body.ae-color-shift .chatbot-toggle,
-body.ae-color-shift .whatsapp-bubble {
+body.ae-color-shift .accessibility-panel,
+body.ae-color-shift .chat-fab,
+body.ae-color-shift .whatsapp-float {
   filter: none !important;
 }
 
-/* Detener animación - Fuerza bruta (EXCEPTO botones flotantes) */
-body.ae-stop-animation,
-body.ae-stop-animation *,
-body.ae-stop-animation *::before,
-body.ae-stop-animation *::after {
+body.ae-stop-animation *:not(.accessibility-toggle):not(.chat-fab):not(.whatsapp-float):not(.fab-ring),
+body.ae-stop-animation *:not(.accessibility-toggle):not(.chat-fab):not(.whatsapp-float):not(.fab-ring)::before,
+body.ae-stop-animation *:not(.accessibility-toggle):not(.chat-fab):not(.whatsapp-float):not(.fab-ring)::after {
   animation: none !important;
   transition: none !important;
-  transform: none !important;
 }
 
-/* EXCEPCIÓN: Mantener transiciones en botones flotantes */
 body.ae-stop-animation .accessibility-toggle,
-body.ae-stop-animation .chatbot-toggle,
-body.ae-stop-animation .whatsapp-bubble {
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+body.ae-stop-animation .chat-fab,
+body.ae-stop-animation .whatsapp-float {
+  transition: transform 0.25s ease, box-shadow 0.25s ease !important;
 }
 
-body.ae-stop-animation .accessibility-toggle:hover,
-body.ae-stop-animation .chatbot-toggle:hover,
-body.ae-stop-animation .whatsapp-bubble:hover {
-  transform: translateY(-2px) scale(1.1) !important;
-}
-
-/* Texto grande - Fuerza bruta */
 body.ae-text-large,
 body.ae-text-large * {
-  font-size: 1.5rem !important;
+  font-size: 1.3rem !important;
   line-height: 1.6 !important;
 }
 
-/* Espaciado aumentado - Fuerza bruta */
+body.ae-text-extra-large,
+body.ae-text-extra-large * {
+  font-size: 1.6rem !important;
+  line-height: 1.6 !important;
+}
+
 body.ae-spacing-increased,
 body.ae-spacing-increased * {
-  letter-spacing: 0.2em !important;
-  line-height: 2.0 !important;
+  letter-spacing: 0.15em !important;
+  line-height: 1.8 !important;
   word-spacing: 0.1em !important;
 }
 
-/* Fuente disléxica - Fuerza bruta */
 body.ae-dyslexic-font,
 body.ae-dyslexic-font * {
-  font-family: 'Comic Sans MS', 'Chalkboard SE', 'Arial', sans-serif !important;
-  font-weight: 500 !important;
+  font-family: 'Comic Sans MS', 'Chalkboard SE', Arial, sans-serif !important;
 }
 
-/* Guía de lectura - Fuerza bruta */
-body.ae-reading-guide::after {
-  content: '' !important;
-  position: fixed !important;
-  top: 50% !important;
-  left: 0 !important;
-  right: 0 !important;
-  height: 6px !important;
-  background: #ff6600 !important;
-  z-index: 99999 !important;
-  pointer-events: none !important;
-  opacity: 0.8 !important;
-  box-shadow: 0 0 20px rgba(255, 102, 0, 0.8) !important;
+#ae-reading-guide {
+  position: fixed;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: #ff6600;
+  z-index: 10003;
+  pointer-events: none;
+  opacity: 0.7;
+  transform: translateY(-50%);
 }
 
-/* Máscara de ventana - Fuerza bruta */
-body.ae-window-mask::before {
-  content: '' !important;
-  position: fixed !important;
-  top: 0 !important;
-  left: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  background: rgba(0, 0, 0, 0.9) !important;
-  z-index: 99998 !important;
-  pointer-events: none !important;
+#ae-window-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  z-index: 9998;
+  pointer-events: none;
 }
 
-body.ae-window-mask:hover::before {
-  background: transparent !important;
-}
-
-/* Ocultar imágenes - Fuerza bruta */
 body.ae-hide-images img,
 body.ae-hide-images svg,
 body.ae-hide-images picture {
@@ -650,7 +627,15 @@ body.ae-hide-images picture {
   visibility: hidden !important;
 }
 
-/* Destacar encabezados - Fuerza bruta */
+body.ae-hide-images .accessibility-toggle svg,
+body.ae-hide-images .accessibility-panel svg,
+body.ae-hide-images .chat-fab svg,
+body.ae-hide-images .whatsapp-float img,
+body.ae-hide-images .whatsapp-float svg {
+  display: block !important;
+  visibility: visible !important;
+}
+
 body.ae-highlight-headings h1,
 body.ae-highlight-headings h2,
 body.ae-highlight-headings h3,
@@ -664,10 +649,16 @@ body.ae-highlight-headings h6 {
   box-shadow: 0 0 15px rgba(255, 102, 0, 0.5) !important;
 }
 
-/* Inversión de colores - Fuerza bruta */
 body.ae-invert-colors,
 body.ae-invert-colors * {
   filter: invert(1) !important;
+}
+
+body.ae-invert-colors .accessibility-toggle,
+body.ae-invert-colors .accessibility-panel,
+body.ae-invert-colors .chat-fab,
+body.ae-invert-colors .whatsapp-float {
+  filter: none !important;
 }
 
 /* ===== ESTILOS DE ACCESIBILIDAD GLOBALES ===== */

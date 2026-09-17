@@ -1,23 +1,18 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
-
+import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClientTesting } from '@angular/common/http/testing';
+import { TestBed } from '@angular/core/testing';
 import { LibroReclamacionesComponent } from './libro-reclamaciones';
 
 describe('LibroReclamacionesComponent', () => {
-  let component: LibroReclamacionesComponent;
-  let fixture: ComponentFixture<LibroReclamacionesComponent>;
-
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      declarations: [LibroReclamacionesComponent]
-    })
-    .compileComponents();
-
-    fixture = TestBed.createComponent(LibroReclamacionesComponent);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+      imports: [LibroReclamacionesComponent],
+      providers: [provideHttpClient(), provideHttpClientTesting()],
+    }).compileComponents();
   });
 
   it('should create', () => {
-    expect(component).toBeTruthy();
+    const fixture = TestBed.createComponent(LibroReclamacionesComponent);
+    expect(fixture.componentInstance).toBeTruthy();
   });
 });

@@ -12,6 +12,7 @@ import { CmsSeoService } from './cms/cms-seo.service';
 import { CmsTextDirective } from './cms/cms-text.directive';
 import { CmsImageDirective } from './cms/cms-image.directive';
 import { slugFromRoute } from './cms/cms.models';
+import { LocaleService } from './cms/locale.service';
 
 @Component({
   selector: 'app-root',
@@ -33,6 +34,7 @@ export class App implements OnInit {
   private router = inject(Router);
   private cms = inject(CmsContentService);
   private seo = inject(CmsSeoService);
+  private locales = inject(LocaleService);
   editor = inject(CmsEditorService);
   isAdmin = signal(false);
   showCtaBanner = signal(true);
@@ -48,6 +50,9 @@ export class App implements OnInit {
 
   ngOnInit() {
     void this.seo;
+    if (!this.router.url.startsWith('/admin')) {
+      this.locales.setFromUrl(this.router.url);
+    }
     this.cms.loadAll().catch(() => undefined);
 
     const cookiesAccepted = localStorage.getItem('cookiesAccepted');
@@ -66,11 +71,17 @@ export class App implements OnInit {
     ).subscribe((event) => {
       const url = event.urlAfterRedirects.split('?')[0];
       this.isAdmin.set(url.startsWith('/admin'));
-      const slug = slugFromRoute(url);
-      if (slug && !this.editor.editMode()) {
-        this.cms.useSlug(slug);
-      }
       if (!url.startsWith('/admin')) {
+        const prev = this.locales.locale();
+        const parsed = this.locales.parseUrl(url);
+        this.locales.locale.set(parsed.locale);
+        if (parsed.locale !== prev) {
+          this.cms.loadAll().catch(() => undefined);
+        }
+        const slug = slugFromRoute(parsed.path);
+        if (slug && !this.editor.editMode()) {
+          this.cms.useSlug(slug);
+        }
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     });

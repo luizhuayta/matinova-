@@ -3,7 +3,12 @@ API/.env
 API/vendor
 API/uploads/*
 !API/uploads/.gitkeep
+!API/uploads/.htaccess
 API/tmp
+
+dist-upload/
+dist-upload.zip
+
 
 # Documentacion interna (no se sube a esta rama)
 docs/

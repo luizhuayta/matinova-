@@ -10,8 +10,13 @@
     <nav aria-label="Menú del panel">
       <a routerLink="/admin" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}">Inicio</a>
       <a routerLink="/admin/paginas" routerLinkActive="active">Páginas</a>
+      <a routerLink="/admin/chatbot" routerLinkActive="active">Chatbot</a>
       <a routerLink="/admin/mensajes" routerLinkActive="active">Mensajes</a>
       <a routerLink="/admin/archivos" routerLinkActive="active">Imágenes</a>
+      @if (auth.isAdmin()) {
+        <a routerLink="/admin/usuarios" routerLinkActive="active">Usuarios</a>
+        <a routerLink="/admin/webhooks" routerLinkActive="active">Webhooks</a>
+      }
     </nav>
     <div class="nav-foot">
       <a class="site-link" href="/" target="_blank" rel="noopener">Ver la web</a>

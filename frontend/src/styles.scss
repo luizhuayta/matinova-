@@ -268,3 +268,38 @@ input, textarea, select {
 .ql-container.ql-snow {
   border-radius: 0 0 8px 8px;
 }
+
+.cms-list-editing {
+  outline: 1px dashed rgba(37, 99, 235, 0.45);
+  outline-offset: 6px;
+}
+
+.cms-list-handle {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  z-index: 8;
+  display: flex;
+  gap: 4px;
+}
+
+.cms-list-handle button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(15, 17, 19, 0.88);
+  color: #fff;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1;
+}
+
+.cms-list-handle button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+body.chatbot-open {
+  overflow: hidden;
+}

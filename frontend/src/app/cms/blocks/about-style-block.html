@@ -1,0 +1,139 @@
+<div class="acerca-container">
+  @switch (block().type) {
+    @case ('pageHero') {
+      <section class="about-hero" [style.background-image]="props()['image'] ? 'url(' + props()['image'] + ')' : null">
+        <div class="hero-overlay">
+          <div class="container hero-content">
+            <span class="hero-badge" [cmsText]="path('badge')"></span>
+            <h1 [cmsText]="path('title')"></h1>
+            <p [cmsText]="path('text')"></p>
+            @if (internal(linkOf()) && props()['cta']) {
+              <button class="btn-hero" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></button>
+            } @else if (props()['cta'] && linkOf()) {
+              <a class="btn-hero" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+            }
+          </div>
+        </div>
+      </section>
+    }
+    @case ('stats') {
+      <section class="stats-section">
+        <div class="container">
+          <div class="stats-grid" [cmsList]="path('items')">
+            @for (stat of items(); track $index) {
+              <div class="stat-card">
+                <div class="stat-icon" [cmsText]="path('items.' + $index + '.icon')"></div>
+                <div class="stat-number" [cmsText]="path('items.' + $index + '.number')"></div>
+                <div class="stat-label" [cmsText]="path('items.' + $index + '.label')"></div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+    @case ('team') {
+      <section class="team-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag" [cmsText]="path('tag')"></span>
+            <h2 [cmsText]="path('title')"></h2>
+            <p [cmsText]="path('text')"></p>
+          </div>
+          <div class="team-grid" [cmsList]="path('items')">
+            @for (member of items(); track $index) {
+              <div class="team-card">
+                <div class="team-image">
+                  <img [src]="member['image']" [alt]="member['name']" [cmsImage]="path('items.' + $index + '.image')">
+                </div>
+                <div class="team-info">
+                  <h3 [cmsText]="path('items.' + $index + '.name')"></h3>
+                  <p class="team-role" [cmsText]="path('items.' + $index + '.role')"></p>
+                  <div class="team-social">
+                    <a [href]="member['linkedin'] || '#'" [attr.target]="hasLink(member['linkedin']) ? '_blank' : null" rel="noopener noreferrer" aria-label="LinkedIn" [cmsLink]="path('items.' + $index + '.linkedin')">
+                      <i class="bi bi-linkedin"></i>
+                    </a>
+                    <a [href]="member['github'] || '#'" [attr.target]="hasLink(member['github']) ? '_blank' : null" rel="noopener noreferrer" aria-label="GitHub" [cmsLink]="path('items.' + $index + '.github')">
+                      <i class="bi bi-github"></i>
+                    </a>
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+    @case ('about') {
+      <section class="about-section">
+        <div class="container">
+          <div class="about-content">
+            <div class="about-image">
+              <img [src]="props()['image'] || 'about-image.jpg'" [alt]="props()['imageAlt'] || ''" [cmsImage]="path('image')">
+            </div>
+            <div class="about-text">
+              <span class="section-tag" [cmsText]="path('tag')"></span>
+              <h2 [cmsText]="path('title')"></h2>
+              <p [cmsText]="path('text')"></p>
+              @if (features().length) {
+                <div class="features-list">
+                  @for (feature of features(); track $index) {
+                    <div class="feature-item">
+                      <span class="feature-icon">✓</span>
+                      <span [cmsText]="featurePath($index)"></span>
+                    </div>
+                  }
+                </div>
+              }
+              @if (internal(linkOf()) && props()['cta']) {
+                <button class="btn-primary" type="button" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></button>
+              } @else if (props()['cta'] && linkOf()) {
+                <a class="btn-primary" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+              }
+            </div>
+          </div>
+        </div>
+      </section>
+    }
+    @case ('contactCards') {
+      <section class="contact-info-section">
+        <div class="container">
+          <div class="contact-info-grid">
+            @for (card of items(); track $index) {
+              <div class="contact-info-card">
+                <div class="contact-icon">
+                  <i class="bi" [class]="card['icon'] || 'bi-geo-alt-fill'"></i>
+                </div>
+                <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
+                <p [cmsText]="path('items.' + $index + '.text')"></p>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+    @case ('videos') {
+      <section class="youtube-section">
+        <div class="container">
+          <div class="section-header">
+            <span class="section-tag" [cmsText]="path('tag')"></span>
+            <h2 [cmsText]="path('title')"></h2>
+            <p [cmsText]="path('text')"></p>
+          </div>
+          <div class="videos-grid" [cmsList]="path('items')">
+            @for (video of items(); track $index) {
+              <div class="video-card">
+                <div class="video-wrapper">
+                  <iframe [src]="embed(video['embed'])" title="YouTube" allowfullscreen></iframe>
+                </div>
+                <div class="video-info">
+                  <div class="video-user" [cmsText]="path('items.' + $index + '.user')"></div>
+                  <div class="video-title" [cmsText]="path('items.' + $index + '.title')"></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </section>
+    }
+  }
+</div>

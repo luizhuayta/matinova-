@@ -1,9 +1,9 @@
 <div class="top-bar"></div>
-<header class="main-header">
+<header class="main-header" [class.scrolled]="isScrolled">
   <div class="navbar">
     <div class="logo-container">
       <a routerLink="/">
-        <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="logo-img" cmsImage="logo" cmsScope="site">
+        <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="logo-img" [class.logo-entrance]="logoClass === 'logo-entrance'" cmsImage="logo" cmsScope="site">
       </a>
     </div>
     <button class="mobile-menu-toggle" type="button" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" aria-label="Abrir menú">
@@ -11,19 +11,41 @@
     </button>
     <nav class="nav" [class.mobile-open]="isMobileMenuOpen">
       <ul class="nav-list">
-        <li><a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="navigateTo('/')" cmsText="nav.inicio" cmsScope="site"></a></li>
-        <li><a routerLink="/acerca-de" routerLinkActive="active" (click)="navigateTo('/acerca-de')" cmsText="nav.acerca" cmsScope="site"></a></li>
-        <li><a [href]="nav()['academyUrl'] || 'https://misacademyonline.com/'" target="_blank" rel="noopener noreferrer" cmsText="nav.academy" cmsScope="site"></a></li>
-        <li class="dropdown">
-          <a class="dropbtn"><span cmsText="nav.servicios" cmsScope="site"></span> <i class="bi bi-caret-down-fill"></i></a>
+        <li><a [routerLink]="homeLink()" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="navigateTo(homeLink())" cmsText="nav.inicio" cmsScope="site"></a></li>
+        <li><a [routerLink]="aboutLink()" routerLinkActive="active" (click)="navigateTo(aboutLink())" cmsText="nav.acerca" cmsScope="site"></a></li>
+        <li><a [href]="nav()['academyUrl'] || 'https://misacademyonline.com/'" target="_blank" rel="noopener noreferrer" cmsText="nav.academy" cmsLink="nav.academyUrl" cmsScope="site"></a></li>
+        <li class="dropdown" [class.open]="openMenu === 'servicios'">
+          <a class="dropbtn" (click)="toggleMenu('servicios', $event)"><span cmsText="nav.servicios" cmsScope="site"></span> <i class="bi bi-caret-down-fill"></i></a>
           <div class="dropdown-content">
-            <a *ngFor="let item of navServices(); let i = index" [routerLink]="item['path']" (click)="navigateTo(item['path'])" [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></a>
+            <a *ngFor="let item of navServices(); let i = index" [routerLink]="menuPath(item['path'])" (click)="navigateTo(menuPath(item['path']))" [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></a>
           </div>
         </li>
-        <li><a routerLink="/contacto" routerLinkActive="active" (click)="navigateTo('/contacto')" cmsText="nav.contacto" cmsScope="site"></a></li>
-        @if (showClients()) {
-          <li><a (click)="toggleTransparency()" class="btn-transparencia" cmsText="clientsLabel" cmsScope="site"></a></li>
+        <li><a [routerLink]="contactLink()" routerLinkActive="active" (click)="navigateTo(contactLink())" cmsText="nav.contacto" cmsScope="site"></a></li>
+        @for (item of extraMenu(); track item.slug) {
+          <li>
+            <a [routerLink]="menuPath(item.path)" routerLinkActive="active" (click)="navigateTo(menuPath(item.path))">{{ item.title }}</a>
+          </li>
         }
+        @if (showClients()) {
+          <li class="dropdown" [class.open]="openMenu === 'clientes'">
+            <a class="dropbtn btn-transparencia" (click)="toggleMenu('clientes', $event)">
+              <span cmsText="clientsLabel" cmsScope="site"></span>
+              <i class="bi bi-caret-down-fill"></i>
+            </a>
+            <div class="dropdown-content">
+              <a [routerLink]="clientsLink()" (click)="navigateTo(clientsLink())">Ver todos los clientes</a>
+              <div class="dropdown-divider"></div>
+              @for (item of clientCategories; track item.key) {
+                <a [routerLink]="clientsLink()" [queryParams]="{ category: item.key }" (click)="goClients(item.key)">{{ item.label }}</a>
+              }
+            </div>
+          </li>
+        }
+        <li class="lang">
+          @for (item of localeOptions; track item.id) {
+            <button type="button" [class.active]="locales.locale() === item.id" (click)="switchLocale(item.id)">{{ item.id.toUpperCase() }}</button>
+          }
+        </li>
       </ul>
     </nav>
   </div>

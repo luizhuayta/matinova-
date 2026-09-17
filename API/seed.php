@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+if (!function_exists('cms_clients_page_document')) {
+    require_once __DIR__ . '/clients-catalog.php';
+}
+
 function site_seed(): array
 {
     return [
@@ -21,6 +25,12 @@ function site_seed(): array
         'whatsappMessage' => 'Hola Matt Innova Solution, quisiera recibir más información.',
         'whatsappTooltip' => '¡Escríbenos ahora!',
         'showChatbot' => true,
+        'chatbotMode' => 'clasico',
+        'aiProvider' => 'openrouter',
+        'aiModel' => 'openai/gpt-4o-mini',
+        'aiBaseUrl' => 'https://openrouter.ai/api/v1',
+        'defaultLocale' => 'es',
+        'locales' => ['es', 'en'],
         'cookieText' => 'Usamos cookies para asegurar que te damos la mejor experiencia en nuestra web. Si continúas usando este sitio, asumiremos que estás de acuerdo con ello.',
         'cookieAccept' => 'Aceptar',
         'cookieReject' => 'Rechazar',
@@ -169,9 +179,9 @@ HTML;
                     'text' => 'En MIS ha sido fundamental en la mejora de nuestras soluciones TI. Su atención personalizada y soporte excepcional nos han ayudado a alcanzar nuestros objetivos tecnológicos con gran éxito.',
                     'cta' => 'Aprender Más',
                     'items' => [
-                        ['text' => 'Un equipo profesional como la empresa MIS que entiende nuestras necesidades y resuelve problemas rápidamente.', 'client' => 'IEI Nº 449 San Luis – Cañete', 'logo' => 'sanluis.jpg'],
-                        ['text' => 'Matt Innova Solution mejoró nuestra infraestructura TI y ofrece un soporte excepcional. ¡Recomendados!', 'client' => 'IESTP TECNOCOM', 'logo' => 'tecnocom.jpg'],
-                        ['text' => 'La implementación del ERP y otras soluciones de Matt Innova Solution optimizó nuestros procesos y aumentó la eficiencia.', 'client' => 'IESTP WORLDNET', 'logo' => 'worldnet.jpg'],
+                        ['text' => 'Un equipo profesional como la empresa MIS que entiende nuestras necesidades y resuelve problemas rápidamente.', 'client' => 'IEI Nº 449 San Luis – Cañete', 'logo' => 'sanluis.jpg', 'role' => 'Cliente Satisfecho', 'company' => 'Matt Innova Solution', 'rating' => 5],
+                        ['text' => 'Matt Innova Solution mejoró nuestra infraestructura TI y ofrece un soporte excepcional. ¡Recomendados!', 'client' => 'IESTP TECNOCOM', 'logo' => 'tecnocom.jpg', 'role' => 'Cliente Satisfecho', 'company' => 'Matt Innova Solution', 'rating' => 5],
+                        ['text' => 'La implementación del ERP y otras soluciones de Matt Innova Solution optimizó nuestros procesos y aumentó la eficiencia.', 'client' => 'IESTP WORLDNET', 'logo' => 'worldnet.jpg', 'role' => 'Cliente Satisfecho', 'company' => 'Matt Innova Solution', 'rating' => 5],
                     ],
                 ],
             ],
@@ -388,6 +398,11 @@ HTML;
                 'submitLabel' => 'Enviar Reclamación Virtual',
             ],
         ],
+        'clientes' => [
+            'title' => 'Clientes',
+            'show_in_menu' => false,
+            'content' => cms_clients_page_document(),
+        ],
         'sitio' => [
             'title' => 'Apariencia del sitio',
             'content' => site_seed(),
@@ -397,6 +412,14 @@ HTML;
 
 function service_page_seed(string $hero, string $heroAlt, string $image, string $imageAlt, string $label, string $title, string $text, array $reasons): array
 {
+    foreach ($reasons as $i => $reason) {
+        if (!is_array($reason)) {
+            continue;
+        }
+        if (!isset($reason['alt']) || trim((string) $reason['alt']) === '') {
+            $reasons[$i]['alt'] = (string) ($reason['title'] ?? 'Motivo');
+        }
+    }
     return [
         'heroImage' => $hero,
         'heroAlt' => $heroAlt,
@@ -415,6 +438,9 @@ function service_page_seed(string $hero, string $heroAlt, string $image, string 
 function seed_database(): void
 {
     db_init();
+    if (function_exists('db_migrate')) {
+        db_migrate();
+    }
     $pdo = db();
 
     $user = cfg('ADMIN_USER', 'admin');
@@ -422,27 +448,43 @@ function seed_database(): void
     $exists = $pdo->prepare('SELECT id FROM users WHERE username = ?');
     $exists->execute([$user]);
     if (!$exists->fetch()) {
-        $ins = $pdo->prepare('INSERT INTO users (username, password_hash) VALUES (?, ?)');
-        $ins->execute([$user, password_hash($pass, PASSWORD_DEFAULT)]);
+        $ins = $pdo->prepare('INSERT INTO users (username, password_hash, role, active) VALUES (?, ?, ?, 1)');
+        $ins->execute([$user, password_hash($pass, PASSWORD_DEFAULT), 'admin']);
+    }
+
+    $editor = cfg('EDITOR_USER', '');
+    $editorPass = cfg('EDITOR_PASSWORD', '');
+    if ($editor !== '' && $editorPass !== '') {
+        $exists->execute([$editor]);
+        if (!$exists->fetch()) {
+            $ins = $pdo->prepare('INSERT INTO users (username, password_hash, role, active) VALUES (?, ?, ?, 1)');
+            $ins->execute([$editor, password_hash($editorPass, PASSWORD_DEFAULT), 'editor']);
+        }
     }
 
     $siteCount = (int) $pdo->query('SELECT COUNT(*) FROM site_settings')->fetchColumn();
     if ($siteCount === 0) {
-        $ins = $pdo->prepare('INSERT INTO site_settings (id, content) VALUES (1, ?)');
-        $ins->execute([json_encode(site_seed(), JSON_UNESCAPED_UNICODE)]);
+        $ins = $pdo->prepare('INSERT INTO site_settings (locale, content) VALUES (?, ?)');
+        $ins->execute(['es', json_encode(site_seed(), JSON_UNESCAPED_UNICODE)]);
     }
 
     $pages = pages_seed();
-    $check = $pdo->prepare('SELECT slug FROM pages WHERE slug = ?');
-    $ins = $pdo->prepare('INSERT INTO pages (slug, title, content) VALUES (?, ?, ?)');
+    $check = $pdo->prepare('SELECT slug FROM pages WHERE slug = ? AND locale = ?');
+    $ins = $pdo->prepare('INSERT INTO pages (slug, locale, title, content, path, show_in_menu, menu_order) VALUES (?, ?, ?, ?, ?, ?, ?)');
+    $order = 10;
+    $known = cms_known_page_paths();
     foreach ($pages as $slug => $page) {
         if ($slug === 'sitio') {
             continue;
         }
-        $check->execute([$slug]);
+        $check->execute([$slug, 'es']);
         if ($check->fetch()) {
             continue;
         }
-        $ins->execute([$slug, $page['title'], json_encode($page['content'], JSON_UNESCAPED_UNICODE)]);
+        $content = migrate_cms_document($page['content'], $slug);
+        $path = cms_page_path_for($slug, $known[$slug] ?? null);
+        $show = !empty($page['show_in_menu']) ? 1 : 0;
+        $ins->execute([$slug, 'es', $page['title'], json_encode($content, JSON_UNESCAPED_UNICODE), $path, $show, $order]);
+        $order += 10;
     }
 }
