@@ -1,5 +1,6 @@
 import { Directive, HostListener, effect, input } from '@angular/core';
 import { CmsEditableHost } from './cms-editable-host';
+import { imageSizes, inferImageFit, publicPhotoSrc, rasterSrcset, srcsetFromVariants, uploadMediaId, webpSrcset } from './public-url';
 
 @Directive({
   selector: 'img[cmsImage]',
@@ -19,7 +20,39 @@ export class CmsImageDirective extends CmsEditableHost {
       const value = this.cms.get<string>(path, this.cmsScope());
       const img = this.el.nativeElement as HTMLImageElement;
       if (typeof value === 'string' && value) {
-        img.src = value;
+        img.src = publicPhotoSrc(value);
+        img.dataset['cmsSrc'] = value;
+        const webp = webpSrcset(value);
+        if (webp) {
+          img.srcset = webp;
+        } else if (uploadMediaId(value)) {
+          img.srcset = rasterSrcset(value);
+        } else if (value.includes('/uploads/')) {
+          img.removeAttribute('srcset');
+          void this.applyResolvedSrcset(img, value);
+        } else {
+          img.removeAttribute('srcset');
+        }
+        const fit = inferImageFit(img);
+        if (!img.getAttribute('sizes')) {
+          img.sizes = imageSizes(fit);
+        }
+        const picture = img.parentElement;
+        if (picture?.tagName === 'PICTURE') {
+          const source = picture.querySelector('source[type="image/webp"]');
+          if (source && !source.getAttribute('sizes')) {
+            source.setAttribute('sizes', img.sizes);
+          }
+        }
+        if (!img.getAttribute('decoding')) {
+          img.decoding = 'async';
+        }
+        if (!img.hasAttribute('loading')) {
+          img.loading = fit === 'hero' ? 'eager' : 'lazy';
+        }
+        if (fit === 'hero' && !img.hasAttribute('fetchpriority')) {
+          img.setAttribute('fetchpriority', 'high');
+        }
       }
       const meta = typeof value === 'string' ? this.cms.imageMeta()[value] : undefined;
       if (meta) {
@@ -36,6 +69,17 @@ export class CmsImageDirective extends CmsEditableHost {
 
   protected fieldPath(): string {
     return this.cmsImage();
+  }
+
+  private async applyResolvedSrcset(img: HTMLImageElement, url: string): Promise<void> {
+    const item = await this.cms.resolvePublicMedia(url);
+    if (img.dataset['cmsSrc'] !== url) {
+      return;
+    }
+    const srcset = srcsetFromVariants(item?.variants, 'webp') || srcsetFromVariants(item?.variants, 'jpeg');
+    if (srcset) {
+      img.srcset = srcset;
+    }
   }
 
   @HostListener('dragover', ['$event'])

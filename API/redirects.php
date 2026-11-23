@@ -76,6 +76,9 @@ function handle_redirects(string $path, string $method): void
 function handle_spa_fallback(): void
 {
     $raw = (string) ($_GET['cms_path'] ?? '');
+    if ($raw === '') {
+        $raw = request_uri_path();
+    }
     $path = cms_normalize_redirect_path($raw === '' ? '/' : $raw);
     $row = cms_lookup_redirect($path);
     if ($row) {
@@ -89,8 +92,12 @@ function handle_spa_fallback(): void
         __DIR__ . '/../frontend/dist/frontend/browser/index.html',
         __DIR__ . '/../index.html',
     ];
+    // Slugs inexistentes: se sirve la SPA pero con 404 real (el DynamicPage
+    // muestra "Página no encontrada"). Si la BD no responde, se conserva 200.
+    $status = cms_spa_path_is_known($path) ? 200 : 404;
     foreach ($candidates as $file) {
         if (is_file($file)) {
+            http_response_code($status);
             header('Content-Type: text/html; charset=UTF-8');
             header('Cache-Control: no-store');
             readfile($file);
@@ -101,4 +108,32 @@ function handle_spa_fallback(): void
     header('Content-Type: text/plain; charset=UTF-8');
     echo 'Not found';
     exit;
+}
+
+function cms_spa_path_is_known(string $path): bool
+{
+    $p = '/' . trim($path, '/');
+    if ($p === '/' || $p === '/admin' || str_starts_with($p, '/admin/')) {
+        return true;
+    }
+    $stripped = preg_replace('#^/(en|es)(?=/|$)#', '', $p);
+    $p = is_string($stripped) && $stripped !== '' ? $stripped : '/';
+    if ($p === '/') {
+        return true;
+    }
+    $slug = ltrim($p, '/');
+    try {
+        $stmt = db()->prepare('SELECT 1 FROM pages WHERE path = ? OR slug = ? LIMIT 1');
+        $stmt->execute([$p, $slug]);
+        if ($stmt->fetch()) {
+            return true;
+        }
+        // /servicios/<suffix> y otras subrutas CMS: basta que exista la raíz.
+        $root = '/' . explode('/', $slug)[0];
+        $stmt = db()->prepare('SELECT 1 FROM pages WHERE path = ? OR slug = ? LIMIT 1');
+        $stmt->execute([$root, ltrim($root, '/')]);
+        return (bool) $stmt->fetch();
+    } catch (Throwable) {
+        return true;
+    }
 }

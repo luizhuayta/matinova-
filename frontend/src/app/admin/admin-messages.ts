@@ -4,7 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsMessage, labeledMessageFields } from '../cms/cms.models';
 
-type MessageFilter = 'all' | 'contacto' | 'reclamacion';
+type MessageFilter = 'all' | 'contacto' | 'reclamacion' | 'accesibilidad';
 type StatusFilter = 'all' | 'pendiente' | 'atendido';
 
 @Component({
@@ -33,6 +33,7 @@ type StatusFilter = 'all' | 'pendiente' | 'atendido';
         <button type="button" [attr.aria-pressed]="filter() === 'all'" [class.active]="filter() === 'all'" (click)="setFilter('all')">Todos</button>
         <button type="button" [attr.aria-pressed]="filter() === 'contacto'" [class.active]="filter() === 'contacto'" (click)="setFilter('contacto')">Contacto</button>
         <button type="button" [attr.aria-pressed]="filter() === 'reclamacion'" [class.active]="filter() === 'reclamacion'" (click)="setFilter('reclamacion')">Reclamaciones</button>
+        <button type="button" [attr.aria-pressed]="filter() === 'accesibilidad'" [class.active]="filter() === 'accesibilidad'" (click)="setFilter('accesibilidad')">Accesibilidad</button>
       </div>
 
       <div class="admin-toolbar">
@@ -74,7 +75,7 @@ type StatusFilter = 'all' | 'pendiente' | 'atendido';
                   <strong>{{ item.subject }}</strong>
                   <span class="msg-meta">
                     <span class="pill sm" [class.warn]="item.kind === 'reclamacion'" [class.neutral]="item.kind !== 'reclamacion'">
-                      {{ item.kind === 'reclamacion' ? 'Reclamación' : 'Contacto' }}
+                      {{ item.kind === 'reclamacion' ? 'Reclamación' : (item.kind === 'accesibilidad' ? 'Accesibilidad' : 'Contacto') }}
                     </span>
                     @if (item.ticket) {
                       <code class="ticket-inline">{{ item.ticket }}</code>
@@ -118,71 +119,7 @@ type StatusFilter = 'all' | 'pendiente' | 'atendido';
       }
     </section>
   `,
-  styles: [`
-    .wrap { max-width: 900px; }
-    .admin-seg { margin: 1rem 0 0; width: fit-content; }
-    .admin-toolbar select.fixed { flex: 0 1 180px; min-width: 150px; }
-    .msg-card {
-      background: var(--admin-surface);
-      border: 1px solid var(--admin-line);
-      border-radius: 12px;
-      overflow: hidden;
-      transition: border-color 160ms ease, box-shadow 160ms ease;
-    }
-    .msg-card:hover { border-color: #b7b1a9; }
-    .msg-card.expanded { border-color: var(--admin-ink); box-shadow: var(--admin-shadow); }
-    .msg-head {
-      width: 100%;
-      display: flex;
-      align-items: center;
-      gap: 0.8rem;
-      padding: 0.8rem 0.9rem;
-      background: transparent;
-      border: 0;
-      text-align: left;
-      font-family: inherit;
-      cursor: pointer;
-      color: var(--admin-text);
-    }
-    .msg-copy { display: grid; gap: 0.3rem; min-width: 0; flex: 1 1 auto; }
-    .msg-copy strong {
-      font-size: 0.9375rem; font-weight: 700;
-      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-    }
-    .msg-meta { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
-    .msg-meta time { color: var(--admin-muted); font-size: 0.75rem; }
-    .ticket-inline {
-      font-family: ui-monospace, monospace;
-      font-size: 0.72rem; font-weight: 700; color: var(--admin-mark-ink);
-      background: var(--admin-mark-soft); border: 1px solid #f2cda8;
-      padding: 0.1rem 0.45rem; border-radius: 6px;
-    }
-    .pill.sm { min-height: 24px; font-size: 0.68rem; }
-    .chev { color: var(--admin-muted); flex: 0 0 auto; }
-    .msg-body {
-      border-top: 1px solid var(--admin-line);
-      background: #faf9f7;
-      padding: 0.95rem 1rem 1rem;
-      display: grid;
-      gap: 0.8rem;
-    }
-    .mail-line { margin: 0; font-size: 0.8rem; color: var(--admin-muted); }
-    .fields { margin: 0; display: grid; gap: 0.6rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
-    .field {
-      background: var(--admin-surface); border: 1px solid var(--admin-line);
-      border-radius: 8px; padding: 0.55rem 0.7rem; min-width: 0;
-    }
-    .field dt { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; color: var(--admin-muted); margin-bottom: 0.2rem; }
-    .field dd { margin: 0; color: var(--admin-text); font-size: 0.875rem; white-space: pre-wrap; overflow-wrap: anywhere; }
-    .msg-actions { display: flex; justify-content: flex-end; }
-    .pager { display: flex; gap: 0.75rem; align-items: center; justify-content: center; margin-top: 1.1rem; font-size: 0.85rem; color: var(--admin-muted); }
-    .empty-state { margin-top: 0.9rem; }
-    @media (max-width: 560px) {
-      .msg-head .pill.sm { display: none; }
-      .msg-copy strong { white-space: normal; }
-      .page-head { flex-wrap: wrap; }
-    }
-  `],
+  styleUrl: './styles/messages.scss',
 })
 export class AdminMessages implements OnInit {
   private cms = inject(CmsContentService);

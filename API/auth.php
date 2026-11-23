@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 function handle_auth(string $path, string $method): void
 {
-    start_admin_session();
+    start_admin_session($path === '/auth/login' && $method === 'POST');
 
     if ($path === '/auth/login' && $method === 'POST') {
         rate_limit('login', 8, 300);
@@ -36,17 +36,25 @@ function handle_auth(string $path, string $method): void
     }
 
     if ($path === '/auth/logout' && $method === 'POST') {
-        $_SESSION = [];
-        if (ini_get('session.use_cookies')) {
-            $p = session_get_cookie_params();
-            setcookie(session_name(), '', time() - 42000, $p['path'], $p['domain'] ?? '', (bool) $p['secure'], (bool) $p['httponly']);
+        if (admin_session_ready()) {
+            $_SESSION = [];
+            if (ini_get('session.use_cookies')) {
+                $p = admin_session_cookie_params();
+                setcookie(session_name(), '', [
+                    'expires' => time() - 42000,
+                    'path' => $p['path'],
+                    'secure' => (bool) $p['secure'],
+                    'httponly' => (bool) $p['httponly'],
+                    'samesite' => $p['samesite'],
+                ]);
+            }
+            session_destroy();
         }
-        session_destroy();
         json_out(['ok' => true]);
     }
 
     if ($path === '/auth/me' && $method === 'GET') {
-        if (empty($_SESSION['admin_id'])) {
+        if (!admin_session_ready() || empty($_SESSION['admin_id'])) {
             json_out(['authenticated' => false], 200);
         }
         json_out([

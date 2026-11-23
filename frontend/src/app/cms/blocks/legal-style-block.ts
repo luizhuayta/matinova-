@@ -3,25 +3,25 @@ import { Component, computed, input } from '@angular/core';
 import { CmsTextDirective } from '../cms-text.directive';
 import { CmsRichDirective } from '../cms-rich.directive';
 import { CmsBlock, propsPath } from '../block-registry';
+import { PageHeader } from '../../components/ui/page-header';
+import { HudDivider } from '../../components/ui/hud-divider';
 
 @Component({
   selector: 'app-legal-style-block',
   standalone: true,
-  imports: [CommonModule, CmsTextDirective, CmsRichDirective],
+  imports: [CommonModule, CmsTextDirective, CmsRichDirective, PageHeader, HudDivider],
   template: `
-    <div class="privacidad-container">
-      <div class="container">
-        <div class="header-section">
-          <h1 [cmsText]="path('title')"></h1>
-          @if (props()['lastUpdated']) {
-            <p class="last-updated">Última actualización: <span [cmsText]="path('lastUpdated')"></span></p>
-          }
-        </div>
-        <div class="content-section" [cmsRich]="path('body')"></div>
-      </div>
+    <app-page-header align="left" background="none">
+      <h1 page-title class="cyber-page-header__title" [cmsText]="path('title')"></h1>
+      @if (props()['lastUpdated']) {
+        <p page-text class="cyber-page-header__text">Última actualización: <span [cmsText]="path('lastUpdated')"></span></p>
+      }
+    </app-page-header>
+    <div class="legal-shell">
+      <app-hud-divider />
+      <div class="content-section" [cmsRich]="path('body')"></div>
     </div>
   `,
-  styleUrl: '../../pages/privacidad/privacidad.scss',
 })
 export class LegalStyleBlock {
   readonly block = input.required<CmsBlock>();

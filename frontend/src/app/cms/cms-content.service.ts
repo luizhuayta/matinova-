@@ -16,13 +16,20 @@ import {
   setByPath,
 } from './cms.models';
 import { BLOCK_CATALOG, CmsBlock, makeBlock, pageBlocks } from './block-registry';
+import { CmsLocale, LocaleService } from './locale.service';
 
 @Injectable({ providedIn: 'root' })
 export class CmsContentService {
   constructor(
     private api: CmsApiService = inject(CmsApiService),
-    private undoHistory: CmsHistoryService = inject(CmsHistoryService)
+    private undoHistory: CmsHistoryService = inject(CmsHistoryService),
+    private locales?: LocaleService
   ) {}
+
+  /** Locale activo; 'es' cuando el servicio se instancia fuera de la DI (tests). */
+  private activeLocale(): CmsLocale {
+    return this.locales?.locale() ?? 'es';
+  }
 
   readonly site = signal<JsonMap>({});
   readonly pages = signal<Record<string, JsonMap>>({});
@@ -32,6 +39,8 @@ export class CmsContentService {
   readonly dirty = signal(false);
   readonly saving = signal(false);
   readonly loaded = signal(false);
+  readonly loadingSlug = signal<string | null>(null);
+  readonly publicLoadError = signal('');
   readonly conflict = signal('');
   readonly hasDraft = signal<Record<string, boolean>>({});
   readonly versions = signal<Record<string, number>>({});
@@ -43,6 +52,14 @@ export class CmsContentService {
   private pendingRemove: { path: string; index: number; item: unknown } | null = null;
   private autosaveTimer?: number;
   private editing = false;
+  private shellLocale = '';
+  private shellTask: Promise<void> | null = null;
+  private loadedEverything = false;
+  private readonly pageLoads = new Map<string, Promise<void>>();
+  private readonly resolvedMedia = new Map<
+    string,
+    Promise<{ url: string; width?: number | null; height?: number | null; variants?: Array<{ width: number; url: string; kind?: string }> } | null>
+  >();
   private readonly onBeforeUnload = (event: BeforeUnloadEvent) => {
     if (this.dirty()) {
       event.preventDefault();
@@ -360,8 +377,90 @@ export class CmsContentService {
     this.versions.set(versions);
     this.hasDraft.set(drafts);
     this.loaded.set(true);
+    this.loadedEverything = true;
+    this.shellLocale = this.activeLocale();
+    this.shellTask = Promise.resolve();
+    this.pageLoads.clear();
     this.dirty.set(false);
     this.conflict.set('');
+  }
+
+  hasAllPages(): boolean {
+    return this.loadedEverything;
+  }
+
+  async loadPublic(slug: string): Promise<void> {
+    const target = slug || 'inicio';
+    this.loadingSlug.set(target);
+    this.publicLoadError.set('');
+    try {
+      await this.ensureShell();
+      if (this.activeLocale() !== this.shellLocale) {
+        return this.loadPublic(target);
+      }
+      if (target !== 'sitio' && !this.pages()[target]) {
+        await this.fetchPage(target);
+      }
+      this.currentSlug.set(target);
+      this.loaded.set(true);
+    } catch {
+      this.publicLoadError.set(this.activeLocale() === 'en'
+        ? 'We could not load the content. Please try again in a moment.'
+        : 'No pudimos cargar el contenido. Inténtalo de nuevo en unos segundos.');
+    } finally {
+      if (this.loadingSlug() === target) {
+        this.loadingSlug.set(null);
+      }
+    }
+  }
+
+  private ensureShell(): Promise<void> {
+    const locale = this.activeLocale();
+    if (this.shellTask && this.shellLocale === locale) {
+      return this.shellTask;
+    }
+    this.loadedEverything = false;
+    this.pageLoads.clear();
+    this.pages.set({});
+    this.loaded.set(false);
+    this.shellLocale = locale;
+    const preview = this.previewQuery();
+    const task = Promise.all([this.api.getSite(preview), this.api.getPagesCatalog()]).then(([site, catalog]) => {
+      if (this.activeLocale() !== locale) {
+        return;
+      }
+      this.writeDoc('sitio', site);
+      this.pageList.set(catalog.pages);
+      this.menuItems.set(catalog.menu);
+      registerPageRoutes(catalog.pages);
+    }).catch((err) => {
+      if (this.shellTask === task) {
+        this.shellTask = null;
+      }
+      throw err;
+    });
+    this.shellTask = task;
+    return this.shellTask;
+  }
+
+  private fetchPage(slug: string): Promise<void> {
+    const locale = this.activeLocale();
+    const key = `${locale}:${slug}`;
+    const existing = this.pageLoads.get(key);
+    if (existing) {
+      return existing;
+    }
+    const task = this.api.getPage(slug, this.previewQuery()).then((full) => {
+      if (this.activeLocale() !== locale) {
+        return;
+      }
+      this.writeDoc(slug, full);
+    }).catch((err) => {
+      this.pageLoads.delete(key);
+      throw err;
+    });
+    this.pageLoads.set(key, task);
+    return task;
   }
 
   async reloadSlug(slug: string): Promise<void> {
@@ -454,11 +553,37 @@ export class CmsContentService {
     return res.url;
   }
 
+  async cropImageDetails(url: string, box: { x: number; y: number; w: number; h: number }) {
+    const res = await this.api.cropMedia({ url, ...box });
+    if (res.width && res.height) {
+      this.imageMeta.update((map) => ({ ...map, [res.url]: { width: res.width!, height: res.height! } }));
+    }
+    return res;
+  }
+
+  async mediaVersions(id: number) {
+    return this.api.listMediaVersions(id);
+  }
+
+  async restoreMedia(id: number, body: { use?: string; versionId?: number }) {
+    return this.api.restoreMedia(id, body);
+  }
+
   rememberImage(url: string, width?: number | null, height?: number | null): void {
     if (!url || !width || !height) {
       return;
     }
     this.imageMeta.update((map) => ({ ...map, [url]: { width, height } }));
+  }
+
+  resolvePublicMedia(url: string) {
+    const hit = this.resolvedMedia.get(url);
+    if (hit) {
+      return hit;
+    }
+    const pending = this.api.resolveMedia(url).catch(() => null);
+    this.resolvedMedia.set(url, pending);
+    return pending;
   }
 
   async listMedia() {

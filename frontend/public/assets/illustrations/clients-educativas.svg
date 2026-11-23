@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180" role="img" aria-labelledby="eduTitle">
+  <title id="eduTitle">Instituciones educativas</title>
+  <rect width="320" height="180" fill="#EEF2F8"/>
+  <polygon points="48,148 160,88 272,148 160,172" fill="#F7F9FC" stroke="#2C50B8" stroke-width="1"/>
+  <polygon points="110,70 160,44 210,70 210,132 160,154 110,132" fill="#0C1D4A"/>
+  <polygon points="110,70 160,44 210,70 160,96" fill="#2C50B8"/>
+  <polygon points="148,118 172,106 172,148 148,158" fill="#F26522"/>
+  <circle cx="160" cy="82" r="10" fill="#EEF2F8"/>
+  <rect x="74" y="118" width="12" height="28" fill="#1A3279"/>
+  <rect x="234" y="118" width="12" height="28" fill="#1A3279"/>
+</svg>

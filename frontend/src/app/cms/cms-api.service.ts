@@ -1,10 +1,11 @@
 import { Injectable, Optional } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, timeout } from 'rxjs';
 import {
   API_URL,
   CmsDocResponse,
   CmsMediaItem,
+  CmsMediaVersion,
   CmsMenuItem,
   CmsMessage,
   CmsPageSummary,
@@ -33,13 +34,26 @@ export class CmsApiService {
     return { locale: this.locale?.locale() || 'es' };
   }
 
+  private requireDoc(res: CmsDocResponse): CmsDocResponse {
+    if (!res || !res.content || typeof res.content !== 'object' || Array.isArray(res.content)) {
+      throw new Error('La API no devolvió un documento CMS válido.');
+    }
+    return res;
+  }
+
   getSite(preview = ''): Promise<CmsDocResponse> {
-    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`, { params: this.locParams() }));
+    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`, { params: this.locParams() }).pipe(timeout(15000)))
+      .then((res) => this.requireDoc(res));
   }
 
   getPagesCatalog(): Promise<{ pages: CmsPageSummary[]; menu: CmsMenuItem[] }> {
-    return firstValueFrom(this.http.get<{ pages: CmsPageSummary[]; menu?: CmsMenuItem[] }>(`${API_URL}/pages`, { params: this.locParams() })).then(
-      (res) => ({ pages: res.pages ?? [], menu: res.menu ?? [] })
+    return firstValueFrom(this.http.get<{ pages: CmsPageSummary[]; menu?: CmsMenuItem[] }>(`${API_URL}/pages`, { params: this.locParams() }).pipe(timeout(15000))).then(
+      (res) => {
+        if (!res || !Array.isArray(res.pages)) {
+          throw new Error('La API no devolvió un catálogo CMS válido.');
+        }
+        return { pages: res.pages, menu: res.menu ?? [] };
+      }
     );
   }
 
@@ -79,7 +93,8 @@ export class CmsApiService {
   }
 
   getPage(slug: string, preview = ''): Promise<CmsDocResponse> {
-    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/pages/${slug}${preview}`, { params: this.locParams() }));
+    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/pages/${slug}${preview}`, { params: this.locParams() }).pipe(timeout(15000)))
+      .then((res) => this.requireDoc(res));
   }
 
   save(slug: string, content: JsonMap, version: number): Promise<CmsDocResponse> {
@@ -114,8 +129,26 @@ export class CmsApiService {
     );
   }
 
-  cropMedia(body: { url: string; x: number; y: number; w: number; h: number }): Promise<{ url: string; width?: number; height?: number }> {
-    return firstValueFrom(this.http.post<{ url: string; width?: number; height?: number }>(`${API_URL}/media/crop`, body));
+  cropMedia(body: { url: string; x: number; y: number; w: number; h: number }): Promise<{
+    url: string;
+    width?: number;
+    height?: number;
+    id?: number;
+    previous_url?: string;
+    parent_id?: number | null;
+    original_url?: string | null;
+  }> {
+    return firstValueFrom(
+      this.http.post<{
+        url: string;
+        width?: number;
+        height?: number;
+        id?: number;
+        previous_url?: string;
+        parent_id?: number | null;
+        original_url?: string | null;
+      }>(`${API_URL}/media/crop`, body)
+    );
   }
 
   listUsers(): Promise<Array<{ id: number; username: string; role: string; active: boolean }>> {
@@ -138,10 +171,19 @@ export class CmsApiService {
     );
   }
 
+  private readonly redirectCache = new Map<string, Promise<{ to: string; status: number } | null>>();
+
   lookupRedirect(path: string): Promise<{ to: string; status: number } | null> {
-    return firstValueFrom(this.http.get<{ redirect: { to: string; status: number } | null }>(`${API_URL}/redirects/lookup`, { params: { path } })).then(
-      (res) => res.redirect
-    );
+    const key = String(path ?? '');
+    let pending = this.redirectCache.get(key);
+    if (!pending) {
+      pending = firstValueFrom(this.http.get<{ redirect: { to: string; status: number } | null }>(`${API_URL}/redirects/lookup`, { params: { path: key } })).then(
+        (res) => res.redirect
+      );
+      pending.catch(() => this.redirectCache.delete(key));
+      this.redirectCache.set(key, pending);
+    }
+    return pending;
   }
 
   listWebhooks(): Promise<Array<{ id: number; url: string; events: string; active: boolean }>> {
@@ -178,14 +220,40 @@ export class CmsApiService {
     return firstValueFrom(this.http.delete(`${API_URL}/redirects/${id}`)).then(() => undefined);
   }
 
-  uploadMedia(file: File): Promise<{ url: string; width?: number; height?: number }> {
+  uploadMedia(file: File): Promise<{ url: string; width?: number; height?: number; variants?: CmsMediaItem['variants'] }> {
     const body = new FormData();
     body.append('file', file);
-    return firstValueFrom(this.http.post<{ url: string; width?: number; height?: number }>(`${API_URL}/media`, body));
+    return firstValueFrom(
+      this.http.post<{ url: string; width?: number; height?: number; variants?: CmsMediaItem['variants'] }>(`${API_URL}/media`, body)
+    );
+  }
+
+  resolveMedia(url: string): Promise<{
+    url: string;
+    width?: number | null;
+    height?: number | null;
+    variants?: CmsMediaItem['variants'];
+  }> {
+    return firstValueFrom(
+      this.http.get<{
+        url: string;
+        width?: number | null;
+        height?: number | null;
+        variants?: CmsMediaItem['variants'];
+      }>(`${API_URL}/media/resolve`, { params: { url } })
+    );
   }
 
   listMedia(): Promise<CmsMediaItem[]> {
     return firstValueFrom(this.http.get<{ items: CmsMediaItem[] }>(`${API_URL}/media`)).then((res) => res.items ?? []);
+  }
+
+  listMediaVersions(id: number): Promise<CmsMediaVersion[]> {
+    return firstValueFrom(this.http.get<{ items: CmsMediaVersion[] }>(`${API_URL}/media/${id}/versions`)).then((res) => res.items ?? []);
+  }
+
+  restoreMedia(id: number, body: { use?: string; versionId?: number }): Promise<{ url: string; id?: number; kind?: string }> {
+    return firstValueFrom(this.http.post<{ url: string; id?: number; kind?: string }>(`${API_URL}/media/${id}/restore`, body));
   }
 
   deleteMedia(id: number): Promise<void> {

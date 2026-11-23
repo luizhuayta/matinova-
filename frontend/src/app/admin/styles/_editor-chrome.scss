@@ -1,0 +1,148 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  width: 100%;
+}
+
+.editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.editor-bar {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-12);
+  flex-wrap: wrap;
+  align-items: center;
+  flex-shrink: 0;
+  position: relative;
+  z-index: 4;
+  background: var(--admin-paper);
+}
+
+.editor-title {
+  min-width: 0;
+  flex: 1 1 180px;
+}
+
+.slug-edit,
+.locale-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  align-items: center;
+  margin-top: 6px;
+  font-size: var(--text-14);
+}
+
+.slug-edit .admin-control,
+.locale-edit .admin-control {
+  max-width: 180px;
+}
+
+.slug-hint {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-12);
+  color: var(--admin-muted);
+}
+
+.back {
+  display: inline-flex;
+  align-items: center;
+  font-size: var(--text-14);
+  margin-bottom: 2px;
+}
+
+.editor-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.publish-cluster {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.icon-tools {
+  display: flex;
+  gap: 2px;
+}
+
+.save-state {
+  margin: 0;
+  min-width: 10.5rem;
+  font-size: var(--text-14);
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+
+.save-state[data-state='Guardando…'] {
+  color: var(--admin-ink);
+}
+
+.save-state[data-state='Cambios sin publicar'] {
+  color: var(--admin-warn);
+}
+
+.save-state[data-state='Guardado'] {
+  color: var(--admin-ok);
+}
+
+.editor-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 380px);
+  gap: var(--space-12);
+  align-items: stretch;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .editor-actions {
+    justify-content: flex-start;
+  }
+
+  .editor-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(42vh, 1fr) minmax(220px, 38vh);
+  }
+}
+
+@media (max-width: 640px) {
+  .save-state {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+
+  .slug-edit .admin-control,
+  .locale-edit .admin-control {
+    max-width: none;
+    flex: 1 1 140px;
+  }
+
+  .icon-tools {
+    flex-wrap: wrap;
+  }
+
+  .editor-body {
+    grid-template-columns: 1fr;
+    grid-template-rows: none;
+  }
+
+  .preview-wrap {
+    min-height: 55vh;
+  }
+}

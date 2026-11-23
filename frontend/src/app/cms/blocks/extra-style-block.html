@@ -1,5 +1,8 @@
-<section class="extra-block extra-{{ block().type }}">
+<section class="extra-block extra-{{ block().type }}" [class.extra-faq]="block().type === 'faq'">
   <div class="extra-inner">
+    @if (block().type === 'clients') {
+      <app-hud-divider />
+    }
     @if (block().type !== 'map' || props()['title']) {
       <header class="extra-head">
         <h2 [cmsText]="path('title')"></h2>
@@ -12,81 +15,94 @@
     @switch (block().type) {
       @case ('clients') {
         @if (layout() === 'paneles') {
-          <div class="accordion-controls">
-            <button type="button" class="btn-control" (click)="expandAll()">
-              <i class="bi bi-arrows-expand"></i> Expandir todo
-            </button>
-            <button type="button" class="btn-control" (click)="collapseAll()">
-              <i class="bi bi-arrows-collapse"></i> Colapsar todo
-            </button>
-          </div>
-          <div class="clients-panels" [cmsList]="path(listPath())">
-            @for (panel of panels(); track panel.key) {
-              <section class="clients-accordion">
-                <button type="button" class="accordion-header" (click)="toggleCategory(panel.key)" [attr.aria-expanded]="!!expandedCategories[panel.key]">
-                  <h3 class="category-title">
-                    <i class="bi" [ngClass]="panel.icon"></i>
-                    {{ panel.label }}
-                  </h3>
-                  <i class="bi bi-chevron-down" [class.rotated]="expandedCategories[panel.key]"></i>
+          <div class="client-directory">
+            <div class="studio-grid client-sectors">
+              @for (panel of panels(); track panel.key) {
+                <button
+                  type="button"
+                  class="client-sector span-4"
+                  [class.is-active]="activeSector() === panel.key"
+                  (click)="selectSector(panel.key)"
+                  [attr.aria-pressed]="activeSector() === panel.key">
+                  <img [src]="sectorArt(panel.key)" width="160" height="90" alt="" aria-hidden="true">
+                  <span class="client-sector-copy">
+                    <strong>{{ panel.label }}</strong>
+                    <span>{{ sectorCount(panel) }}</span>
+                  </span>
                 </button>
-                <div class="accordion-content" [class.expanded]="expandedCategories[panel.key]">
-                  @for (sub of panel.subs; track sub.name) {
-                    <section class="subcategory-accordion">
-                      <button type="button" class="subcategory-header" (click)="toggleSub(subKey(panel.key, sub.name))" [attr.aria-expanded]="!!expandedSubs[subKey(panel.key, sub.name)]">
-                        <h4 class="subcategory-title">
-                          @if (sub.icon) {
-                            <span>{{ sub.icon }}</span>
-                          }
-                          {{ sub.name }}
-                        </h4>
-                        <i class="bi bi-chevron-down" [class.rotated]="expandedSubs[subKey(panel.key, sub.name)]"></i>
-                      </button>
-                      <div class="subcategory-content" [class.expanded]="expandedSubs[subKey(panel.key, sub.name)]">
-                        <div class="clients-cards">
-                          @for (i of sub.indices; track i) {
-                            @let item = items()[i];
-                            @if (hasUrl(item['url']) && internal(item['url'])) {
-                              <a class="client-card" [routerLink]="item['url']">
-                                <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
-                              </a>
-                            } @else if (hasUrl(item['url'])) {
-                              <a class="client-card" [href]="item['url']" target="_blank" rel="noopener">
-                                <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
-                              </a>
-                            } @else {
-                              <article class="client-card">
-                                <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
-                              </article>
-                            }
-                          }
+              }
+            </div>
+
+            @if (activePanel(); as panel) {
+              <div class="client-filters" role="group" aria-label="Filtrar por rubro">
+                <button type="button" class="client-chip" [class.is-active]="!activeSub()" [attr.aria-pressed]="!activeSub()" (click)="selectSub('')">
+                  Todos
+                </button>
+                @for (sub of panel.subs; track sub.name) {
+                  <button
+                    type="button"
+                    class="client-chip"
+                    [class.is-active]="activeSub() === sub.name"
+                    [attr.aria-pressed]="activeSub() === sub.name"
+                    (click)="selectSub(sub.name)">
+                    <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use [attr.href]="'assets/icons/ui.svg#' + subIcon(sub.name)"></use></svg>
+                    {{ sub.name }}
+                    <span>{{ sub.indices.length }}</span>
+                  </button>
+                }
+              </div>
+
+              @if (!visibleIndices().length) {
+                <p class="clients-empty">Aún no cargamos logos de este rubro.</p>
+              } @else {
+                <div class="studio-grid clients-cards" [cmsList]="path(listPath())">
+                  @for (i of visibleIndices(); track i) {
+                    @let item = items()[i];
+                    @if (hasUrl(item['url']) && internal(item['url'])) {
+                      <app-cyber-card class="span-3 client-tile">
+                        <a class="client-tile-link" [routerLink]="clientHref(item['url'])">
+                          <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
+                        </a>
+                      </app-cyber-card>
+                    } @else if (hasUrl(item['url'])) {
+                      <app-cyber-card class="span-3 client-tile">
+                        <a class="client-tile-link" [href]="item['url']" target="_blank" rel="noopener noreferrer">
+                          <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
+                        </a>
+                      </app-cyber-card>
+                    } @else {
+                      <app-cyber-card class="span-3 client-tile">
+                        <div class="client-tile-link">
+                          <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
                         </div>
-                      </div>
-                    </section>
+                      </app-cyber-card>
+                    }
                   }
                 </div>
-              </section>
+              }
             }
           </div>
           <ng-template #cardInner let-item="item" let-i="i">
-            @if (item['logo']) {
-              <div class="client-logo-wrap">
-                <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + i + '.logo')" (error)="hideBrokenLogo($event)">
-              </div>
-            } @else {
-              <div class="client-icon">{{ item['icon'] || initial(item['name']) }}</div>
-            }
-            <span [cmsText]="path(listPath() + '.' + i + '.name')"></span>
-            @if (item['text']) {
-              <p class="client-description" [cmsText]="path(listPath() + '.' + i + '.text')"></p>
-            }
+            <div class="client-tile-mark">
+              @if (item['logo']) {
+                <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + i + '.logo')" (error)="hideBrokenLogo($event)" width="48" height="48">
+              } @else {
+                <svg class="ui-icon" aria-hidden="true"><use [attr.href]="'assets/icons/ui.svg#' + subIcon(itemSub(item))"></use></svg>
+              }
+            </div>
+            <div class="client-tile-copy">
+              <strong [cmsText]="path(listPath() + '.' + i + '.name')"></strong>
+              @if (itemSub(item)) {
+                <span>{{ itemSub(item) }}</span>
+              }
+            </div>
           </ng-template>
         } @else if (layout() === 'carrusel') {
           <div class="clients-carousel">
             @for (item of items(); track $index) {
               @if ($index === current) {
                 <article class="client-slide">
-                  <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')">
+                  <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')" loading="lazy" decoding="async" width="160" height="90">
                   <h3 [cmsText]="path(listPath() + '.' + $index + '.name')"></h3>
                   @if (item['text']) {
                     <p [cmsText]="path(listPath() + '.' + $index + '.text')"></p>
@@ -103,9 +119,9 @@
                 <div>
                   <h3 [cmsText]="path(listPath() + '.' + $index + '.name')"></h3>
                   <p [cmsText]="path(listPath() + '.' + $index + '.text')"></p>
-                  @if (item['url'] && internal(item['url'])) {
-                    <a [routerLink]="item['url']" [cmsLink]="path(listPath() + '.' + $index + '.url')">Ver más</a>
-                  } @else if (item['url']) {
+                  @if (hasUrl(item['url']) && internal(item['url'])) {
+                    <a [routerLink]="clientHref(item['url'])" [cmsLink]="path(listPath() + '.' + $index + '.url')">Ver más</a>
+                  } @else if (hasUrl(item['url'])) {
                     <a [href]="item['url']" target="_blank" rel="noopener" [cmsLink]="path(listPath() + '.' + $index + '.url')">Ver más</a>
                   }
                 </div>
@@ -116,16 +132,16 @@
           <div class="clients-grid" [cmsList]="path(listPath())">
             @for (item of items(); track $index) {
               <article class="client-logo">
-                @if (item['url'] && internal(item['url'])) {
-                  <a [routerLink]="item['url']">
-                    <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')">
+                @if (hasUrl(item['url']) && internal(item['url'])) {
+                  <a [routerLink]="clientHref(item['url'])">
+                    <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')" loading="lazy" decoding="async" width="160" height="90">
                   </a>
-                } @else if (item['url']) {
+                } @else if (hasUrl(item['url'])) {
                   <a [href]="item['url']" target="_blank" rel="noopener">
-                    <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')">
+                    <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')" loading="lazy" decoding="async" width="160" height="90">
                   </a>
                 } @else {
-                  <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')">
+                  <img [src]="item['logo']" [alt]="item['alt'] || item['name']" [cmsImage]="path(listPath() + '.' + $index + '.logo')" loading="lazy" decoding="async" width="160" height="90">
                 }
                 <span [cmsText]="path(listPath() + '.' + $index + '.name')"></span>
               </article>
@@ -139,7 +155,12 @@
             <li>
               <span class="step" [cmsText]="path('stages.' + $index + '.step')"></span>
               @if (item['image']) {
-                <img [src]="item['image']" [alt]="item['title']" [cmsImage]="path('stages.' + $index + '.image')">
+                <picture>
+                  @if (webpOf(item['image']); as webp) {
+                    <source type="image/webp" [srcset]="webp">
+                  }
+                  <img [src]="rasterOf(item['image']) || item['image']" [alt]="item['title']" [cmsImage]="path('stages.' + $index + '.image')" width="480" height="320" loading="lazy" decoding="async">
+                </picture>
               }
               <div>
                 <h3 [cmsText]="path('stages.' + $index + '.title')"></h3>
@@ -150,7 +171,7 @@
         </ol>
       }
       @case ('faq') {
-        <div class="faq-list">
+        <div class="faq-list" appReveal>
           @for (item of items(); track $index) {
             <details class="faq-item" [open]="openFaq === $index" (toggle)="openFaq = $any($event.target).open ? $index : openFaq">
               <summary [cmsText]="path('items.' + $index + '.question')"></summary>
@@ -163,7 +184,12 @@
         <div class="gallery-grid">
           @for (item of items(); track $index) {
             <figure>
-              <img [src]="item['image']" [alt]="item['alt'] || item['caption'] || ''" [cmsImage]="path('items.' + $index + '.image')">
+              <picture>
+                @if (webpOf(item['image']); as webp) {
+                  <source type="image/webp" [srcset]="webp">
+                }
+                <img [src]="rasterOf(item['image']) || item['image']" [alt]="item['alt'] || item['caption'] || ''" [cmsImage]="path('items.' + $index + '.image')" loading="lazy" decoding="async" width="800" height="520">
+              </picture>
               @if (item['caption']) {
                 <figcaption [cmsText]="path('items.' + $index + '.caption')"></figcaption>
               }
@@ -174,7 +200,20 @@
       @case ('map') {
         @if (props()['embed']) {
           <div class="map-frame">
-            <iframe [src]="embed(mapUrl())" title="Mapa" loading="lazy"></iframe>
+            @if (!mapLoaded()) {
+              <button type="button" class="map-facade" (click)="loadMap()" [attr.aria-label]="'Cargar mapa interactivo: ' + (props()['title'] || 'Dónde estamos')">
+                <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                @if (props()['title']) {
+                  <span class="map-facade-title" [cmsText]="path('title')"></span>
+                }
+                @if (props()['text']) {
+                  <span class="map-facade-address" [cmsText]="path('text')"></span>
+                }
+                <span class="map-facade-cta">Cargar mapa</span>
+              </button>
+            } @else {
+              <iframe [src]="embed(mapUrl())" title="Mapa de Matt Innova Solution en San Vicente de Cañete" aria-label="Mapa de Matt Innova Solution en San Vicente de Cañete" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="800" height="450" allowfullscreen></iframe>
+            }
           </div>
         }
       }

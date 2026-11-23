@@ -17,6 +17,10 @@ test.describe('panel admin', () => {
 
     await page.goto('/admin/paginas/inicio');
     await expect(page.getByRole('heading', { name: 'Inicio', level: 1 })).toBeVisible();
+    const preview = page.locator('.preview-frame');
+    await expect(preview).toHaveClass(/public-theme/);
+    const previewColor = await preview.evaluate((el) => getComputedStyle(el).color);
+    expect(previewColor).toBe('rgb(248, 250, 252)');
     const edit = page.getByRole('button', { name: 'Editar' });
     if ((await edit.getAttribute('aria-pressed')) !== 'true') {
       await edit.click();

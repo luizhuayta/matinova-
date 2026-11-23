@@ -1,4 +1,9 @@
 <FilesMatch "\.(php|phtml|phar|cgi|pl)$">
   Require all denied
 </FilesMatch>
+<IfModule mod_headers.c>
+  <FilesMatch "\.(webp|jpe?g|png|gif|avif)$">
+    Header set Cache-Control "public, max-age=31536000, immutable"
+  </FilesMatch>
+</IfModule>
 Options -ExecCGI

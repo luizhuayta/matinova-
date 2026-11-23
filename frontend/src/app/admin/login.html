@@ -2,7 +2,6 @@
   <aside class="login-brand">
     <div class="brand-inner">
       <img src="logo.svg" alt="Matt Innova Solution" class="login-logo">
-      <p class="brand-kicker"><span class="brand-dot" aria-hidden="true"></span>Matt Innova · CMS</p>
       <h1>Panel de la web</h1>
       <p>Cambia textos, fotos y mensajes tal como se ven en el sitio público.</p>
       <ul class="login-points">
@@ -24,6 +23,7 @@
   </aside>
 
   <section class="login-form-wrap">
+    <a routerLink="/" class="login-back" aria-label="Volver al inicio">← Volver al inicio</a>
     <form class="login-card" (ngSubmit)="submit()" novalidate>
       <div class="login-card-head">
         <span class="login-badge"><i class="bi bi-shield-lock" aria-hidden="true"></i></span>

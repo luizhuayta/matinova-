@@ -87,34 +87,7 @@ import { CmsApiService } from '../cms/cms-api.service';
       }
     </section>
   `,
-  styles: [`
-    .wrap { max-width: 800px; }
-    .create { display: grid; grid-template-columns: 2fr 1fr auto; gap: 0.7rem; align-items: end; }
-    .admin-banner.ok code, .card-sub code, .wh-sub code { font-family: ui-monospace, monospace; }
-    .empty-state { margin-top: 0.9rem; }
-    .wh-row strong.url { display: block; font-size: 0.875rem; overflow-wrap: anywhere; }
-    .wh-sub { display: flex; gap: 0.5rem; align-items: center; margin-top: 0.3rem; flex-wrap: wrap; }
-    .wh-sub code {
-      font-size: 0.72rem; background: var(--admin-paper); border: 1px solid var(--admin-line);
-      padding: 0.1rem 0.45rem; border-radius: 6px; color: var(--admin-muted);
-    }
-    .pill.sm { min-height: 24px; font-size: 0.68rem; }
-    .actions { display: flex; gap: 0.45rem; flex-wrap: wrap; justify-content: flex-end; }
-    .log-card { margin-top: 0.9rem; }
-    .log { list-style: none; padding: 0; margin: 0; display: grid; gap: 0.45rem; }
-    .log li {
-      display: flex; gap: 0.7rem; align-items: flex-start;
-      background: #faf9f7; border: 1px solid var(--admin-line);
-      border-radius: 8px; padding: 0.55rem 0.7rem;
-    }
-    .log-copy { display: grid; gap: 0.1rem; min-width: 0; }
-    .log-copy strong { font-size: 0.83rem; }
-    .log-copy small { color: var(--admin-muted); font-size: 0.75rem; overflow-wrap: anywhere; }
-    @media (max-width: 640px) {
-      .create { grid-template-columns: 1fr; }
-      .wh-row { flex-wrap: wrap; }
-    }
-  `],
+  styleUrl: './styles/webhooks.scss',
 })
 export class AdminWebhooks implements OnInit {
   private api = inject(CmsApiService);

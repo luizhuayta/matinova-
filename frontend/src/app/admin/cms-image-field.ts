@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { CmsContentService } from '../cms/cms-content.service';
 import { CmsEditorService } from '../cms/cms-editor.service';
 import { altPathForImage } from '../cms/cms-schema';
-import { CmsMediaItem } from '../cms/cms.models';
+import { CmsMediaItem, CmsMediaVersion } from '../cms/cms.models';
 
 @Component({
   selector: 'app-cms-image-field',
@@ -62,6 +62,17 @@ import { CmsMediaItem } from '../cms/cms.models';
           <label>Vertical <input type="range" min="0" max="80" [ngModel]="crop().y" (ngModelChange)="setCrop('y', $event)"></label>
           <label>Tamaño <input type="range" min="20" max="100" [ngModel]="crop().w" (ngModelChange)="setCrop('w', $event)"></label>
           <button type="button" class="admin-btn-primary" (click)="applyCrop()" [disabled]="cropping()">{{ cropping() ? 'Recortando…' : 'Aplicar recorte' }}</button>
+          @if (previousUrl()) {
+            <button type="button" class="admin-btn-ghost" (click)="undoCrop()">Deshacer recorte</button>
+          }
+          @if (versions().length) {
+            <p class="micro">Historial en el servidor</p>
+            <div class="hist">
+              @for (item of versions(); track item.id + item.url) {
+                <button type="button" class="admin-btn-ghost" (click)="useVersion(item)">{{ versionLabel(item) }}</button>
+              }
+            </div>
+          }
         </div>
       </div>
     }
@@ -90,75 +101,7 @@ import { CmsMediaItem } from '../cms/cms.models';
       </div>
     }
   `,
-  styles: [`
-    .image-field { display: grid; gap: 8px; min-width: 0; }
-    .preview {
-      width: 100%;
-      min-height: 112px;
-      border-radius: var(--admin-radius-ctrl);
-      overflow: hidden;
-      background: #ece8e2;
-      display: grid;
-      place-items: center;
-    }
-    .preview.empty span {
-      color: var(--admin-muted);
-      font-size: 0.8125rem;
-      padding: 12px;
-      text-align: center;
-    }
-    img { width: 100%; height: 112px; object-fit: cover; display: block; }
-    .name {
-      margin: 0;
-      font-size: 0.75rem;
-      color: var(--admin-muted);
-      overflow-wrap: anywhere;
-    }
-    .image-actions {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-    }
-    .image-actions label,
-    .image-actions button {
-      flex: 1 1 96px;
-      min-height: 36px;
-      font-size: 0.8125rem;
-      white-space: nowrap;
-    }
-    .image-actions input { display: none; }
-    .picker {
-      position: fixed;
-      inset: 0;
-      z-index: 50;
-      background: rgba(20, 24, 31, 0.5);
-      display: grid;
-      place-items: center;
-      padding: 1rem;
-    }
-    .picker-card {
-      width: min(100%, 640px);
-      max-height: 80vh;
-      overflow: auto;
-      background: var(--admin-surface);
-      border-radius: var(--admin-radius);
-      padding: 1rem;
-      display: grid;
-      gap: 0.75rem;
-    }
-    .picker-card header { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-    .picker-card h3 { margin: 0; font-size: 1rem; }
-    .picker-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 8px; }
-    .picker-grid button { padding: 0; border: 0; background: var(--admin-paper); border-radius: var(--admin-radius-ctrl); overflow: hidden; min-height: 80px; }
-    .picker-grid img { width: 100%; height: 80px; object-fit: cover; }
-    .warn, .micro { margin: 0; font-size: 0.8125rem; color: var(--admin-warn); }
-    .micro { color: var(--admin-muted); }
-    .alt-label { font-size: 0.8125rem; font-weight: 600; }
-    .switch-row { display: flex; gap: 8px; align-items: center; font-size: 0.8125rem; }
-    .crop-preview { position: relative; background: #111; border-radius: 8px; overflow: hidden; }
-    .crop-preview img { height: auto; max-height: 280px; object-fit: contain; }
-    .crop-box { position: absolute; border: 2px solid #fff; box-shadow: 0 0 0 999px rgba(0,0,0,.45); pointer-events: none; }
-  `],
+  styleUrl: './styles/image-field.scss',
 })
 export class CmsImageField {
   private cms = inject(CmsContentService);
@@ -172,6 +115,9 @@ export class CmsImageField {
   busy = signal(false);
   crop = signal({ x: 10, y: 10, w: 80, h: 45 });
   natural = signal({ w: 0, h: 0 });
+  previousUrl = signal('');
+  versions = signal<CmsMediaVersion[]>([]);
+  mediaId = signal<number | null>(null);
 
   url(): string {
     return this.cms.get<string>(this.path()) ?? '';
@@ -267,6 +213,7 @@ export class CmsImageField {
 
   openCrop(): void {
     this.cropOpen.set(true);
+    void this.loadHistory();
   }
 
   onCropLoad(event: Event): void {
@@ -292,16 +239,64 @@ export class CmsImageField {
     const box = this.crop();
     this.cropping.set(true);
     try {
-      const url = await this.cms.cropImage(this.url(), {
+      const res = await this.cms.cropImageDetails(this.url(), {
         x: Math.round((box.x / 100) * nat.w),
         y: Math.round((box.y / 100) * nat.h),
         w: Math.round((box.w / 100) * nat.w),
         h: Math.round((box.h / 100) * nat.h),
       });
-      this.cms.set(this.path(), url);
+      this.previousUrl.set(res.previous_url || this.url());
+      if (res.id) {
+        this.mediaId.set(res.id);
+      }
+      this.cms.set(this.path(), res.url);
       this.cropOpen.set(false);
+      void this.loadHistory();
     } finally {
       this.cropping.set(false);
     }
+  }
+
+  undoCrop(): void {
+    const previous = this.previousUrl();
+    if (!previous) {
+      return;
+    }
+    this.cms.set(this.path(), previous);
+    this.previousUrl.set('');
+  }
+
+  async loadHistory(): Promise<void> {
+    const url = this.url();
+    try {
+      const items = await this.cms.listMedia();
+      const current = items.find((item) => item.url === url) ?? items.find((item) => url.endsWith(item.url.split('/').pop() || '---'));
+      if (!current) {
+        this.versions.set([]);
+        return;
+      }
+      this.mediaId.set(current.id);
+      this.versions.set(await this.cms.mediaVersions(current.id));
+    } catch {
+      this.versions.set([]);
+    }
+  }
+
+  useVersion(item: CmsMediaVersion): void {
+    this.previousUrl.set(this.url());
+    this.cms.set(this.path(), item.url);
+  }
+
+  versionLabel(item: CmsMediaVersion): string {
+    if (item.reason === 'parent') {
+      return 'Foto anterior';
+    }
+    if (item.reason === 'upload') {
+      return 'Subida original';
+    }
+    if (item.reason === 'original') {
+      return 'Archivo original';
+    }
+    return 'Recorte guardado';
   }
 }

@@ -6,13 +6,28 @@ function cms_client_catalog_item(string $name, string $url, string $category, st
     return [
         'logo' => '',
         'name' => $name,
-        'url' => $url,
+        'url' => cms_public_href($url),
         'alt' => $name,
         'text' => '',
-        'icon' => $icon,
+        'icon' => '',
         'category' => $category,
         'subcategory' => $subcategory,
     ];
+}
+
+function cms_public_href(string $url): string
+{
+    $url = trim($url);
+    if ($url === '' || $url === '#') {
+        return '';
+    }
+    if (preg_match('/\.(xyz|website)(\/|$|\?)/i', $url)) {
+        return '';
+    }
+    if (stripos($url, 'makitoolsporu') !== false) {
+        return '';
+    }
+    return $url;
 }
 
 function cms_clients_catalog_items(): array
@@ -96,20 +111,20 @@ function cms_clients_page_document(): array
         'decorativeImagePaths' => [],
         'blocks' => [
             cms_make_block('listingHero', [
-                'image' => '/carousel.jpg',
-                'title' => 'Nuestros clientes',
-                'text' => 'Empresas e instituciones que confían en nosotros para transformar su futuro tecnológico',
+                'image' => 'assets/illustrations/hero.svg',
+                'title' => 'Instituciones y empresas que ya operan con nosotros.',
+                'text' => 'Colegios, institutos y empresas en Cañete y el Perú. Los logos aparecen cuando el cliente lo autoriza; las URLs de demostración no se enlazan.',
             ]),
             cms_make_block('clients', [
-                'title' => 'Quiénes confían en nosotros',
-                'text' => 'Organizados por rubro. Abre un panel para ver logos y sitios.',
+                'title' => 'Por rubro',
+                'text' => 'Elige un sector. Hasta que el cliente autorice su logo, mostramos el ícono del rubro y la inicial.',
                 'layout' => 'paneles',
                 'items' => cms_clients_catalog_items(),
             ]),
             cms_make_block('cta', [
-                'title' => '¿Quieres ser parte de nuestros clientes satisfechos?',
-                'text' => 'Cuéntanos tu proyecto y te mostramos casos similares.',
-                'button' => 'Contáctanos',
+                'title' => 'Cuéntanos el sistema que no está cerrando',
+                'text' => 'Revisamos el caso contra implementaciones similares, sin inventar logros.',
+                'button' => 'Hablar con un experto',
                 'link' => '/contacto',
             ]),
         ],

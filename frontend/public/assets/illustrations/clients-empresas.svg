@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180" role="img" aria-labelledby="empTitle">
+  <title id="empTitle">Empresas y comercio</title>
+  <rect width="320" height="180" fill="#EEF2F8"/>
+  <polygon points="40,140 160,78 280,140 160,172" fill="#F7F9FC" stroke="#2C50B8" stroke-width="1"/>
+  <polygon points="88,92 132,70 132,128 88,148" fill="#1A3279"/>
+  <polygon points="132,70 176,92 176,148 132,128" fill="#0C1D4A"/>
+  <polygon points="88,92 132,70 176,92 132,114" fill="#2C50B8"/>
+  <rect x="108" y="118" width="16" height="22" fill="#F26522" transform="skewY(-24)"/>
+  <polygon points="188,100 228,80 228,132 188,150" fill="#2C50B8"/>
+  <polygon points="228,80 264,98 264,150 228,132" fill="#0C1D4A"/>
+  <polygon points="188,100 228,80 264,98 224,118" fill="#4A6BD0"/>
+  <rect x="206" y="122" width="14" height="18" fill="#F26522" transform="skewY(-24)"/>
+</svg>

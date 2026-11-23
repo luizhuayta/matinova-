@@ -1,0 +1,110 @@
+@if (showSplash()) {
+  <div class="loading-screen" role="dialog" aria-label="Cargando Matt Innova Solution" tabindex="0" (click)="dismissSplash()" (keydown.escape)="dismissSplash()">
+    <div class="splash-atmosphere" aria-hidden="true">
+      <div class="splash-core"></div>
+      <div class="splash-flare"></div>
+      <svg class="splash-traces" viewBox="0 0 1440 900" preserveAspectRatio="xMidYMid slice">
+        <g class="splash-traces__run splash-traces__run--tl" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M0 118 H168 V64 H292"/>
+          <path pathLength="1" d="M86 0 V158 H38 V248"/>
+          <path pathLength="1" d="M0 206 H128 V268"/>
+          <path pathLength="1" d="M214 64 V28 H268"/>
+        </g>
+        <g class="splash-traces__nodes splash-traces__nodes--tl">
+          <circle cx="168" cy="118" r="3.2"/>
+          <circle cx="86" cy="158" r="3.2"/>
+          <circle cx="128" cy="206" r="2.4"/>
+          <circle cx="292" cy="64" r="2.4"/>
+          <circle cx="268" cy="28" r="2.2"/>
+        </g>
+        <g class="splash-traces__run splash-traces__run--br" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M1440 782 H1272 V836 H1148"/>
+          <path pathLength="1" d="M1354 900 V742 H1402 V652"/>
+          <path pathLength="1" d="M1440 694 H1312 V632"/>
+          <path pathLength="1" d="M1226 836 V872 H1172"/>
+        </g>
+        <g class="splash-traces__nodes splash-traces__nodes--br">
+          <circle cx="1272" cy="782" r="3.2"/>
+          <circle cx="1354" cy="742" r="3.2"/>
+          <circle cx="1312" cy="694" r="2.4"/>
+          <circle cx="1148" cy="836" r="2.4"/>
+          <circle cx="1172" cy="872" r="2.2"/>
+        </g>
+        <g class="splash-traces__run splash-traces__run--tr" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M1440 132 H1288 V78 H1176"/>
+          <path pathLength="1" d="M1362 0 V168 H1410"/>
+        </g>
+        <g class="splash-traces__nodes splash-traces__nodes--tr">
+          <circle cx="1288" cy="132" r="2.8"/>
+          <circle cx="1362" cy="168" r="2.4"/>
+          <circle cx="1176" cy="78" r="2.2"/>
+        </g>
+        <g class="splash-traces__run splash-traces__run--bl" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+          <path pathLength="1" d="M0 768 H152 V822 H264"/>
+          <path pathLength="1" d="M78 900 V732 H30"/>
+        </g>
+        <g class="splash-traces__nodes splash-traces__nodes--bl">
+          <circle cx="152" cy="768" r="2.8"/>
+          <circle cx="78" cy="732" r="2.4"/>
+          <circle cx="264" cy="822" r="2.2"/>
+        </g>
+        <g class="splash-traces__run splash-traces__run--feed" fill="none" stroke="currentColor" stroke-linecap="round">
+          <path pathLength="1" d="M292 64 C 420 64, 470 180, 560 250"/>
+          <path pathLength="1" d="M1148 836 C 1020 836, 970 720, 880 650"/>
+          <path pathLength="1" d="M1176 78 C 1040 140, 960 220, 900 300"/>
+          <path pathLength="1" d="M264 822 C 400 760, 480 680, 540 600"/>
+        </g>
+      </svg>
+    </div>
+    <div class="splash-lockup">
+      <div class="splash-marks">
+        @for (mark of splashMarks(); track $index) {
+          <img
+            class="splash-mark a11y-keep"
+            [class.splash-mark--lead]="$index === splashMarks().length - 1"
+            [style.--splash-i]="$index"
+            [src]="markSrc(mark['image'])"
+            [alt]="mark['alt'] || site()['logoAlt'] || 'Matt Innova Solution'"
+            [cmsImage]="'splashImages.' + (editor.editMode() ? $index : splashImages().length - 1) + '.image'"
+            cmsScope="site"
+            [attr.loading]="$index === splashMarks().length - 1 ? 'eager' : 'lazy'"
+            [attr.fetchpriority]="$index === splashMarks().length - 1 ? 'high' : 'low'"
+            decoding="async">
+        }
+      </div>
+      <p class="loading-tagline" cmsText="splashTagline" cmsScope="site">SOLUCIONES TI QUE TRANSFORMAN</p>
+      <p class="loading-label" cmsText="splashLabel" cmsScope="site">CARGANDO…</p>
+      <span class="loading-bar" aria-hidden="true"><span></span></span>
+    </div>
+  </div>
+}
+
+@if (showCta()) {
+  <div class="cta-banner studio-dark">
+    <div class="container cta-content">
+      <p class="cta-text" cmsText="ctaText" cmsScope="site"></p>
+      <div class="cta-actions">
+        <a [href]="'mailto:' + (site()['ctaEmail'] || '')" class="cta-email" [attr.aria-label]="'Escribir a ' + (site()['ctaEmail'] || 'Matt Innova')">
+          <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#mail"></use></svg>
+          <span cmsText="ctaEmail" cmsScope="site"></span>
+        </a>
+        <a publicBtn class="cta-button" [routerLink]="contactPath()" [localeLink]="'/contacto'" cmsText="ctaButton" cmsScope="site" aria-label="Hablar con un experto de Matt Innova"></a>
+        <button class="cta-close" type="button" (click)="closeCtaBanner()" aria-label="Cerrar aviso">
+          <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#x"></use></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showCookies()) {
+  <div class="cookie-banner" role="dialog" aria-modal="false" aria-label="Cookies" (keydown.escape)="rejectCookies()">
+    <div class="container cookie-content studio-dark">
+      <p class="cookie-text" cmsText="cookieText" cmsScope="site"></p>
+      <div class="cookie-actions">
+        <button publicBtn type="button" (click)="acceptCookies()" cmsText="cookieAccept" cmsScope="site"></button>
+        <button publicBtn tone="ghost" type="button" (click)="rejectCookies()" cmsText="cookieReject" cmsScope="site"></button>
+      </div>
+    </div>
+  </div>
+}

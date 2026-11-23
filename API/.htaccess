@@ -1,6 +1,21 @@
 RewriteEngine On
 RewriteBase /api/
 
+# Sin listado de directorios.
+Options -Indexes
+
+<IfModule mod_brotli.c>
+  AddOutputFilterByType BROTLI_COMPRESS text/html text/plain text/css application/javascript application/json application/xml text/xml image/svg+xml
+</IfModule>
+<IfModule !mod_brotli.c>
+  <IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/html text/plain text/css application/javascript application/json application/xml text/xml image/svg+xml
+  </IfModule>
+</IfModule>
+<IfModule mod_headers.c>
+  Header merge Vary Accept-Encoding
+</IfModule>
+
 <Files ".env">
   Require all denied
 </Files>
@@ -13,6 +28,10 @@ RewriteRule ^vendor/ - [F]
 RewriteRule ^tmp/ - [F]
 RewriteRule ^uploads/.*\.(php|phtml|phar)$ - [F]
 RewriteRule ^(schema\.sql|composer\.(json|lock)|Dockerfile|entrypoint\.sh|router\.php)$ - [F]
+
+# Solo index.php atiende directo; el resto de planos solo vía router (evita bypass de rate-limit/CORS).
+RewriteCond %{REQUEST_URI} !/index\.php$
+RewriteRule ^[A-Za-z0-9_-]+\.php$ - [F]
 
 RewriteCond %{REQUEST_FILENAME} -f
 RewriteRule ^uploads/ - [L]

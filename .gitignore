@@ -4,19 +4,32 @@ API/vendor
 API/uploads/*
 !API/uploads/.gitkeep
 !API/uploads/.htaccess
+!API/uploads/originals/
+!API/uploads/originals/.gitkeep
+!API/uploads/history/
+!API/uploads/history/.gitkeep
 API/tmp
 
 dist-upload/
 dist-upload.zip
+*.zip
+respaldos/
 
 
 # Documentacion interna (no se sube a esta rama)
-docs/
+docs/*
+!docs/contratos-cms.md
+!docs/CPANEL-RECUPERACION.md
 
 # Herramientas de IA / temporales
+.atl/
 .impeccable/
 .claude/
 .cursor/
+.openchamber/
+.kilo/
+__pycache__/
+/diagnostico.php
 skills/
 
 # Editores y sistema
@@ -30,3 +43,8 @@ Thumbs.db
 .env
 .env.local
 
+# Grabaciones y demos Playwright
+videos_tour/
+
+# Capturas locales de QA
+prueba/

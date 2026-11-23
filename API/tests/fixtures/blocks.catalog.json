@@ -1,0 +1,1031 @@
+{
+    "blockTypes": [
+        "hero",
+        "about",
+        "contactCards",
+        "services",
+        "innovative",
+        "testimonials",
+        "pageHero",
+        "stats",
+        "team",
+        "videos",
+        "listingHero",
+        "serviceCards",
+        "cta",
+        "serviceHero",
+        "reasons",
+        "richText",
+        "contactForm",
+        "claimsBook",
+        "clients",
+        "clientStages",
+        "faq",
+        "gallery",
+        "map"
+    ],
+    "blocks": [
+        {
+            "type": "hero",
+            "label": "Banner carrusel",
+            "icon": "bi-images",
+            "category": "Portada",
+            "schema": [
+                {
+                    "path": "slides",
+                    "type": "list"
+                },
+                {
+                    "path": "slides[].badge",
+                    "type": "text"
+                },
+                {
+                    "path": "slides[].title",
+                    "type": "area"
+                },
+                {
+                    "path": "slides[].image",
+                    "type": "image"
+                },
+                {
+                    "path": "slides[].titleAccent",
+                    "type": "text"
+                },
+                {
+                    "path": "subtitle",
+                    "type": "area"
+                },
+                {
+                    "path": "cta",
+                    "type": "text"
+                },
+                {
+                    "path": "ctaLink",
+                    "type": "link"
+                },
+                {
+                    "path": "secondaryCta",
+                    "type": "text"
+                },
+                {
+                    "path": "secondaryLink",
+                    "type": "link"
+                },
+                {
+                    "path": "stats",
+                    "type": "list"
+                },
+                {
+                    "path": "stats[].icon",
+                    "type": "text"
+                },
+                {
+                    "path": "stats[].number",
+                    "type": "text"
+                },
+                {
+                    "path": "stats[].label",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "about",
+            "label": "Quiénes somos",
+            "icon": "bi-people",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "tag",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "image",
+                    "type": "image"
+                },
+                {
+                    "path": "imageAlt",
+                    "type": "text"
+                },
+                {
+                    "path": "cta",
+                    "type": "text"
+                },
+                {
+                    "path": "ctaLink",
+                    "type": "link"
+                },
+                {
+                    "path": "features",
+                    "type": "list"
+                },
+                {
+                    "path": "features[].text",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "contactCards",
+            "label": "Tarjetas de contacto",
+            "icon": "bi-geo-alt",
+            "category": "Contacto",
+            "schema": [
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].title",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].text",
+                    "type": "area"
+                },
+                {
+                    "path": "items[].icon",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "services",
+            "label": "Servicios (cuadrícula)",
+            "icon": "bi-grid",
+            "category": "Servicios",
+            "schema": [
+                {
+                    "path": "tag",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "titleAccent",
+                    "type": "text"
+                },
+                {
+                    "path": "cards",
+                    "type": "list"
+                },
+                {
+                    "path": "cards[].img",
+                    "type": "image"
+                },
+                {
+                    "path": "cards[].alt",
+                    "type": "text"
+                },
+                {
+                    "path": "cards[].title",
+                    "type": "text"
+                },
+                {
+                    "path": "cards[].text",
+                    "type": "area"
+                },
+                {
+                    "path": "cards[].icon",
+                    "type": "text"
+                },
+                {
+                    "path": "cards[].link",
+                    "type": "link"
+                }
+            ]
+        },
+        {
+            "type": "innovative",
+            "label": "Carrusel de servicios",
+            "icon": "bi-collection",
+            "category": "Servicios",
+            "schema": [
+                {
+                    "path": "tag",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "cta",
+                    "type": "text"
+                },
+                {
+                    "path": "ctaLink",
+                    "type": "link"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].title",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].desc",
+                    "type": "area"
+                },
+                {
+                    "path": "items[].img",
+                    "type": "image"
+                }
+            ]
+        },
+        {
+            "type": "testimonials",
+            "label": "Opiniones",
+            "icon": "bi-chat-quote",
+            "category": "Clientes",
+            "schema": [
+                {
+                    "path": "tag",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "cta",
+                    "type": "text"
+                },
+                {
+                    "path": "ctaLink",
+                    "type": "link"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].text",
+                    "type": "area"
+                },
+                {
+                    "path": "items[].client",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].logo",
+                    "type": "image"
+                },
+                {
+                    "path": "items[].role",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].company",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].rating",
+                    "type": "number"
+                }
+            ]
+        },
+        {
+            "type": "pageHero",
+            "label": "Portada de página",
+            "icon": "bi-window",
+            "category": "Portada",
+            "schema": [
+                {
+                    "path": "badge",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "titleAccent",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "cta",
+                    "type": "text"
+                },
+                {
+                    "path": "ctaLink",
+                    "type": "link"
+                },
+                {
+                    "path": "image",
+                    "type": "image"
+                }
+            ]
+        },
+        {
+            "type": "stats",
+            "label": "Cifras",
+            "icon": "bi-graph-up",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].icon",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].number",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].label",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "team",
+            "label": "Equipo",
+            "icon": "bi-person-badge",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "tag",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].name",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].role",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].image",
+                    "type": "image"
+                },
+                {
+                    "path": "items[].linkedin",
+                    "type": "link"
+                },
+                {
+                    "path": "items[].github",
+                    "type": "link"
+                }
+            ]
+        },
+        {
+            "type": "videos",
+            "label": "Videos",
+            "icon": "bi-youtube",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "tag",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].embed",
+                    "type": "embed"
+                },
+                {
+                    "path": "items[].user",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].title",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "listingHero",
+            "label": "Banner de listado",
+            "icon": "bi-image",
+            "category": "Portada",
+            "schema": [
+                {
+                    "path": "image",
+                    "type": "image"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "titleAccent",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                }
+            ]
+        },
+        {
+            "type": "serviceCards",
+            "label": "Listado con enlaces",
+            "icon": "bi-card-list",
+            "category": "Servicios",
+            "schema": [
+                {
+                    "path": "subtitle",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "cards",
+                    "type": "list"
+                },
+                {
+                    "path": "cards[].path",
+                    "type": "link"
+                },
+                {
+                    "path": "cards[].img",
+                    "type": "image"
+                },
+                {
+                    "path": "cards[].title",
+                    "type": "text"
+                },
+                {
+                    "path": "cards[].icon",
+                    "type": "text"
+                },
+                {
+                    "path": "cards[].text",
+                    "type": "area"
+                },
+                {
+                    "path": "cards[].link",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "cta",
+            "label": "Llamado a la acción",
+            "icon": "bi-megaphone",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "button",
+                    "type": "text"
+                },
+                {
+                    "path": "link",
+                    "type": "link"
+                }
+            ]
+        },
+        {
+            "type": "serviceHero",
+            "label": "Detalle de servicio",
+            "icon": "bi-layers",
+            "category": "Servicios",
+            "schema": [
+                {
+                    "path": "heroImage",
+                    "type": "image"
+                },
+                {
+                    "path": "heroAlt",
+                    "type": "text"
+                },
+                {
+                    "path": "image",
+                    "type": "image"
+                },
+                {
+                    "path": "imageAlt",
+                    "type": "text"
+                },
+                {
+                    "path": "label",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "titleAccent",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "cta",
+                    "type": "text"
+                },
+                {
+                    "path": "ctaLink",
+                    "type": "link"
+                }
+            ]
+        },
+        {
+            "type": "reasons",
+            "label": "Motivos / beneficios",
+            "icon": "bi-check2-square",
+            "category": "Servicios",
+            "schema": [
+                {
+                    "path": "subtitle",
+                    "type": "text"
+                },
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].img",
+                    "type": "image"
+                },
+                {
+                    "path": "items[].title",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].text",
+                    "type": "area"
+                }
+            ]
+        },
+        {
+            "type": "richText",
+            "label": "Texto largo",
+            "icon": "bi-textarea-t",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "lastUpdated",
+                    "type": "text"
+                },
+                {
+                    "path": "body",
+                    "type": "rich"
+                }
+            ]
+        },
+        {
+            "type": "contactForm",
+            "label": "Formulario de contacto",
+            "icon": "bi-envelope",
+            "category": "Contacto",
+            "schema": [
+                {
+                    "path": "submitLabel",
+                    "type": "text"
+                },
+                {
+                    "path": "destinationEmail",
+                    "type": "text"
+                },
+                {
+                    "path": "fields",
+                    "type": "group"
+                },
+                {
+                    "path": "fields.name",
+                    "type": "bool"
+                },
+                {
+                    "path": "fields.email",
+                    "type": "bool"
+                },
+                {
+                    "path": "fields.phone",
+                    "type": "bool"
+                },
+                {
+                    "path": "fields.subject",
+                    "type": "bool"
+                },
+                {
+                    "path": "fields.message",
+                    "type": "bool"
+                },
+                {
+                    "path": "placeholders",
+                    "type": "group"
+                },
+                {
+                    "path": "placeholders.name",
+                    "type": "text"
+                },
+                {
+                    "path": "placeholders.email",
+                    "type": "text"
+                },
+                {
+                    "path": "placeholders.phone",
+                    "type": "text"
+                },
+                {
+                    "path": "placeholders.subject",
+                    "type": "text"
+                },
+                {
+                    "path": "placeholders.message",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "claimsBook",
+            "label": "Libro de reclamaciones",
+            "icon": "bi-journal-text",
+            "category": "Legal",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "company",
+                    "type": "text"
+                },
+                {
+                    "path": "subtitle",
+                    "type": "area"
+                },
+                {
+                    "path": "logo",
+                    "type": "image"
+                },
+                {
+                    "path": "ruc",
+                    "type": "text"
+                },
+                {
+                    "path": "destinationEmail",
+                    "type": "text"
+                },
+                {
+                    "path": "disclaimer1",
+                    "type": "area"
+                },
+                {
+                    "path": "disclaimer2",
+                    "type": "area"
+                },
+                {
+                    "path": "submitLabel",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "clients",
+            "label": "Clientes",
+            "icon": "bi-building",
+            "category": "Clientes",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "layout",
+                    "type": "select"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].logo",
+                    "type": "image"
+                },
+                {
+                    "path": "items[].name",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].url",
+                    "type": "link"
+                },
+                {
+                    "path": "items[].alt",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].text",
+                    "type": "area"
+                },
+                {
+                    "path": "items[].icon",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].category",
+                    "type": "select"
+                },
+                {
+                    "path": "items[].subcategory",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "clientStages",
+            "label": "Fases de clientes",
+            "icon": "bi-diagram-3",
+            "category": "Clientes",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                },
+                {
+                    "path": "stages",
+                    "type": "list"
+                },
+                {
+                    "path": "stages[].step",
+                    "type": "text"
+                },
+                {
+                    "path": "stages[].title",
+                    "type": "text"
+                },
+                {
+                    "path": "stages[].text",
+                    "type": "area"
+                },
+                {
+                    "path": "stages[].image",
+                    "type": "image"
+                }
+            ]
+        },
+        {
+            "type": "faq",
+            "label": "Preguntas frecuentes",
+            "icon": "bi-question-circle",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].question",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].answer",
+                    "type": "area"
+                }
+            ]
+        },
+        {
+            "type": "gallery",
+            "label": "Galería",
+            "icon": "bi-images",
+            "category": "Contenido",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "items",
+                    "type": "list"
+                },
+                {
+                    "path": "items[].image",
+                    "type": "image"
+                },
+                {
+                    "path": "items[].alt",
+                    "type": "text"
+                },
+                {
+                    "path": "items[].caption",
+                    "type": "text"
+                }
+            ]
+        },
+        {
+            "type": "map",
+            "label": "Mapa",
+            "icon": "bi-map",
+            "category": "Contacto",
+            "schema": [
+                {
+                    "path": "title",
+                    "type": "text"
+                },
+                {
+                    "path": "embed",
+                    "type": "embed"
+                },
+                {
+                    "path": "text",
+                    "type": "area"
+                }
+            ]
+        }
+    ],
+    "templates": [
+        {
+            "id": "blank",
+            "label": "En blanco",
+            "description": "Una sección de texto para empezar."
+        },
+        {
+            "id": "home",
+            "label": "Portada",
+            "description": "Banner, quiénes somos y un llamado."
+        },
+        {
+            "id": "service",
+            "label": "Servicio",
+            "description": "Banner, texto e ítems de beneficios."
+        },
+        {
+            "id": "legal",
+            "label": "Legal",
+            "description": "Título y texto largo."
+        },
+        {
+            "id": "clients",
+            "label": "Clientes",
+            "description": "Paneles por rubro, logos y llamado a contacto."
+        },
+        {
+            "id": "contact",
+            "label": "Contacto",
+            "description": "Tarjetas y formulario."
+        }
+    ],
+    "slugs": {
+        "inicio": "/",
+        "acerca-de": "/acerca-de",
+        "servicios": "/servicios",
+        "servicios-software": "/servicios/software",
+        "servicios-hardware": "/servicios/hardware",
+        "servicios-saas": "/servicios/saas",
+        "servicios-consultoria": "/servicios/consultoria",
+        "servicios-soluciones-ti": "/servicios/soluciones-ti",
+        "contacto": "/contacto",
+        "privacidad": "/privacidad",
+        "terminos": "/terminos",
+        "libro-reclamaciones": "/libro-reclamaciones",
+        "clientes": "/clientes",
+        "sitio": "/"
+    },
+    "siteBools": [
+        "showSplash",
+        "showCtaBanner",
+        "showWhatsapp",
+        "showChatbot",
+        "showClientsToggle",
+        "animateCarousels"
+    ],
+    "siteNumbers": [
+        "splashSeconds"
+    ],
+    "publicPosts": {
+        "contacto": {
+            "request": [
+                "name",
+                "email",
+                "phone",
+                "subject",
+                "message"
+            ],
+            "response": [
+                "status",
+                "message",
+                "mailSent"
+            ]
+        },
+        "reclamaciones": {
+            "response": [
+                "ticket",
+                "mailSent",
+                "message"
+            ]
+        },
+        "accesibilidad": {
+            "request": [
+                "name",
+                "email",
+                "phone",
+                "assistanceType",
+                "description"
+            ]
+        },
+        "bot": {
+            "request": [
+                "message"
+            ],
+            "response": [
+                "reply",
+                "links",
+                "source"
+            ]
+        }
+    },
+    "docKeys": [
+        "content",
+        "version",
+        "updated_at",
+        "schemaVersion"
+    ],
+    "blockShape": [
+        "id",
+        "type",
+        "hidden",
+        "layout",
+        "props"
+    ]
+}

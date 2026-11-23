@@ -1,0 +1,141 @@
+{
+    "blockTypes": [
+        "hero",
+        "about",
+        "contactCards",
+        "services",
+        "innovative",
+        "testimonials",
+        "pageHero",
+        "stats",
+        "team",
+        "videos",
+        "listingHero",
+        "serviceCards",
+        "cta",
+        "serviceHero",
+        "reasons",
+        "richText",
+        "contactForm",
+        "claimsBook",
+        "clients",
+        "clientStages",
+        "faq",
+        "gallery",
+        "map"
+    ],
+    "templates": [
+        {
+            "id": "blank",
+            "label": "En blanco",
+            "description": "Una sección de texto para empezar."
+        },
+        {
+            "id": "home",
+            "label": "Portada",
+            "description": "Banner, quiénes somos y un llamado."
+        },
+        {
+            "id": "service",
+            "label": "Servicio",
+            "description": "Banner, texto e ítems de beneficios."
+        },
+        {
+            "id": "legal",
+            "label": "Legal",
+            "description": "Título y texto largo."
+        },
+        {
+            "id": "clients",
+            "label": "Clientes",
+            "description": "Paneles por rubro, logos y llamado a contacto."
+        },
+        {
+            "id": "contact",
+            "label": "Contacto",
+            "description": "Tarjetas y formulario."
+        }
+    ],
+    "slugs": {
+        "inicio": "/",
+        "acerca-de": "/acerca-de",
+        "servicios": "/servicios",
+        "servicios-software": "/servicios/software",
+        "servicios-hardware": "/servicios/hardware",
+        "servicios-saas": "/servicios/saas",
+        "servicios-consultoria": "/servicios/consultoria",
+        "servicios-soluciones-ti": "/servicios/soluciones-ti",
+        "contacto": "/contacto",
+        "privacidad": "/privacidad",
+        "terminos": "/terminos",
+        "libro-reclamaciones": "/libro-reclamaciones",
+        "clientes": "/clientes",
+        "sitio": "/"
+    },
+    "siteBools": [
+        "showSplash",
+        "showCtaBanner",
+        "showWhatsapp",
+        "showChatbot",
+        "showClientsToggle",
+        "animateCarousels"
+    ],
+    "siteNumbers": [
+        "splashSeconds"
+    ],
+    "publicPosts": {
+        "contacto": {
+            "request": [
+                "name",
+                "email",
+                "phone",
+                "subject",
+                "message"
+            ],
+            "response": [
+                "status",
+                "message",
+                "mailSent"
+            ]
+        },
+        "reclamaciones": {
+            "response": [
+                "ticket",
+                "mailSent",
+                "message"
+            ]
+        },
+        "accesibilidad": {
+            "request": [
+                "name",
+                "email",
+                "phone",
+                "assistanceType",
+                "description"
+            ]
+        },
+        "bot": {
+            "request": [
+                "message"
+            ],
+            "response": [
+                "reply",
+                "links",
+                "source"
+            ]
+        }
+    },
+    "docKeys": [
+        "content",
+        "version",
+        "updated_at",
+        "schemaVersion"
+    ],
+    "blockShape": [
+        "id",
+        "type",
+        "hidden",
+        "layout",
+        "props"
+    ]
+}

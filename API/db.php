@@ -12,17 +12,22 @@ function db(): PDO
     $port = cfg('DB_PORT', '3306');
     $name = cfg('DB_NAME', 'mattinnova_cms');
     $user = cfg('DB_USER', 'matt');
-    $pass = cfg('DB_PASSWORD', 'mattlocal');
+    $pass = cfg('DB_PASSWORD', '');
 
     $dsn = sprintf('mysql:host=%s;port=%s;dbname=%s;charset=utf8mb4', $host, $port, $name);
     $retries = in_array($host, ['db', 'mysql', 'mariadb'], true) ? 30 : 1;
     $last = null;
     for ($i = 0; $i < $retries; $i++) {
         try {
-            $pdo = new PDO($dsn, $user, $pass, [
+            $connection = new PDO($dsn, $user, $pass, [
                 PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
                 PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::ATTR_TIMEOUT => 5,
             ]);
+            // Evita que un ALTER o una fila bloqueada deje todas las peticiones esperando.
+            $connection->exec('SET SESSION lock_wait_timeout = 10');
+            $connection->exec('SET SESSION innodb_lock_wait_timeout = 10');
+            $pdo = $connection;
             return $pdo;
         } catch (PDOException $e) {
             $last = $e;

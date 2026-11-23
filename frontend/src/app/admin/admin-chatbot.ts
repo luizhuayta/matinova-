@@ -91,20 +91,7 @@ import { CmsContentService } from '../cms/cms-content.service';
       }
     </section>
   `,
-  styles: [`
-    .wrap { max-width: 720px; }
-    form { display: grid; gap: 0.9rem; }
-    .admin-seg { width: fit-content; max-width: 100%; }
-    .mode-hint { margin-top: 0.6rem; }
-    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
-    .form-grid .span { grid-column: 1 / -1; }
-    .admin-card .admin-banner { margin-top: 0.8rem; }
-    .actions { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-top: 0.9rem; }
-    @media (max-width: 560px) {
-      .form-grid { grid-template-columns: 1fr; }
-      .page-head { flex-wrap: wrap; }
-    }
-  `],
+  styleUrl: './styles/chatbot.scss',
 })
 export class AdminChatbot implements OnInit {
   private api = inject(CmsApiService);

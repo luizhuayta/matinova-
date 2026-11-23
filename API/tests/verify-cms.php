@@ -4,8 +4,11 @@ declare(strict_types=1);
 require __DIR__ . '/../helpers.php';
 require __DIR__ . '/../sanitize.php';
 require __DIR__ . '/../cms-schema.php';
+require_once __DIR__ . '/../blocks.php';
 require __DIR__ . '/../cms-doc.php';
+require __DIR__ . '/../Domain/CmsImagePaths.php';
 require __DIR__ . '/../redirects.php';
+require __DIR__ . '/../media.php';
 
 $failed = 0;
 function expect(bool $ok, string $label): void
@@ -36,11 +39,17 @@ expect(isset($migrated['blocks'][0]['type']), 'migración blocks en inicio');
 expect(($migrated['blocks'][0]['type'] ?? '') === 'hero', 'primer bloque de inicio es hero');
 expect(isset($migrated['decorativeImagePaths']) && is_array($migrated['decorativeImagePaths']), 'migración decorativeImagePaths');
 
+$emptyStats = cms_make_block('hero', ['stats' => []]);
+expect(($emptyStats['props']['stats'] ?? null) === [], 'stats vacío se respeta');
+
 $bad = validate_cms_payload(['showSplash' => 'si']);
 expect($bad !== null && ($bad['field'] ?? '') === 'showSplash', 'bool inválido');
 
 expect(validate_link_value('/contacto') === null, 'ruta interna ok');
 expect(validate_link_value('javascript:alert(1)') !== null, 'javascript rechazado');
+expect(validate_cms_tree(['cards' => [['link' => 'Ver consultoría']]], 'blocks.0.props') === null, 'link etiqueta con espacios pasa');
+expect(validate_cms_tree(['cards' => [['link' => 'javascript:alert(1)']]], 'blocks.0.props') !== null, 'link javascript se rechaza');
+expect(validate_cms_tree(['cards' => [['link' => '/contacto']]], 'blocks.0.props') === null, 'link ruta interna pasa');
 
 $magic = normalize_inicio_sections(['sections' => [['type' => 'magic'], ['type' => 'hero']]]);
 $types = array_column($magic['sections'], 'type');
@@ -167,6 +176,16 @@ expect(cms_hmac_signature('{}', 'secret') === 'sha256=' . hash_hmac('sha256', '{
 expect((cms_schema_for_slug('contacto')['kind'] ?? '') === 'contact', 'schema explícito contacto');
 expect((cms_schema_for_slug('acerca-de')['kind'] ?? '') === 'about', 'schema explícito acerca-de');
 expect((cms_default_layout()['width'] ?? '') === 'full', 'layout por defecto');
+expect(array_key_exists('backgroundImage', cms_default_layout()), 'layout trae backgroundImage');
+expect((cms_default_layout()['backgroundImage'] ?? '') === CMS_DEFAULT_BG_IMAGE, 'layout trae fondo por defecto');
+$v6doc = migrate_cms_document(['schemaVersion' => 5, 'blocks' => [
+    ['id' => 'a', 'type' => 'cta', 'hidden' => false, 'layout' => ['width' => 'full', 'padding' => '', 'background' => '', 'backgroundImage' => ''], 'props' => []],
+    ['id' => 'b', 'type' => 'cta', 'hidden' => false, 'layout' => ['width' => 'full', 'padding' => '', 'background' => '', 'backgroundImage' => '/api/uploads/x.webp'], 'props' => []],
+]], 'inicio');
+expect(($v6doc['blocks'][0]['layout']['backgroundImage'] ?? '') === CMS_DEFAULT_BG_IMAGE, 'v6 rellena fondo vacío');
+expect(($v6doc['blocks'][1]['layout']['backgroundImage'] ?? '') === '/api/uploads/x.webp', 'v6 respeta fondo propio');
+$bgBlock = cms_make_block('cta', [], false, null, ['backgroundImage' => '/api/uploads/bg.webp']);
+expect(($bgBlock['layout']['backgroundImage'] ?? '') === '/api/uploads/bg.webp', 'make_block conserva imagen de fondo');
 expect(cms_normalize_redirect_path('/vieja/') === '/vieja', 'normaliza redirect');
 $erp = chatbot_classic_result('precio del erp');
 expect(in_array('/contacto', array_column($erp['links'] ?? [], 'path'), true), 'precios derivan a contacto');
@@ -181,6 +200,12 @@ $iaKept = migrate_cms_document(['chatbotMode' => 'ia', 'schemaVersion' => 5], 's
 expect(($iaKept['chatbotMode'] ?? '') === 'ia', 'publicar sitio conserva modo ia');
 $modeFilled = migrate_cms_document(['schemaVersion' => 5], 'sitio');
 expect(in_array($modeFilled['chatbotMode'] ?? '', ['ia', 'clasico'], true), 'sitio siempre tiene chatbotMode');
+$splash = migrate_cms_document(['schemaVersion' => 5], 'sitio');
+expect(isset($splash['splashImages'][0]['image']) && str_contains((string) $splash['splashImages'][0]['image'], 'mis-academy'), 'splash rellena marcas');
+$splashEmpty = migrate_cms_document(['schemaVersion' => 5, 'splashImages' => []], 'sitio');
+expect($splashEmpty['splashImages'] === [], 'splash vacía se respeta');
+$enLabel = cms_apply_splash_defaults(['schemaVersion' => 5], 'en');
+expect(($enLabel['splashLabel'] ?? '') === 'LOADING…', 'splash en inglés');
 $plazo = chatbot_classic_result('cuanto tardan un desarrollo');
 expect(str_contains(strtolower((string) $plazo['reply']), 'semana') || str_contains(strtolower((string) $plazo['reply']), 'sprint'), 'plazos de desarrollo');
 $hire = chatbot_classic_result('quiero contratar sus servicios');
@@ -189,9 +214,54 @@ $aiCtx = chatbot_ai_context();
 expect(str_contains($aiCtx, '/clientes'), 'contexto IA incluye /clientes');
 require_once __DIR__ . '/../clients-catalog.php';
 expect(count(cms_clients_catalog_items()) >= 50, 'catalogo de clientes cargado');
+expect(cms_public_href('#') === '', 'quita href hash');
+expect(cms_public_href('https://electrihouse.xyz/') === '', 'quita .xyz demo');
+expect(cms_public_href('https://makitoolsporu.com/') === '', 'quita typo makitoolsporu');
+expect(cms_public_href('http://tecnocom.edu.pe/') === 'http://tecnocom.edu.pe/', 'conserva URL educativa');
+$contactoBlocks = cms_blocks_from_contacto(['title' => 'Contacto']);
+$contactoTypes = array_map(static fn ($block) => $block['type'] ?? '', $contactoBlocks);
+expect(in_array('faq', $contactoTypes, true) && in_array('map', $contactoTypes, true), 'contacto incluye faq y mapa');
+$acercaDoc = migrate_cms_document([
+    'heroTitle' => 'Equipo en Cañete, operación en todo el Perú.',
+    'heroText' => '30 años instalando sistemas.',
+    'heroCta' => 'Hablar con un experto',
+], 'acerca-de');
+expect(($acercaDoc['blocks'][0]['type'] ?? '') === 'pageHero', 'acerca-de empieza en pageHero');
+expect(($acercaDoc['blocks'][0]['props']['title'] ?? '') === 'Equipo en Cañete, operación en todo el Perú.', 'acerca-de conserva el lema');
+$serviciosDoc = migrate_cms_document([
+    'heroTitle' => 'Cinco líneas, cada una hasta la puesta en marcha.',
+    'heroText' => 'Software, hardware y consultoría.',
+    'cards' => [],
+], 'servicios');
+expect(($serviciosDoc['blocks'][0]['type'] ?? '') === 'listingHero', 'servicios empieza en listingHero');
+expect(str_contains((string) ($serviciosDoc['blocks'][0]['props']['title'] ?? ''), 'puesta en marcha'), 'servicios conserva el lema');
+$contactoDoc = migrate_cms_document([
+    'title' => 'Escríbenos con el problema, no con un briefing vacío.',
+    'text' => 'Casa matriz en San Vicente de Cañete.',
+    'cards' => [],
+], 'contacto');
+expect(($contactoDoc['blocks'][0]['type'] ?? '') === 'pageHero', 'contacto empieza en pageHero');
+expect(str_contains((string) ($contactoDoc['blocks'][0]['props']['title'] ?? ''), 'briefing vacío'), 'contacto conserva el lema');
+$packed = chatbot_pack("Hola \u{1F680}");
+expect(!preg_match('/[\x{1F300}-\x{1FAFF}]/u', $packed['reply']), 'chatbot quita emoji');
 expect(cms_clients_content_is_placeholder(['blocks' => []]) === true, 'pagina clientes vacia es placeholder');
 expect(cms_clients_content_is_placeholder(['blocks' => [['type' => 'clients', 'props' => ['items' => [['name' => 'A'], ['name' => 'B']]]]]]) === false, 'clientes con 2 items no es placeholder');
 $fromText = chatbot_links_from_text('Mira /contacto y /servicios/software');
 expect(count($fromText) === 2, 'extrae rutas del texto de IA');
+
+$rewritten = '/software.png';
+cms_rewrite_public_image_tree($rewritten);
+expect($rewritten === '/software.webp', 'reescribe software.png a webp');
+$tree = ['cards' => [['img' => 'hardware2026.png'], ['img' => 'consultoria.png']]];
+cms_rewrite_public_image_tree($tree);
+expect($tree['cards'][0]['img'] === 'hardware2026.webp', 'reescribe hardware en árbol');
+expect($tree['cards'][1]['img'] === 'consultoria.webp', 'reescribe consultoria en árbol');
+$again = 'software.webp';
+cms_rewrite_public_image_tree($again);
+expect($again === 'software.webp', 'reescribir webp es idempotente');
+
+expect(cms_media_basename('/api/uploads/27dd730a948402a6.webp') === '27dd730a948402a6.webp', 'basename de subida principal');
+expect(cms_media_basename('/api/uploads/27dd730a948402a6-480.webp') === '27dd730a948402a6.webp', 'basename quita variante 480');
+expect(cms_media_basename('/api/uploads/27dd730a948402a6-960.jpg') === '27dd730a948402a6.jpg', 'basename quita variante 960 jpg');
 
 exit($failed > 0 ? 1 : 0);

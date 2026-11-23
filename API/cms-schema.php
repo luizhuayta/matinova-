@@ -1,7 +1,10 @@
 <?php
 declare(strict_types=1);
 
-const CMS_SCHEMA_VERSION = 5;
+const CMS_SCHEMA_VERSION = 6;
+
+// Fondo de sección por defecto (textura navy del rediseño); se cambia por bloque en el CMS.
+const CMS_DEFAULT_BG_IMAGE = '/images/redesign/section-bg.webp';
 
 function cms_known_bools(): array
 {
@@ -14,6 +17,25 @@ function cms_known_bools(): array
 function cms_known_numbers(): array
 {
     return ['splashSeconds'];
+}
+
+function cms_default_splash_images(): array
+{
+    return [
+        ['image' => 'splash/mis-academy.webp', 'alt' => 'MIS Academy'],
+        ['image' => 'splash/matt-innova.webp', 'alt' => 'Matt Innova Solution'],
+    ];
+}
+
+function cms_apply_splash_defaults(array $content, string $locale = 'es'): array
+{
+    if (!array_key_exists('splashImages', $content)) {
+        $content['splashImages'] = cms_default_splash_images();
+    }
+    if (!isset($content['splashLabel']) || $content['splashLabel'] === '') {
+        $content['splashLabel'] = $locale === 'en' ? 'LOADING…' : 'CARGANDO…';
+    }
+    return $content;
 }
 
 function cms_known_links(): array
@@ -71,9 +93,13 @@ function validate_cms_tree(mixed $value, string $path): ?array
         return ['field' => $path, 'message' => 'Debe ser un número'];
     }
     if (is_string($value) && in_array($leaf, cms_known_links(), true)) {
-        $linkErr = validate_link_value($value);
-        if ($linkErr) {
-            return ['field' => $path, 'message' => $linkErr];
+        // 'link' es etiqueta visible en serviceCards ("Ver consultoría"); las URL reales
+        // nunca llevan espacios, así que solo se validan valores sin espacios.
+        if (!preg_match('/\s/', $value)) {
+            $linkErr = validate_link_value($value);
+            if ($linkErr) {
+                return ['field' => $path, 'message' => $linkErr];
+            }
         }
     }
     if (is_string($value) && strlen($value) > 200_000) {
@@ -149,7 +175,7 @@ function migrate_cms_document(array $content, string $slug): array
                 ['type' => 'contactCards', 'hidden' => false],
                 ['type' => 'services', 'hidden' => false],
                 ['type' => 'innovative', 'hidden' => false],
-                ['type' => 'testimonials', 'hidden' => false],
+                ['type' => 'testimonials', 'hidden' => true],
             ];
         }
         $content['schemaVersion'] = 2;
@@ -186,6 +212,22 @@ function migrate_cms_document(array $content, string $slug): array
         }
         $content['schemaVersion'] = 5;
     }
+    if ($version < 6) {
+        if ($slug !== 'sitio' && isset($content['blocks']) && is_array($content['blocks'])) {
+            foreach ($content['blocks'] as $i => $block) {
+                if (!is_array($block)) {
+                    continue;
+                }
+                $layout = is_array($block['layout'] ?? null) ? $block['layout'] : [];
+                $merged = array_merge(cms_default_layout(), $layout);
+                if (trim((string) ($merged['backgroundImage'] ?? '')) === '') {
+                    $merged['backgroundImage'] = CMS_DEFAULT_BG_IMAGE;
+                }
+                $content['blocks'][$i]['layout'] = $merged;
+            }
+        }
+        $content['schemaVersion'] = 6;
+    }
     if ($slug === 'sitio') {
         $content['chatbotMode'] = cms_resolve_chatbot_mode($content);
         if (!isset($content['aiProvider'])) {
@@ -197,6 +239,9 @@ function migrate_cms_document(array $content, string $slug): array
         if (!isset($content['aiBaseUrl'])) {
             $content['aiBaseUrl'] = 'https://openrouter.ai/api/v1';
         }
+        if (!array_key_exists('splashImages', $content)) {
+            $content['splashImages'] = cms_default_splash_images();
+        }
     }
     if ($slug !== 'sitio') {
         $content = cms_normalize_blocks($content);
@@ -206,7 +251,55 @@ function migrate_cms_document(array $content, string $slug): array
 
 function allowed_inicio_sections(): array
 {
-    return ['hero', 'about', 'contactCards', 'services', 'innovative', 'testimonials'];
+    return ['hero', 'about', 'contactCards', 'services', 'innovative', 'testimonials', 'faq'];
+}
+
+function cms_studio_faq_items(string $locale = 'es'): array
+{
+    if ($locale === 'en') {
+        return [
+            'title' => 'Questions we get from finance and IT',
+            'items' => [
+                [
+                    'question' => 'Do you apply SUNAT detraction on IT services?',
+                    'answer' => 'When the contract falls under SPOT, we apply the current detraction rate on the electronic invoice. We confirm the CIIU and the percentage in the quote before starting.',
+                ],
+                [
+                    'question' => 'Do you issue electronic invoices and report them in SIRE?',
+                    'answer' => 'Yes. We issue electronic receipts and register operations in SUNAT SIRE. The RUC is printed on every invoice; we do not close a job without a valid voucher.',
+                ],
+                [
+                    'question' => 'What are support response times?',
+                    'answer' => 'Critical server incidents: we answer in under 15 minutes during operating hours. The rest is scheduled the same business day. The SLA is written into the contract, not left as a chat promise.',
+                ],
+                [
+                    'question' => 'Can you work under a government framework agreement?',
+                    'answer' => 'We work with schools and public entities. Each convocatoria or acuerdo marco is reviewed against the expediente. Send the procedure number and we confirm whether we fit before bidding.',
+                ],
+            ],
+        ];
+    }
+    return [
+        'title' => 'Preguntas de finanzas y TI',
+        'items' => [
+            [
+                'question' => '¿Aplican detracción SUNAT a los servicios de TI?',
+                'answer' => 'Si el contrato califica en el SPOT, aplicamos la tasa vigente sobre el comprobante electrónico. El CIIU y el porcentaje se confirman en la cotización, antes de iniciar el trabajo.',
+            ],
+            [
+                'question' => '¿Emiten factura electrónica y registran en SIRE?',
+                'answer' => 'Sí. Emitimos comprobantes electrónicos y declaramos las operaciones en el SIRE de SUNAT. El RUC va en cada factura; no cerramos un trabajo sin voucher válido.',
+            ],
+            [
+                'question' => '¿Cuáles son los tiempos de soporte?',
+                'answer' => 'Incidencias críticas de servidores: respuesta en menos de 15 minutos en horario de operación. El resto se agenda el mismo día hábil. El SLA queda escrito en el contrato, no en el chat.',
+            ],
+            [
+                'question' => '¿Pueden contratar con el Estado en un acuerdo marco?',
+                'answer' => 'Trabajamos con entidades educativas y públicas. Cada convocatoria o acuerdo marco se revisa contra el expediente. Envíenos el número de procedimiento y confirmamos si calzamos antes de postular.',
+            ],
+        ],
+    ];
 }
 
 function normalize_inicio_sections(array $content): array
@@ -381,6 +474,7 @@ function cms_default_layout(): array
         'width' => 'full',
         'padding' => '',
         'background' => '',
+        'backgroundImage' => CMS_DEFAULT_BG_IMAGE,
     ];
 }
 
@@ -472,7 +566,8 @@ function cms_blocks_from_inicio(array $content): array
             ['type' => 'contactCards', 'hidden' => false],
             ['type' => 'services', 'hidden' => false],
             ['type' => 'innovative', 'hidden' => false],
-            ['type' => 'testimonials', 'hidden' => false],
+            ['type' => 'testimonials', 'hidden' => true],
+            ['type' => 'faq', 'hidden' => false],
         ];
     }
     $blocks = [];
@@ -483,11 +578,15 @@ function cms_blocks_from_inicio(array $content): array
         $type = (string) ($row['type'] ?? '');
         $hidden = !empty($row['hidden']);
         $props = match ($type) {
-            'hero' => [
+            'hero' => array_filter([
                 'slides' => $content['slides'] ?? [],
+                'subtitle' => $content['heroSubtitle'] ?? ($content['subtitle'] ?? ''),
                 'cta' => $content['heroCta'] ?? '',
-                'ctaLink' => $content['heroCtaLink'] ?? '/contacto',
-            ],
+                'ctaLink' => $content['heroCtaLink'] ?? '/servicios',
+                'stats' => $content['heroStats'] ?? null,
+                'secondaryCta' => $content['heroSecondaryCta'] ?? null,
+                'secondaryLink' => $content['heroSecondaryLink'] ?? null,
+            ], static fn ($value) => $value !== null),
             'about' => array_merge(
                 is_array($content['about'] ?? null) ? $content['about'] : [],
                 ['ctaLink' => $content['about']['ctaLink'] ?? '/acerca-de', 'features' => $content['about']['features'] ?? []]
@@ -502,6 +601,7 @@ function cms_blocks_from_inicio(array $content): array
                 is_array($content['testimonials'] ?? null) ? $content['testimonials'] : [],
                 ['ctaLink' => $content['testimonials']['ctaLink'] ?? '/contacto']
             ),
+            'faq' => is_array($content['faq'] ?? null) ? $content['faq'] : cms_studio_faq_items(),
             default => null,
         };
         if ($props === null) {
@@ -522,10 +622,11 @@ function cms_blocks_from_acerca(array $content): array
         cms_make_block('pageHero', [
             'badge' => $content['heroBadge'] ?? '',
             'title' => $content['heroTitle'] ?? '',
+            'titleAccent' => $content['heroTitleAccent'] ?? '',
             'text' => $content['heroText'] ?? '',
             'cta' => $content['heroCta'] ?? '',
             'ctaLink' => '/contacto',
-            'image' => '',
+            'image' => $content['heroImage'] ?? 'expertos.webp',
         ]),
         cms_make_block('stats', ['items' => $content['stats'] ?? []]),
         cms_make_block('about', [
@@ -598,16 +699,46 @@ function cms_blocks_from_service_page(array $content): array
     ];
 }
 
+function cms_contacto_map_embed(): string
+{
+    return 'https://maps.google.com/maps?q=Urb.+Libertad+Calle+Las+Moras+San+Vicente+de+Ca%C3%B1ete&output=embed';
+}
+
+function cms_contacto_support_blocks(string $locale = 'es'): array
+{
+    if ($locale === 'en') {
+        $faq = cms_studio_faq_items('en');
+        return [
+            cms_make_block('faq', $faq),
+            cms_make_block('map', [
+                'title' => 'Where we are',
+                'text' => 'Urb. Libertad Mz. I Lt. 5, Calle Las Moras, San Vicente de Cañete, Lima, Peru.',
+                'embed' => cms_contacto_map_embed(),
+            ]),
+        ];
+    }
+    $faq = cms_studio_faq_items('es');
+    return [
+        cms_make_block('faq', $faq),
+        cms_make_block('map', [
+            'title' => 'Dónde estamos',
+            'text' => 'Urb. Libertad Mz. I Lt. 5, Calle Las Moras, San Vicente de Cañete, Lima, Perú.',
+            'embed' => cms_contacto_map_embed(),
+        ]),
+    ];
+}
+
 function cms_blocks_from_contacto(array $content): array
 {
-    return [
+    return array_merge([
         cms_make_block('pageHero', [
             'badge' => $content['badge'] ?? '',
             'title' => $content['title'] ?? '',
-            'text' => '',
+            'titleAccent' => $content['heroTitleAccent'] ?? '',
+            'text' => $content['text'] ?? $content['heroText'] ?? 'Casa matriz en San Vicente de Cañete. WhatsApp y correo con respuesta el mismo día hábil.',
             'cta' => '',
             'ctaLink' => '',
-            'image' => '',
+            'image' => $content['heroImage'] ?? 'expertos.webp',
         ]),
         cms_make_block('contactCards', ['items' => $content['cards'] ?? []]),
         cms_make_block('contactForm', [
@@ -616,7 +747,7 @@ function cms_blocks_from_contacto(array $content): array
             'fields' => $content['fields'] ?? [],
             'placeholders' => $content['placeholders'] ?? [],
         ]),
-    ];
+    ], cms_contacto_support_blocks());
 }
 
 function cms_blocks_from_legal(array $content): array

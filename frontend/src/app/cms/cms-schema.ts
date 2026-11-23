@@ -1,8 +1,8 @@
 import { FieldDesc, FieldKind, fieldLabel } from './cms-fields';
 import { JsonMap } from './cms.models';
-import { BLOCK_CATALOG, CmsBlock, findSchemaFieldIn, migratePageToBlocks, pageBlocks } from './block-registry';
+import { BLOCK_CATALOG, CmsBlock, DEFAULT_BG_IMAGE, findSchemaFieldIn, migratePageToBlocks, pageBlocks } from './block-registry';
 
-export const CMS_SCHEMA_VERSION = 5;
+export const CMS_SCHEMA_VERSION = 6;
 
 export type SchemaKind =
   | 'text'
@@ -33,19 +33,15 @@ export interface SchemaField {
   min?: number;
 }
 
-export const INICIO_SECTION_TYPES = [
-  { value: 'hero', label: 'Banner' },
-  { value: 'about', label: 'Quiénes somos' },
-  { value: 'contactCards', label: 'Tarjetas de contacto' },
-  { value: 'services', label: 'Servicios' },
-  { value: 'innovative', label: 'Servicios innovadores' },
-  { value: 'testimonials', label: 'Opiniones' },
-] as const;
-
-export const DEFAULT_INICIO_SECTIONS = INICIO_SECTION_TYPES.map((item) => ({
-  type: item.value,
-  hidden: false,
-}));
+const DEFAULT_INICIO_SECTIONS = [
+  { type: 'hero', hidden: false },
+  { type: 'about', hidden: false },
+  { type: 'contactCards', hidden: false },
+  { type: 'services', hidden: false },
+  { type: 'innovative', hidden: false },
+  { type: 'testimonials', hidden: true },
+  { type: 'faq', hidden: false },
+];
 
 const SEO_FIELDS: SchemaField[] = [
   { path: 'title', type: 'text', label: 'Título SEO', maxLength: 70, description: 'Aparece en la pestaña y en Google.' },
@@ -53,51 +49,36 @@ const SEO_FIELDS: SchemaField[] = [
   { path: 'image', type: 'image', label: 'Imagen para compartir' },
 ];
 
-const SLIDE_ITEM: SchemaField[] = [
-  { path: 'badge', type: 'text', label: 'Etiqueta' },
-  { path: 'title', type: 'area', label: 'Título', maxLength: 180 },
-  { path: 'image', type: 'image', label: 'Imagen' },
-];
-
-const CARD_ITEM: SchemaField[] = [
-  { path: 'title', type: 'text', label: 'Título' },
-  { path: 'text', type: 'area', label: 'Texto' },
-];
-
-const SERVICE_CARD_ITEM: SchemaField[] = [
-  { path: 'img', type: 'image', label: 'Imagen' },
-  { path: 'alt', type: 'text', label: 'Texto de la imagen' },
-  { path: 'title', type: 'text', label: 'Título' },
-  { path: 'text', type: 'area', label: 'Texto' },
-];
-
-const INNOVATIVE_ITEM: SchemaField[] = [
-  { path: 'title', type: 'text', label: 'Título' },
-  { path: 'desc', type: 'area', label: 'Descripción' },
-  { path: 'img', type: 'image', label: 'Imagen' },
-];
-
-const TESTIMONIAL_ITEM: SchemaField[] = [
-  { path: 'text', type: 'area', label: 'Opinión' },
-  { path: 'client', type: 'text', label: 'Cliente' },
-  { path: 'role', type: 'text', label: 'Rol' },
-  { path: 'company', type: 'text', label: 'Empresa' },
-  { path: 'rating', type: 'number', label: 'Estrellas (1-5)', default: 5 },
-  { path: 'logo', type: 'image', label: 'Logo' },
-];
-
 const NAV_SERVICE_ITEM: SchemaField[] = [
   { path: 'label', type: 'text', label: 'Texto' },
   { path: 'path', type: 'link', label: 'Enlace' },
 ];
 
+const SPLASH_IMAGE_ITEM: SchemaField[] = [
+  { path: 'image', type: 'image', label: 'Imagen' },
+  { path: 'alt', type: 'text', label: 'Texto de la imagen' },
+];
+
+export const DEFAULT_SPLASH_IMAGES = [
+  { image: 'splash/mis-academy.webp', alt: 'MIS Academy' },
+  { image: 'splash/matt-innova.webp', alt: 'Matt Innova Solution' },
+];
+
 export const SITE_SCHEMA: SchemaField[] = [
   { path: 'showSplash', type: 'bool', label: 'Mostrar pantalla de bienvenida' },
   { path: 'splashSeconds', type: 'number', label: 'Segundos de bienvenida', description: 'Cuántos segundos se muestra la bienvenida.' },
+  {
+    path: 'splashImages',
+    type: 'list',
+    label: 'Imágenes de la pantalla de carga',
+    description: 'Agrega, quita o reordena las marcas que aparecen al cargar el sitio.',
+    item: SPLASH_IMAGE_ITEM,
+  },
+  { path: 'splashTagline', type: 'area', label: 'Frase de bienvenida' },
+  { path: 'splashLabel', type: 'text', label: 'Etiqueta de carga', description: 'Texto sobre la barra, por ejemplo CARGANDO…' },
   { path: 'founderName', type: 'text', label: 'Nombre del fundador' },
   { path: 'founderRole', type: 'text', label: 'Cargo del fundador' },
   { path: 'founderImage', type: 'image', label: 'Foto del fundador' },
-  { path: 'splashTagline', type: 'area', label: 'Frase de bienvenida' },
   { path: 'logo', type: 'image', label: 'Logo' },
   { path: 'logoAlt', type: 'text', label: 'Texto del logo', description: 'Se lee en voz alta si la imagen no carga.' },
   {
@@ -169,77 +150,6 @@ export const SITE_SCHEMA: SchemaField[] = [
   { path: 'seo', type: 'group', label: 'SEO', children: SEO_FIELDS },
 ];
 
-export const INICIO_SCHEMA: SchemaField[] = [
-  {
-    path: 'sections',
-    type: 'list',
-    label: 'Orden de secciones',
-    description: 'Reordena, duplica u oculta las secciones que ya existen. No se pueden inventar tipos nuevos.',
-    item: [
-      {
-        path: 'type',
-        type: 'select',
-        label: 'Sección',
-        options: INICIO_SECTION_TYPES.map((item) => ({ value: item.value, label: item.label })),
-        default: 'hero',
-      },
-      { path: 'hidden', type: 'bool', label: 'Ocultar en la web', default: false },
-    ],
-  },
-  { path: 'slides', type: 'list', label: 'Banners', item: SLIDE_ITEM },
-  { path: 'heroCta', type: 'text', label: 'Botón del banner' },
-  { path: 'heroCtaLink', type: 'link', label: 'Enlace del banner', description: 'Ruta de la web (/contacto) o un enlace https://' },
-  {
-    path: 'about',
-    type: 'group',
-    label: 'Quiénes somos',
-    children: [
-      { path: 'tag', type: 'text', label: 'Etiqueta' },
-      { path: 'title', type: 'text', label: 'Título' },
-      { path: 'text', type: 'area', label: 'Texto' },
-      { path: 'image', type: 'image', label: 'Imagen' },
-      { path: 'imageAlt', type: 'text', label: 'Texto de la imagen' },
-      { path: 'cta', type: 'text', label: 'Botón' },
-    ],
-  },
-  { path: 'contactCards', type: 'list', label: 'Tarjetas de contacto', item: CARD_ITEM },
-  {
-    path: 'services',
-    type: 'group',
-    label: 'Servicios',
-    children: [
-      { path: 'tag', type: 'text', label: 'Etiqueta' },
-      { path: 'title', type: 'text', label: 'Título' },
-      { path: 'cards', type: 'list', label: 'Tarjetas', item: SERVICE_CARD_ITEM },
-    ],
-  },
-  {
-    path: 'innovative',
-    type: 'group',
-    label: 'Servicios innovadores',
-    children: [
-      { path: 'tag', type: 'text', label: 'Etiqueta' },
-      { path: 'title', type: 'text', label: 'Título' },
-      { path: 'text', type: 'area', label: 'Texto' },
-      { path: 'cta', type: 'text', label: 'Botón' },
-      { path: 'items', type: 'list', label: 'Elementos', item: INNOVATIVE_ITEM },
-    ],
-  },
-  {
-    path: 'testimonials',
-    type: 'group',
-    label: 'Opiniones',
-    children: [
-      { path: 'tag', type: 'text', label: 'Etiqueta' },
-      { path: 'title', type: 'text', label: 'Título' },
-      { path: 'text', type: 'area', label: 'Texto' },
-      { path: 'cta', type: 'text', label: 'Botón' },
-      { path: 'items', type: 'list', label: 'Comentarios', item: TESTIMONIAL_ITEM },
-    ],
-  },
-  { path: 'seo', type: 'group', label: 'SEO', children: SEO_FIELDS },
-];
-
 export const PAGE_BLOCKS_SCHEMA: SchemaField[] = [
   {
     path: 'blocks',
@@ -273,58 +183,11 @@ export function schemaForSlug(slug: string): SchemaField[] | null {
   return PAGE_SCHEMA_BY_SLUG[slug] ?? PAGE_BLOCKS_SCHEMA;
 }
 
-const INICIO_SECTION_BLOCKS: Record<string, string[]> = {
-  hero: ['slides', 'heroCta', 'heroCtaLink'],
-  about: ['about'],
-  contactCards: ['contactCards'],
-  services: ['services'],
-  innovative: ['innovative'],
-  testimonials: ['testimonials'],
-};
-
-export function inspectorRootSchema(slug: string, content: JsonMap): SchemaField[] | null {
+export function inspectorRootSchema(slug: string, _content: JsonMap): SchemaField[] | null {
   if (slug === 'sitio') {
     return SITE_SCHEMA;
   }
-  if (Array.isArray(content['blocks']) || schemaForSlug(slug)) {
-    return PAGE_BLOCKS_SCHEMA;
-  }
-  const schema = schemaForSlug(slug);
-  if (!schema) {
-    return null;
-  }
-  if (slug !== 'inicio') {
-    return schema;
-  }
-  const byPath = new Map(schema.map((field) => [field.path, field]));
-  const out: SchemaField[] = [];
-  const used = new Set<string>(['seo']);
-  const sectionsField = byPath.get('sections');
-  if (sectionsField) {
-    out.push(sectionsField);
-    used.add('sections');
-  }
-  const rows = Array.isArray(content['sections']) ? (content['sections'] as Array<{ type?: string }>) : [];
-  for (const row of rows) {
-    for (const path of INICIO_SECTION_BLOCKS[String(row?.type ?? '')] ?? []) {
-      const field = byPath.get(path);
-      if (field && !used.has(path)) {
-        out.push(field);
-        used.add(path);
-      }
-    }
-  }
-  for (const field of schema) {
-    if (!used.has(field.path)) {
-      out.push(field);
-      used.add(field.path);
-    }
-  }
-  const seo = byPath.get('seo');
-  if (seo) {
-    out.push(seo);
-  }
-  return out;
+  return PAGE_BLOCKS_SCHEMA;
 }
 
 export function labelForPath(slug: string, path: string): string {
@@ -388,6 +251,7 @@ export function migrateCmsDocument(content: JsonMap, slug: string): JsonMap {
           width: (block as CmsBlock & { layout?: { width?: string } }).layout?.width || 'full',
           padding: (block as CmsBlock & { layout?: { padding?: string } }).layout?.padding || '',
           background: (block as CmsBlock & { layout?: { background?: string } }).layout?.background || '',
+          backgroundImage: (block as CmsBlock & { layout?: { backgroundImage?: string } }).layout?.backgroundImage || '',
         },
       }));
     } else {
@@ -396,6 +260,21 @@ export function migrateCmsDocument(content: JsonMap, slug: string): JsonMap {
     }
     next['schemaVersion'] = 5;
   }
+  if (version < 6) {
+    if (slug !== 'sitio') {
+      const blocks = pageBlocks(next);
+      next['blocks'] = blocks.map((block) => ({
+        ...block,
+        layout: {
+          width: (block as CmsBlock & { layout?: { width?: string } }).layout?.width || 'full',
+          padding: (block as CmsBlock & { layout?: { padding?: string } }).layout?.padding || '',
+          background: (block as CmsBlock & { layout?: { background?: string } }).layout?.background || '',
+          backgroundImage: String((block as CmsBlock & { layout?: { backgroundImage?: string } }).layout?.backgroundImage ?? '').trim() || DEFAULT_BG_IMAGE,
+        },
+      }));
+    }
+    next['schemaVersion'] = 6;
+  }
   if (slug === 'sitio') {
     if (next['chatbotMode'] !== 'ia' && next['chatbotMode'] !== 'clasico') {
       next['chatbotMode'] = 'clasico';
@@ -403,6 +282,12 @@ export function migrateCmsDocument(content: JsonMap, slug: string): JsonMap {
     if (!next['aiProvider']) next['aiProvider'] = 'openrouter';
     if (!next['aiModel']) next['aiModel'] = 'openai/gpt-4o-mini';
     if (!next['aiBaseUrl']) next['aiBaseUrl'] = 'https://openrouter.ai/api/v1';
+    if (!('splashImages' in next)) {
+      next['splashImages'] = DEFAULT_SPLASH_IMAGES.map((item) => ({ ...item }));
+    }
+    if (!next['splashLabel']) {
+      next['splashLabel'] = 'CARGANDO…';
+    }
   }
   return next;
 }
@@ -436,6 +321,9 @@ export function blankFromSchema(fields: SchemaField[]): JsonMap {
 
 export function humanChangeLine(slug: string, path: string): string {
   const leaf = path.replace(/^blocks\.\d+\.props\./, '');
+  if (/blocks\.\d+\.layout\.backgroundImage$/.test(path)) {
+    return 'Cambiaste la imagen de fondo de una sección';
+  }
   if (/slides\.\d+\.title$/.test(leaf) || /slides\.\d+\.title$/.test(path)) {
     return 'Cambiaste el titular de la portada';
   }

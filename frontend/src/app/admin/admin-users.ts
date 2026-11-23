@@ -86,27 +86,7 @@ interface AdminUser {
       </ul>
     </section>
   `,
-  styles: [`
-    .wrap { max-width: 760px; }
-    .create {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0.7rem;
-    }
-    .create .admin-btn { grid-column: 1 / -1; justify-self: start; }
-    .admin-card .admin-banner { margin-top: 0.8rem; }
-    .user-row.inactive { opacity: 0.75; }
-    .user-row strong { display: block; font-size: 0.95rem; }
-    .user-sub { display: flex; gap: 0.4rem; margin-top: 0.3rem; flex-wrap: wrap; }
-    .pill.sm { min-height: 24px; font-size: 0.68rem; }
-    .actions { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-    .admin-control.sm { min-height: 34px; width: auto; font-size: 0.8125rem; }
-    @media (max-width: 560px) {
-      .create { grid-template-columns: 1fr; }
-      .user-row { flex-wrap: wrap; }
-      .actions { width: 100%; }
-    }
-  `],
+  styleUrl: './styles/users.scss',
 })
 export class AdminUsers implements OnInit {
   private api = inject(CmsApiService);

@@ -6,14 +6,15 @@ import { CmsContentService } from '../../cms/cms-content.service';
 import { CmsEditorService } from '../../cms/cms-editor.service';
 import { CmsTextDirective } from '../../cms/cms-text.directive';
 import { CmsImageDirective } from '../../cms/cms-image.directive';
-import { CmsLinkDirective } from '../../cms/cms-link.directive';
 import { LocaleService, CMS_LOCALES } from '../../cms/locale.service';
 import { CLIENT_CATEGORY_META, CLIENT_CATEGORY_ORDER } from '../../cms/client-panels';
+import { KNOWN_NAV_PATHS } from '../../cms/cms-routes';
+import { PublicButton } from '../public/public-button';
 
 @Component({
   selector: 'app-header',
   standalone: true,
-  imports: [CommonModule, RouterModule, CmsTextDirective, CmsImageDirective, CmsLinkDirective],
+  imports: [CommonModule, RouterModule, CmsTextDirective, CmsImageDirective, PublicButton],
   templateUrl: './header.html',
   styleUrls: ['./header.scss']
 })
@@ -24,12 +25,11 @@ export class Header implements AfterViewInit {
   private router = inject(Router);
   isMobileMenuOpen = false;
   isScrolled = false;
-  logoClass = '';
   site = computed(() => this.cms.site());
   nav = computed(() => (this.site()['nav'] as Record<string, string>) ?? {});
   navServices = computed(() => (this.site()['navServices'] as Array<Record<string, string>>) ?? []);
   extraMenu = computed(() => {
-    const known = new Set(['/', '/acerca-de', '/contacto', '/servicios', '/libro-reclamaciones', '/privacidad', '/terminos', '/clientes']);
+    const known = KNOWN_NAV_PATHS;
     return this.cms.menuItems().filter((item) => item.path && !known.has(item.path) && !item.path.startsWith('/servicios/'));
   });
   showClients = computed(() => this.site()['showClientsToggle'] !== false);
@@ -68,20 +68,18 @@ export class Header implements AfterViewInit {
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe(() => {
-      this.animateLogo();
+      this.closeMobileMenu();
     });
-  }
-
-  animateLogo() {
-    this.logoClass = '';
-    setTimeout(() => {
-      this.logoClass = 'logo-entrance';
-    }, 10);
   }
 
   @HostListener('window:scroll')
   onWindowScroll() {
     this.checkScroll();
+  }
+
+  @HostListener('document:keydown.escape')
+  onEscapeKey() {
+    this.openMenu = null;
   }
 
   checkScroll() {
@@ -99,11 +97,12 @@ export class Header implements AfterViewInit {
     this.openMenu = this.openMenu === menu ? null : menu;
   }
   navigateTo(path: string) {
-    this.router.navigate([path]);
+    void this.router.navigateByUrl(path);
     this.closeMobileMenu();
   }
   goClients(category: string) {
-    void this.router.navigate([this.clientsLink()], { queryParams: { category } });
+    const path = this.clientsLink();
+    void this.router.navigateByUrl(`${path}${path.includes('?') ? '&' : '?'}category=${encodeURIComponent(category)}`);
     this.closeMobileMenu();
   }
 }

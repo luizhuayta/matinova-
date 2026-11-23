@@ -11,6 +11,7 @@ import { bindQuillPaste, CMS_QUILL_TOOLBAR } from '../cms/cms-quill';
       <div #host></div>
     </div>
   `,
+  styleUrl: './styles/rich-field.scss',
 })
 export class CmsRichField implements AfterViewInit, OnDestroy {
   @ViewChild('host') host?: ElementRef<HTMLElement>;

@@ -1,0 +1,405 @@
+// Acerca de: stats, team, about visual.
+
+@use '../../../../styles/bp' as *;
+
+.contact-grid,
+.stats-grid,
+.services-grid,
+.reasons-grid,
+.team-grid {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.services-grid,
+.reasons-grid { grid-template-columns: repeat(3, 1fr); }
+
+.team-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); }
+
+.acerca-container .team-photo {
+  position: relative;
+  margin: 0 0 0.75rem;
+  aspect-ratio: 4 / 3;
+  border-radius: calc(var(--cyber-radius) - 4px);
+  overflow: hidden;
+  background: var(--cyber-surface-solid);
+  border: 1px solid var(--cyber-border);
+}
+
+.acerca-container .team-photo picture,
+.acerca-container .team-photo img {
+  position: absolute;
+  inset: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.acerca-container .team-photo img {
+  object-fit: cover;
+  object-position: 50% 20%;
+  margin: 0;
+  background: var(--cyber-surface-solid);
+}
+
+.team-social {
+  display: flex;
+  gap: var(--space-8);
+  margin-top: var(--space-8);
+}
+
+.team-social a {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  color: var(--cyber-cyan);
+  border: 1px solid var(--cyber-border);
+  border-radius: 10px;
+}
+
+.team-social a:hover {
+  border-color: var(--cyber-cyan);
+  background: color-mix(in srgb, var(--cyber-cyan) 8%, transparent);
+  box-shadow: var(--cyber-glow);
+}
+
+.stat-number {
+  font-family: var(--public-display);
+  font-size: 2rem;
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--cyber-cyan);
+}
+
+.stat-label {
+  color: var(--cyber-muted);
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.about-frame img {
+  width: 100%;
+  height: auto;
+  min-height: 280px;
+  object-fit: contain;
+  background: var(--dt-panel);
+  border: 1px solid var(--dt-line);
+  border-radius: var(--radius-lg);
+}
+
+.about-visual {
+  position: relative;
+}
+
+.about-frame {
+  position: relative;
+  border-radius: var(--p-radius-lg);
+  overflow: visible;
+}
+
+.about-frame-ring {
+  position: absolute;
+  inset: 18px -18px -18px 18px;
+  border: 2px dashed var(--dt-line-strong);
+  border-radius: var(--p-radius-lg);
+  z-index: -1;
+  pointer-events: none;
+}
+
+.about-exp {
+  position: absolute;
+  left: -18px;
+  bottom: 34px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.3rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, var(--jumper), var(--jumper-deep));
+  color: #fff;
+  box-shadow: var(--p-shadow-orange);
+  transform: rotate(-3deg);
+  transition: transform 350ms var(--p-ease);
+}
+
+.about-frame:hover .about-exp {
+  transform: rotate(0deg) scale(1.03);
+}
+
+.about-exp strong {
+  font-family: var(--public-display);
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+
+.about-exp span {
+  font-size: 0.85rem;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.about-mini {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: -34px 28px 0 auto;
+  width: fit-content;
+  padding: 0.95rem 1.25rem;
+  border-radius: 18px;
+  background: var(--dt-panel);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--dt-line);
+  box-shadow: var(--p-shadow-lg);
+  position: relative;
+  z-index: 2;
+  transition: transform 350ms var(--p-ease);
+}
+
+.about-mini:hover {
+  transform: translateY(-3px);
+}
+
+.about-mini strong {
+  display: block;
+  font-size: 0.92rem;
+  font-weight: 800;
+}
+
+.about-mini span span,
+.about-mini > div > span {
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.about-copy .lead {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  color: var(--dt-muted);
+  margin: 1rem 0 0;
+}
+
+.about-ctas {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.4rem;
+}
+
+// --- Cyber UI: Nosotros / Contacto -----------------------------------------
+// Todo lo nuevo va bajo .acerca-container para no tocar el Home, que comparte
+// las clases .premium-about / .premium-contact.
+
+.acerca-container .cyber-about-stats {
+  background: var(--cyber-bg);
+}
+
+.acerca-container .cyber-about-copy {
+  background: var(--dt-bg-2);
+}
+
+.acerca-container .cyber-about-team,
+.acerca-container .cyber-about-contact {
+  background: var(--cyber-bg);
+}
+
+.acerca-container .cyber-about-videos {
+  background: var(--dt-bg-2);
+}
+
+.acerca-container .cyber-page-header--center .cyber-page-header__text {
+  margin-inline: auto;
+}
+
+.acerca-container .cyber-page-header__inner app-glow-button {
+  display: inline-flex;
+  margin-top: 1.5rem;
+}
+
+.acerca-container app-hud-divider .cyber-hud-divider {
+  margin: 0 0 2rem;
+}
+
+.acerca-container .cyber-about-contact {
+  padding-bottom: var(--space-32);
+}
+
+.acerca-container .premium-head h2,
+.acerca-container .about-copy h2,
+.acerca-container .team-bay h3,
+.acerca-container .video-bay h3 {
+  color: var(--cyber-text);
+}
+
+.acerca-container .premium-head p,
+.acerca-container .about-copy .lead,
+.acerca-container .team-role,
+.acerca-container .video-bay p {
+  color: var(--cyber-muted);
+}
+
+.acerca-container .about-frame img {
+  min-height: 0;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: var(--cyber-surface-solid);
+  border-color: var(--cyber-border);
+  border-radius: var(--cyber-radius);
+  box-shadow: var(--cyber-glow);
+}
+
+.acerca-container .about-frame img[src$='.svg'] {
+  object-fit: contain;
+}
+
+.acerca-container .check-card {
+  background: var(--cyber-surface);
+  border-color: var(--cyber-border);
+  color: var(--cyber-text);
+}
+
+.acerca-container .check-card:hover {
+  border-color: var(--cyber-border-strong);
+  box-shadow: var(--cyber-glow);
+}
+
+.acerca-container .check-icon {
+  background: linear-gradient(135deg, var(--cyber-blue), var(--dt-blue-strong));
+}
+
+.acerca-container .about-copy app-glow-button {
+  display: inline-flex;
+  margin-top: 1.5rem;
+}
+
+.acerca-container .stat-bay .cyber-card__body {
+  gap: 0.35rem;
+}
+
+.acerca-container .team-bay .cyber-card__body {
+  gap: 0.35rem;
+}
+
+.acerca-container .team-bay h3 {
+  margin: 0;
+  font-size: 1.15rem;
+}
+
+.acerca-container .team-role {
+  margin: 0;
+  color: var(--cyber-cyan);
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.acerca-container .contact-card h3 {
+  margin: 0;
+  color: var(--cyber-text);
+  font-size: 1.05rem;
+}
+
+.acerca-container .contact-card p {
+  margin: 0;
+  color: var(--cyber-muted);
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.acerca-container .contact-card a {
+  color: var(--cyber-cyan);
+  text-decoration: none;
+  overflow-wrap: anywhere;
+}
+
+.acerca-container .contact-card a:hover {
+  color: var(--cyber-text);
+  text-decoration: underline;
+}
+
+.acerca-container .video-bay .cyber-card__body {
+  gap: 0.4rem;
+}
+
+.acerca-container .video-bay .video-thumb {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: var(--cyber-surface-solid);
+  cursor: pointer;
+}
+
+.acerca-container .video-bay .video-thumb img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.55;
+}
+
+.acerca-container .video-bay .video-play {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  display: grid;
+  place-items: center;
+  border-radius: 999px;
+  background: var(--cyber-blue);
+  color: #fff;
+  box-shadow: var(--cyber-glow-strong);
+}
+
+.acerca-container .video-bay .video-play svg {
+  width: 26px;
+  height: 26px;
+}
+
+.acerca-container .video-bay p {
+  margin: 0;
+  color: var(--cyber-cyan);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.acerca-container .video-bay h3 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.acerca-container .video-bay iframe,
+.acerca-container .video-bay .video-thumb {
+  border-radius: 10px;
+}
+
+@include down(560px) {
+  .about-mini {
+    margin: -24px 0 0;
+    max-width: 100%;
+  }
+
+  .about-exp {
+    left: 12px;
+    bottom: 16px;
+    padding: 0.75rem 1rem;
+  }
+
+  .about-frame-ring {
+    inset: 8px;
+  }
+
+  .about-frame img {
+    min-height: 0;
+  }
+}

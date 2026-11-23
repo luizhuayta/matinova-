@@ -22,7 +22,7 @@ function handle_messages(string $method): void
 
     $where = [];
     $params = [];
-    if (in_array($kind, ['contacto', 'reclamacion'], true)) {
+    if (in_array($kind, ['contacto', 'reclamacion', 'accesibilidad'], true)) {
         $where[] = 'kind = ?';
         $params[] = $kind;
     }
@@ -122,7 +122,11 @@ function destination_email(string $pageSlug, string $fallback): string
                 $cms = cms_block_email($content);
             }
             if ($cms !== '') {
-                return $cms;
+                // Solo se acepta si es email válido; si no, se sigue al fallback (misma regla que el validador CMS).
+                if (filter_var($cms, FILTER_VALIDATE_EMAIL)) {
+                    return $cms;
+                }
+                error_log('destinationEmail CMS inválido en ' . $pageSlug . ', se usa fallback.');
             }
         }
     }
@@ -214,6 +218,52 @@ function handle_contacto(): void
     ]);
 }
 
+function handle_accesibilidad(): void
+{
+    $input = json_input();
+    $name = str_clean((string) ($input['name'] ?? ''), 160);
+    $email = str_clean((string) ($input['email'] ?? ''), 160);
+    $phone = str_clean((string) ($input['phone'] ?? ''), 30);
+    $type = str_clean((string) ($input['assistanceType'] ?? 'accessibility'), 40);
+    $description = str_clean((string) ($input['description'] ?? ''), 4000, true);
+    if ($name === '') {
+        json_out(['field' => 'name', 'message' => 'El nombre es obligatorio.'], 400);
+    }
+    if ($email === '' || !valid_email_addr($email)) {
+        json_out(['field' => 'email', 'message' => 'Indica un correo válido.'], 400);
+    }
+    if ($description === '') {
+        json_out(['field' => 'description', 'message' => 'La descripción es obligatoria.'], 400);
+    }
+    $allowed = ['accessibility', 'general', 'bug'];
+    if (!in_array($type, $allowed, true)) {
+        $type = 'accessibility';
+    }
+    $subject = 'Accesibilidad: ' . $type;
+    $payload = ['name' => $name, 'email' => $email, 'phone' => $phone, 'assistanceType' => $type, 'description' => $description];
+    $stmt = db()->prepare('INSERT INTO messages (kind, subject, payload, status, mail_sent) VALUES (?, ?, ?, ?, 0)');
+    $stmt->execute(['accesibilidad', $subject, json_encode($payload, JSON_UNESCAPED_UNICODE), 'pendiente']);
+    $id = (int) db()->lastInsertId();
+    $to = destination_email('contacto', 'contacto@mattinnovasolution.com');
+    $html = mail_html_card(
+        'Reporte de accesibilidad',
+        '<p><strong>Nombre:</strong> ' . htmlspecialchars($name) . '</p>'
+        . '<p><strong>Correo:</strong> ' . htmlspecialchars($email) . '</p>'
+        . '<p><strong>Teléfono:</strong> ' . htmlspecialchars($phone) . '</p>'
+        . '<p><strong>Tipo:</strong> ' . htmlspecialchars($type) . '</p>'
+        . '<p>' . nl2br(htmlspecialchars($description)) . '</p>'
+    );
+    $mailOk = send_mail($to, $subject, $html);
+    if ($mailOk) {
+        db()->prepare('UPDATE messages SET mail_sent = 1 WHERE id = ?')->execute([$id]);
+    }
+    json_out([
+        'status' => 'success',
+        'message' => $mailOk ? 'Reporte enviado' : 'Reporte registrado. Lo veremos en el panel.',
+        'mailSent' => $mailOk,
+    ]);
+}
+
 function handle_reclamaciones(): void
 {
     $input = json_input();
@@ -269,7 +319,10 @@ function handle_reclamaciones(): void
 
     $amount = null;
     if (!$amountNotApplicable && $claimedAmount !== null && $claimedAmount !== '') {
-        $amount = is_numeric($claimedAmount) ? (float) $claimedAmount : null;
+        if (!is_numeric($claimedAmount) || (float) $claimedAmount < 0 || (float) $claimedAmount > 99999999) {
+            json_out(['field' => 'claimedAmount', 'message' => 'Indica un monto válido entre 0 y 99 999 999.'], 400);
+        }
+        $amount = (float) $claimedAmount;
     }
 
     $payload = [
@@ -290,10 +343,22 @@ function handle_reclamaciones(): void
         'guardianName' => $guardianName,
     ];
 
-    $ticket = 'REC-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
-    $stmt = db()->prepare('INSERT INTO messages (kind, subject, payload, ticket, status, mail_sent) VALUES (?, ?, ?, ?, ?, 0)');
-    $stmt->execute(['reclamacion', 'Libro de reclamaciones ' . $ticket, json_encode($payload, JSON_UNESCAPED_UNICODE), $ticket, 'pendiente']);
-    $id = (int) db()->lastInsertId();
+    $ticket = '';
+    $id = 0;
+    for ($attempt = 0; $attempt < 5; $attempt++) {
+        $ticket = 'REC-' . str_pad((string) random_int(1, 999999), 6, '0', STR_PAD_LEFT);
+        try {
+            $stmt = db()->prepare('INSERT INTO messages (kind, subject, payload, ticket, status, mail_sent) VALUES (?, ?, ?, ?, ?, 0)');
+            $stmt->execute(['reclamacion', 'Libro de reclamaciones ' . $ticket, json_encode($payload, JSON_UNESCAPED_UNICODE), $ticket, 'pendiente']);
+            $id = (int) db()->lastInsertId();
+            break;
+        } catch (PDOException $e) {
+            // 23000 = ticket duplicado (índice único): reintenta con otro.
+            if ($e->getCode() !== '23000' || $attempt === 4) {
+                throw $e;
+            }
+        }
+    }
 
     $to = destination_email('libro-reclamaciones', 'libroreclamaciones@mattinnovasolution.com');
     $amountLabel = $amount !== null ? 'S/ ' . $amount : 'No especificado (opcional)';

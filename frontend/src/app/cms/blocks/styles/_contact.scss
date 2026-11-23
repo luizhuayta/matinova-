@@ -1,0 +1,167 @@
+// Formulario de contacto y panel de lectura legal (Cyber UI).
+
+@use '../../../../styles/bp' as *;
+
+app-page-header,
+app-cyber-card,
+app-hud-divider {
+  display: block;
+}
+
+// Modo alto contraste: los primitivos usan --cyber-*; se alinean al tema claro.
+html[data-a11y-contrast='high'] {
+  --cyber-bg: #ffffff;
+  --cyber-surface: #ffffff;
+  --cyber-surface-solid: #ffffff;
+  --cyber-border: #000000;
+  --cyber-border-strong: #000000;
+  --cyber-blue: #000000;
+  --cyber-cyan: #000000;
+  --cyber-text: #000000;
+  --cyber-muted: #000000;
+  --cyber-glow: none;
+  --cyber-glow-strong: none;
+}
+
+.cyber-glow-button:focus-visible,
+.acerca-container :is(a, button):focus-visible,
+.legal-shell :is(a, button):focus-visible,
+.form-shell :is(a, button):focus-visible,
+.libro-container :is(a, button):focus-visible {
+  outline: 3px solid var(--cyber-cyan);
+  outline-offset: 3px;
+}
+
+html[data-a11y-contrast='high'] .legal-logo-img {
+  filter: none;
+}
+
+html[data-a11y-contrast='high'] .cyber-page-header--grid {
+  background-image: none;
+}
+
+.form-shell {
+  width: min(760px, calc(100% - 2.5rem));
+  margin: 0 auto var(--space-64);
+}
+
+.form-shell label {
+  display: grid;
+  gap: var(--space-8);
+  font-weight: 600;
+  font-size: var(--text-14);
+  color: var(--cyber-text);
+  margin-bottom: var(--space-16);
+}
+
+.form-shell .form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-16);
+}
+
+.form-shell input,
+.form-shell textarea,
+.form-shell select {
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: 0;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid var(--cyber-border);
+  border-radius: 10px;
+  font: inherit;
+  background: color-mix(in srgb, var(--cyber-bg) 60%, transparent);
+  color: var(--cyber-text);
+}
+
+.form-shell input:focus,
+.form-shell textarea:focus,
+.form-shell select:focus {
+  outline: 3px solid var(--cyber-cyan);
+  outline-offset: 2px;
+  border-color: var(--cyber-cyan);
+}
+
+.form-shell input::placeholder,
+.form-shell textarea::placeholder {
+  color: var(--cyber-muted);
+  opacity: 1;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.form-shell app-hud-divider .cyber-hud-divider,
+.legal-shell app-hud-divider .cyber-hud-divider,
+.libro-body app-hud-divider .cyber-hud-divider {
+  margin: 0 0 2rem;
+}
+
+.legal-shell {
+  width: min(760px, calc(100% - 2.5rem));
+  margin: var(--space-48) auto var(--space-64);
+  padding: clamp(1.25rem, 3vw, 2.5rem);
+  background: var(--cyber-surface);
+  border: 1px solid var(--cyber-border);
+  border-radius: var(--cyber-radius);
+  box-shadow: var(--cyber-glow);
+  backdrop-filter: blur(12px);
+  color: var(--cyber-text);
+}
+
+.legal-shell .content-section {
+  color: var(--cyber-text);
+}
+
+.legal-shell .content-section :is(h1, h2, h3, h4, h5, h6) {
+  color: var(--cyber-text);
+  margin-top: 2rem;
+}
+
+.legal-shell .content-section p,
+.legal-shell .content-section li {
+  color: var(--cyber-muted);
+}
+
+.legal-shell .content-section strong {
+  color: var(--cyber-text);
+}
+
+.legal-shell .content-section a {
+  color: var(--cyber-cyan);
+}
+
+.legal-shell .content-section a:hover {
+  color: var(--cyber-text);
+  text-decoration: underline;
+}
+
+.legal-shell .content-section :is(img, video) {
+  max-width: 100%;
+  height: auto;
+  border-radius: var(--radius-sm);
+}
+
+.legal-shell .content-section table {
+  display: block;
+  overflow-x: auto;
+  max-width: 100%;
+}
+
+.legal-shell .content-section hr {
+  height: 1px;
+  border: 0;
+  background: var(--cyber-border);
+  margin: 2rem 0;
+}
+
+// En pantallas chicas las filas del formulario apilan (la regla base ".form-shell .form-row"
+// gana por especificidad a la de _shared, así que se repite aquí).
+@include down(900px) {
+  .form-shell .form-row {
+    grid-template-columns: 1fr;
+  }
+}

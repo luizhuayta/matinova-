@@ -1,33 +1,10 @@
 import { JsonMap } from './cms.models';
+import { BLOCK_CATALOG, PAGE_TEMPLATES } from './block-catalog.generated';
 import type { SchemaField } from './cms-schema';
+import type { CmsBlock, BlockTypeDef, PageTemplateDef } from './block-types';
 
-export interface CmsBlock {
-  id: string;
-  type: string;
-  hidden?: boolean;
-  layout?: {
-    width?: 'full' | 'half' | 'third' | string;
-    padding?: string;
-    background?: string;
-  };
-  props: JsonMap;
-}
-
-export interface BlockTypeDef {
-  type: string;
-  label: string;
-  icon: string;
-  category: string;
-  description: string;
-  schema: SchemaField[];
-  defaults: JsonMap;
-}
-
-export interface PageTemplateDef {
-  id: string;
-  label: string;
-  description: string;
-}
+export type { CmsBlock, BlockTypeDef, PageTemplateDef };
+export { BLOCK_CATALOG, PAGE_TEMPLATES };
 
 export function newBlockId(): string {
   if (typeof crypto !== 'undefined' && crypto.randomUUID) {
@@ -35,559 +12,6 @@ export function newBlockId(): string {
   }
   return Math.random().toString(36).slice(2) + Date.now().toString(36);
 }
-
-function field(path: string, type: SchemaField['type'], label: string, extra: Partial<SchemaField> = {}): SchemaField {
-  return { path, type, label, ...extra };
-}
-
-const SLIDE_ITEM: SchemaField[] = [
-  field('badge', 'text', 'Etiqueta'),
-  field('title', 'area', 'Título', { maxLength: 180 }),
-  field('image', 'image', 'Imagen'),
-];
-const CARD_ITEM: SchemaField[] = [
-  field('title', 'text', 'Título'),
-  field('text', 'area', 'Texto'),
-  field('icon', 'text', 'Icono'),
-];
-const SERVICE_CARD: SchemaField[] = [
-  field('img', 'image', 'Imagen'),
-  field('alt', 'text', 'Texto de la imagen'),
-  field('title', 'text', 'Título'),
-  field('text', 'area', 'Texto'),
-];
-const LINK_CARD: SchemaField[] = [
-  field('path', 'link', 'Enlace'),
-  field('img', 'image', 'Imagen'),
-  field('title', 'text', 'Título'),
-  field('text', 'area', 'Texto'),
-  field('link', 'text', 'Texto del enlace'),
-];
-const INNOVATIVE_ITEM: SchemaField[] = [
-  field('title', 'text', 'Título'),
-  field('desc', 'area', 'Descripción'),
-  field('img', 'image', 'Imagen'),
-];
-const TESTIMONIAL_ITEM: SchemaField[] = [
-  field('text', 'area', 'Opinión'),
-  field('client', 'text', 'Cliente'),
-  field('role', 'text', 'Rol'),
-  field('company', 'text', 'Empresa'),
-  field('rating', 'number', 'Estrellas (1-5)'),
-  field('logo', 'image', 'Logo'),
-];
-const STAT_ITEM: SchemaField[] = [
-  field('icon', 'text', 'Icono'),
-  field('number', 'text', 'Número'),
-  field('label', 'text', 'Etiqueta'),
-];
-const TEAM_ITEM: SchemaField[] = [
-  field('name', 'text', 'Nombre'),
-  field('role', 'text', 'Cargo'),
-  field('image', 'image', 'Foto'),
-  field('linkedin', 'link', 'LinkedIn'),
-  field('github', 'link', 'GitHub'),
-];
-const VIDEO_ITEM: SchemaField[] = [
-  field('embed', 'embed', 'Enlace de YouTube'),
-  field('user', 'text', 'Usuario'),
-  field('title', 'text', 'Título'),
-];
-const REASON_ITEM: SchemaField[] = [
-  field('img', 'image', 'Imagen'),
-  field('title', 'text', 'Título'),
-  field('text', 'area', 'Texto'),
-];
-const CLIENT_ITEM: SchemaField[] = [
-  field('logo', 'image', 'Logo'),
-  field('name', 'text', 'Nombre'),
-  field('url', 'link', 'Enlace'),
-  field('alt', 'text', 'Texto de la imagen'),
-  field('text', 'area', 'Caso de éxito'),
-  field('icon', 'text', 'Icono (si no hay logo)'),
-  field('category', 'select', 'Panel', {
-    options: [
-      { value: 'empresas', label: 'Empresas y E-commerce' },
-      { value: 'educativas', label: 'Instituciones Educativas' },
-      { value: 'alianzas', label: 'Alianzas Institucionales' },
-    ],
-  }),
-  field('subcategory', 'text', 'Subcategoría / rubro'),
-];
-const STAGE_ITEM: SchemaField[] = [
-  field('step', 'text', 'Paso'),
-  field('title', 'text', 'Título'),
-  field('text', 'area', 'Texto'),
-  field('image', 'image', 'Imagen'),
-];
-const FAQ_ITEM: SchemaField[] = [
-  field('question', 'text', 'Pregunta'),
-  field('answer', 'area', 'Respuesta'),
-];
-const GALLERY_ITEM: SchemaField[] = [
-  field('image', 'image', 'Imagen'),
-  field('alt', 'text', 'Texto de la imagen'),
-  field('caption', 'text', 'Pie de foto'),
-];
-
-export const PAGE_TEMPLATES: PageTemplateDef[] = [
-  { id: 'blank', label: 'En blanco', description: 'Una sección de texto para empezar.' },
-  { id: 'home', label: 'Portada', description: 'Banner, quiénes somos y un llamado.' },
-  { id: 'service', label: 'Servicio', description: 'Banner, texto e ítems de beneficios.' },
-  { id: 'legal', label: 'Legal', description: 'Título y texto largo.' },
-  { id: 'clients', label: 'Clientes', description: 'Paneles por rubro, logos y llamado a contacto.' },
-  { id: 'contact', label: 'Contacto', description: 'Tarjetas y formulario.' },
-];
-
-export const BLOCK_CATALOG: Record<string, BlockTypeDef> = {
-  hero: {
-    type: 'hero',
-    label: 'Banner carrusel',
-    icon: 'bi-images',
-    category: 'Portada',
-    description: 'Fotos grandes que rotan con título y botón.',
-    schema: [
-      field('slides', 'list', 'Banners', { item: SLIDE_ITEM }),
-      field('cta', 'text', 'Botón'),
-      field('ctaLink', 'link', 'Enlace del botón'),
-    ],
-    defaults: {
-      slides: [{ badge: 'NUEVO', title: 'Título del banner', image: 'carousel.jpg' }],
-      cta: 'Aprender más',
-      ctaLink: '/contacto',
-    },
-  },
-  about: {
-    type: 'about',
-    label: 'Quiénes somos',
-    icon: 'bi-people',
-    category: 'Contenido',
-    description: 'Imagen, texto y botón. Puedes añadir puntos destacados.',
-    schema: [
-      field('tag', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('image', 'image', 'Imagen'),
-      field('imageAlt', 'text', 'Texto de la imagen'),
-      field('cta', 'text', 'Botón'),
-      field('ctaLink', 'link', 'Enlace del botón'),
-      field('features', 'list', 'Puntos destacados', { item: [field('text', 'text', 'Texto')] }),
-    ],
-    defaults: {
-      tag: 'QUIÉNES SOMOS',
-      title: 'Título de la sección',
-      text: 'Describe aquí tu empresa.',
-      image: 'about-image.jpg',
-      imageAlt: '',
-      cta: 'Leer más',
-      ctaLink: '/acerca-de',
-      features: [],
-    },
-  },
-  contactCards: {
-    type: 'contactCards',
-    label: 'Tarjetas de contacto',
-    icon: 'bi-geo-alt',
-    category: 'Contacto',
-    description: 'Dirección, correo o teléfono en tarjetas.',
-    schema: [field('items', 'list', 'Tarjetas', { item: CARD_ITEM })],
-    defaults: { items: [{ title: 'Contacto', text: 'Escribe aquí el dato', icon: 'bi-geo-alt-fill' }] },
-  },
-  services: {
-    type: 'services',
-    label: 'Servicios (cuadrícula)',
-    icon: 'bi-grid',
-    category: 'Servicios',
-    description: 'Tarjetas con foto, título y texto.',
-    schema: [
-      field('tag', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('cards', 'list', 'Tarjetas', { item: SERVICE_CARD }),
-    ],
-    defaults: {
-      tag: 'QUÉ HACEMOS',
-      title: 'Ofrecemos servicios',
-      cards: [{ img: 'imac.jpg', alt: '', title: 'Servicio', text: 'Descripción del servicio.' }],
-    },
-  },
-  innovative: {
-    type: 'innovative',
-    label: 'Carrusel de servicios',
-    icon: 'bi-collection',
-    category: 'Servicios',
-    description: 'Texto a un lado y tarjetas que se deslizan.',
-    schema: [
-      field('tag', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('cta', 'text', 'Botón'),
-      field('ctaLink', 'link', 'Enlace del botón'),
-      field('items', 'list', 'Elementos', { item: INNOVATIVE_ITEM }),
-    ],
-    defaults: {
-      tag: 'SERVICIOS INNOVADORES',
-      title: 'Conozca nuestros servicios',
-      text: '',
-      cta: 'Descubrir más',
-      ctaLink: '/servicios',
-      items: [{ title: 'Servicio', desc: 'Descripción corta.', img: 'sol_ti.jpg' }],
-    },
-  },
-  testimonials: {
-    type: 'testimonials',
-    label: 'Opiniones',
-    icon: 'bi-chat-quote',
-    category: 'Clientes',
-    description: 'Comentarios de clientes con logo.',
-    schema: [
-      field('tag', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('cta', 'text', 'Botón'),
-      field('ctaLink', 'link', 'Enlace del botón'),
-      field('items', 'list', 'Comentarios', { item: TESTIMONIAL_ITEM }),
-    ],
-    defaults: {
-      tag: 'CLIENTES SATISFECHOS',
-      title: 'Opiniones y casos de éxito',
-      text: '',
-      cta: 'Aprender más',
-      ctaLink: '/contacto',
-      items: [{ text: 'Excelente servicio.', client: 'Cliente', role: 'Cliente Satisfecho', company: 'Matt Innova Solution', rating: 5, logo: 'logo.svg' }],
-    },
-  },
-  pageHero: {
-    type: 'pageHero',
-    label: 'Portada de página',
-    icon: 'bi-window',
-    category: 'Portada',
-    description: 'Título, texto y botón sobre un fondo.',
-    schema: [
-      field('badge', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('cta', 'text', 'Botón'),
-      field('ctaLink', 'link', 'Enlace del botón'),
-      field('image', 'image', 'Imagen de fondo'),
-    ],
-    defaults: {
-      badge: 'SECCIÓN',
-      title: 'Título de la página',
-      text: '',
-      cta: 'Contáctanos',
-      ctaLink: '/contacto',
-      image: '',
-    },
-  },
-  stats: {
-    type: 'stats',
-    label: 'Cifras',
-    icon: 'bi-graph-up',
-    category: 'Contenido',
-    description: 'Números destacados: años, clientes, proyectos.',
-    schema: [field('items', 'list', 'Cifras', { item: STAT_ITEM })],
-    defaults: { items: [{ icon: '🎯', number: '+10', label: 'Años' }] },
-  },
-  team: {
-    type: 'team',
-    label: 'Equipo',
-    icon: 'bi-person-badge',
-    category: 'Contenido',
-    description: 'Fotos y cargos de las personas del equipo.',
-    schema: [
-      field('tag', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('items', 'list', 'Personas', { item: TEAM_ITEM }),
-    ],
-    defaults: {
-      tag: 'NUESTRO EQUIPO',
-      title: 'Conoce al equipo',
-      text: '',
-      items: [{ name: 'Nombre', role: 'Cargo', image: 'taya.jpg', linkedin: '#', github: '#' }],
-    },
-  },
-  videos: {
-    type: 'videos',
-    label: 'Videos',
-    icon: 'bi-youtube',
-    category: 'Contenido',
-    description: 'Videos de YouTube embebidos.',
-    schema: [
-      field('tag', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('items', 'list', 'Videos', { item: VIDEO_ITEM }),
-    ],
-    defaults: {
-      tag: 'NOVEDADES',
-      title: 'Videos',
-      text: '',
-      items: [
-        {
-          embed: 'https://www.youtube.com/embed/RtNdTuCxWoI',
-          user: '@mattinnovasolution',
-          title: 'Video',
-        },
-      ],
-    },
-  },
-  listingHero: {
-    type: 'listingHero',
-    label: 'Banner de listado',
-    icon: 'bi-image',
-    category: 'Portada',
-    description: 'Imagen ancha con título encima.',
-    schema: [
-      field('image', 'image', 'Imagen'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-    ],
-    defaults: { image: '/carousel.jpg', title: 'Nuestros servicios', text: '' },
-  },
-  serviceCards: {
-    type: 'serviceCards',
-    label: 'Listado con enlaces',
-    icon: 'bi-card-list',
-    category: 'Servicios',
-    description: 'Tarjetas que llevan a otra página.',
-    schema: [
-      field('subtitle', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('cards', 'list', 'Tarjetas', { item: LINK_CARD }),
-    ],
-    defaults: {
-      subtitle: 'CONOCE NUESTROS',
-      title: 'Servicios',
-      cards: [{ path: '/contacto', img: '/software.png', title: 'Servicio', text: 'Descripción.', link: 'Ver más →' }],
-    },
-  },
-  cta: {
-    type: 'cta',
-    label: 'Llamado a la acción',
-    icon: 'bi-megaphone',
-    category: 'Contenido',
-    description: 'Título, texto y botón para contactar.',
-    schema: [
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('button', 'text', 'Botón'),
-      field('link', 'link', 'Enlace'),
-    ],
-    defaults: {
-      title: '¿Listo para transformar tu negocio?',
-      text: 'Contáctanos y descubre cómo podemos ayudarte.',
-      button: 'Contáctanos',
-      link: '/contacto',
-    },
-  },
-  serviceHero: {
-    type: 'serviceHero',
-    label: 'Detalle de servicio',
-    icon: 'bi-layers',
-    category: 'Servicios',
-    description: 'Banner, foto y texto introductorio.',
-    schema: [
-      field('heroImage', 'image', 'Imagen del banner'),
-      field('heroAlt', 'text', 'Texto del banner'),
-      field('image', 'image', 'Imagen'),
-      field('imageAlt', 'text', 'Texto de la imagen'),
-      field('label', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('cta', 'text', 'Botón'),
-      field('ctaLink', 'link', 'Enlace del botón'),
-    ],
-    defaults: {
-      heroImage: '/carousel.jpg',
-      heroAlt: '',
-      image: '/software.png',
-      imageAlt: '',
-      label: 'SERVICIO',
-      title: 'Nombre del servicio',
-      text: 'Describe el servicio.',
-      cta: 'Contáctanos',
-      ctaLink: '/contacto',
-    },
-  },
-  reasons: {
-    type: 'reasons',
-    label: 'Motivos / beneficios',
-    icon: 'bi-check2-square',
-    category: 'Servicios',
-    description: 'Por qué elegirte, con foto y texto.',
-    schema: [
-      field('subtitle', 'text', 'Etiqueta'),
-      field('title', 'text', 'Título'),
-      field('items', 'list', 'Motivos', { item: REASON_ITEM }),
-    ],
-    defaults: {
-      subtitle: 'RAZONES POR LAS CUALES',
-      title: 'Debes elegirnos',
-      items: [{ img: '/integridad.jpg', title: 'Motivo', text: 'Explica el beneficio.' }],
-    },
-  },
-  richText: {
-    type: 'richText',
-    label: 'Texto largo',
-    icon: 'bi-textarea-t',
-    category: 'Contenido',
-    description: 'Título y contenido con negritas, listas y enlaces.',
-    schema: [
-      field('title', 'text', 'Título'),
-      field('lastUpdated', 'text', 'Última actualización'),
-      field('body', 'rich', 'Texto'),
-    ],
-    defaults: { title: 'Título', lastUpdated: '', body: '<p>Escribe el contenido aquí.</p>' },
-  },
-  contactForm: {
-    type: 'contactForm',
-    label: 'Formulario de contacto',
-    icon: 'bi-envelope',
-    category: 'Contacto',
-    description: 'Formulario que envía mensajes al correo que indiques.',
-    schema: [
-      field('submitLabel', 'text', 'Texto del botón enviar'),
-      field('destinationEmail', 'text', 'Correo donde llegan los mensajes'),
-      field('fields', 'group', 'Campos visibles', {
-        children: [
-          field('name', 'bool', 'Nombre'),
-          field('email', 'bool', 'Correo'),
-          field('phone', 'bool', 'Teléfono'),
-          field('subject', 'bool', 'Asunto'),
-          field('message', 'bool', 'Mensaje'),
-        ],
-      }),
-      field('placeholders', 'group', 'Textos de ayuda', {
-        children: [
-          field('name', 'text', 'Nombre'),
-          field('email', 'text', 'Correo'),
-          field('phone', 'text', 'Teléfono'),
-          field('subject', 'text', 'Asunto'),
-          field('message', 'text', 'Mensaje'),
-        ],
-      }),
-    ],
-    defaults: {
-      submitLabel: 'Enviar mensaje',
-      destinationEmail: 'contacto@mattinnovasolution.com',
-      fields: { name: true, email: true, phone: true, subject: true, message: true },
-      placeholders: {
-        name: 'Su nombre',
-        email: 'Su correo electrónico',
-        phone: 'Teléfono (9 dígitos)',
-        subject: 'Asunto',
-        message: 'Mensaje',
-      },
-    },
-  },
-  claimsBook: {
-    type: 'claimsBook',
-    label: 'Libro de reclamaciones',
-    icon: 'bi-journal-text',
-    category: 'Legal',
-    description: 'Textos del libro virtual. Los campos del reclamo los pide la ley.',
-    schema: [
-      field('title', 'text', 'Título'),
-      field('company', 'text', 'Empresa'),
-      field('subtitle', 'area', 'Subtítulo'),
-      field('logo', 'image', 'Logo'),
-      field('ruc', 'text', 'RUC'),
-      field('destinationEmail', 'text', 'Correo de destino'),
-      field('disclaimer1', 'area', 'Aviso legal 1'),
-      field('disclaimer2', 'area', 'Aviso legal 2'),
-      field('submitLabel', 'text', 'Texto del botón enviar'),
-    ],
-    defaults: {
-      title: 'Libro de Reclamaciones Virtual',
-      company: 'Matt Innova Solution',
-      subtitle: '',
-      logo: 'logo.svg',
-      ruc: '',
-      destinationEmail: 'libroreclamaciones@mattinnovasolution.com',
-      disclaimer1: '',
-      disclaimer2: '',
-      submitLabel: 'Enviar reclamación virtual',
-    },
-  },
-  clients: {
-    type: 'clients',
-    label: 'Clientes',
-    icon: 'bi-building',
-    category: 'Clientes',
-    description: 'Logos, nombres y casos. Elige paneles, cuadrícula, carrusel o casos.',
-    schema: [
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('layout', 'select', 'Diseño', {
-        options: [
-          { value: 'paneles', label: 'Paneles / acordeón' },
-          { value: 'logos-grid', label: 'Cuadrícula de logos' },
-          { value: 'carrusel', label: 'Carrusel' },
-          { value: 'casos', label: 'Casos de éxito' },
-        ],
-      }),
-      field('items', 'list', 'Clientes', { item: CLIENT_ITEM }),
-    ],
-    defaults: {
-      title: 'Nuestros clientes',
-      text: '',
-      layout: 'paneles',
-      items: [{ logo: '', name: 'Cliente', url: '', alt: 'Cliente', text: '', icon: '', category: 'empresas', subcategory: '' }],
-    },
-  },
-  clientStages: {
-    type: 'clientStages',
-    label: 'Fases de clientes',
-    icon: 'bi-diagram-3',
-    category: 'Clientes',
-    description: 'Pasos o etapas del trabajo con clientes.',
-    schema: [
-      field('title', 'text', 'Título'),
-      field('text', 'area', 'Texto'),
-      field('stages', 'list', 'Fases', { item: STAGE_ITEM }),
-    ],
-    defaults: {
-      title: 'Cómo trabajamos con clientes',
-      text: '',
-      stages: [{ step: '01', title: 'Diagnóstico', text: 'Entendemos tu necesidad.', image: '' }],
-    },
-  },
-  faq: {
-    type: 'faq',
-    label: 'Preguntas frecuentes',
-    icon: 'bi-question-circle',
-    category: 'Contenido',
-    description: 'Pregunta y respuesta en lista.',
-    schema: [field('title', 'text', 'Título'), field('items', 'list', 'Preguntas', { item: FAQ_ITEM })],
-    defaults: {
-      title: 'Preguntas frecuentes',
-      items: [{ question: '¿Cómo empezamos?', answer: 'Escríbenos y agendamos una reunión.' }],
-    },
-  },
-  gallery: {
-    type: 'gallery',
-    label: 'Galería',
-    icon: 'bi-images',
-    category: 'Contenido',
-    description: 'Varias fotos en cuadrícula.',
-    schema: [field('title', 'text', 'Título'), field('items', 'list', 'Fotos', { item: GALLERY_ITEM })],
-    defaults: { title: 'Galería', items: [{ image: 'carousel.jpg', alt: '', caption: '' }] },
-  },
-  map: {
-    type: 'map',
-    label: 'Mapa',
-    icon: 'bi-map',
-    category: 'Contacto',
-    description: 'Mapa embebido (Google Maps u otro iframe https).',
-    schema: [
-      field('title', 'text', 'Título'),
-      field('embed', 'embed', 'Enlace del mapa'),
-      field('text', 'area', 'Texto'),
-    ],
-    defaults: { title: 'Dónde estamos', embed: '', text: '' },
-  },
-};
 
 export const BLOCK_TYPES = Object.values(BLOCK_CATALOG);
 
@@ -603,15 +27,40 @@ export function blockTypeDef(type: string): BlockTypeDef | null {
   return BLOCK_CATALOG[type] ?? null;
 }
 
+export const DEFAULT_BG_IMAGE = '/images/redesign/section-bg.webp';
+
 export function makeBlock(type: string, props?: JsonMap, hidden = false): CmsBlock {
   const def = BLOCK_CATALOG[type];
   return {
     id: newBlockId(),
     type,
     hidden,
-    layout: { width: 'full', padding: '', background: '' },
+    layout: { width: 'full', padding: '', background: '', backgroundImage: DEFAULT_BG_IMAGE },
     props: { ...(def?.defaults ?? {}), ...(props ?? {}) },
   };
+}
+
+export function blockHasBgImage(block: CmsBlock): boolean {
+  return !!String(block.layout?.backgroundImage ?? '').trim();
+}
+
+export function blockLayoutStyle(block: CmsBlock): Record<string, string> {
+  const style: Record<string, string> = {};
+  const padding = block.layout?.padding;
+  if (padding) {
+    style['padding'] = padding;
+  }
+  const image = String(block.layout?.backgroundImage ?? '').trim();
+  const background = String(block.layout?.background ?? '').trim();
+  if (image) {
+    style['backgroundImage'] = `linear-gradient(180deg, rgba(3, 11, 26, 0.6), rgba(3, 11, 26, 0.82)), url("${image}")`;
+    style['backgroundSize'] = 'cover';
+    style['backgroundPosition'] = 'center';
+    style['backgroundColor'] = background && !/url|gradient/i.test(background) ? background : 'var(--dt-bg)';
+  } else if (background) {
+    style['background'] = background;
+  }
+  return style;
 }
 
 export function pageBlocks(content: JsonMap): CmsBlock[] {
@@ -709,7 +158,7 @@ export function migratePageToBlocks(content: JsonMap, slug: string): JsonMap {
     blocks = [makeBlock('richText', { title: String(content['title'] ?? 'Página'), body: String(content['body'] ?? '<p></p>') })];
   }
   return {
-    schemaVersion: 5,
+    schemaVersion: 6,
     seo: (content['seo'] as JsonMap) ?? { title: '', description: '', image: '' },
     decorativeImagePaths: Array.isArray(content['decorativeImagePaths']) ? content['decorativeImagePaths'] : [],
     blocks,
@@ -723,14 +172,20 @@ function blocksFromInicio(content: JsonMap): CmsBlock[] {
     { type: 'contactCards' },
     { type: 'services' },
     { type: 'innovative' },
-    { type: 'testimonials' },
+    { type: 'testimonials', hidden: true },
+    { type: 'faq' },
   ];
   const blocks: CmsBlock[] = [];
   for (const row of order) {
     const type = String(row?.type ?? '');
     const hidden = !!row?.hidden;
     if (type === 'hero') {
-      blocks.push(makeBlock('hero', { slides: content['slides'], cta: content['heroCta'], ctaLink: content['heroCtaLink'] }, hidden));
+      blocks.push(makeBlock('hero', {
+        slides: content['slides'],
+        subtitle: content['heroSubtitle'] ?? content['subtitle'],
+        cta: content['heroCta'],
+        ctaLink: content['heroCtaLink'],
+      }, hidden));
     } else if (type === 'about') {
       blocks.push(makeBlock('about', { ...(asRecord(content['about'])), features: [] }, hidden));
     } else if (type === 'contactCards') {
@@ -741,6 +196,8 @@ function blocksFromInicio(content: JsonMap): CmsBlock[] {
       blocks.push(makeBlock('innovative', asRecord(content['innovative']), hidden));
     } else if (type === 'testimonials') {
       blocks.push(makeBlock('testimonials', asRecord(content['testimonials']), hidden));
+    } else if (type === 'faq') {
+      blocks.push(makeBlock('faq', asRecord(content['faq']), hidden));
     }
   }
   return blocks.length ? blocks : [makeBlock('hero')];
@@ -813,13 +270,27 @@ function blocksFromServicePage(content: JsonMap): CmsBlock[] {
 
 function blocksFromContacto(content: JsonMap): CmsBlock[] {
   return [
-    makeBlock('pageHero', { badge: content['badge'], title: content['title'], text: '', cta: '', ctaLink: '' }),
+    makeBlock('pageHero', { badge: content['badge'], title: content['title'], text: content['text'] || content['heroText'] || '', cta: '', ctaLink: '' }),
     makeBlock('contactCards', { items: content['cards'] }),
     makeBlock('contactForm', {
       submitLabel: content['submitLabel'],
       destinationEmail: content['destinationEmail'],
       fields: content['fields'],
       placeholders: content['placeholders'],
+    }),
+    makeBlock('faq', {
+      title: 'Preguntas de finanzas y TI',
+      items: [
+        { question: '¿Aplican detracción SUNAT a los servicios de TI?', answer: 'Si el contrato califica en el SPOT, aplicamos la tasa vigente sobre el comprobante electrónico. El CIIU y el porcentaje se confirman en la cotización, antes de iniciar el trabajo.' },
+        { question: '¿Emiten factura electrónica y registran en SIRE?', answer: 'Sí. Emitimos comprobantes electrónicos y declaramos las operaciones en el SIRE de SUNAT. El RUC va en cada factura; no cerramos un trabajo sin voucher válido.' },
+        { question: '¿Cuáles son los tiempos de soporte?', answer: 'Incidencias críticas de servidores: respuesta en menos de 15 minutos en horario de operación. El resto se agenda el mismo día hábil. El SLA queda escrito en el contrato, no en el chat.' },
+        { question: '¿Pueden contratar con el Estado en un acuerdo marco?', answer: 'Trabajamos con entidades educativas y públicas. Cada convocatoria o acuerdo marco se revisa contra el expediente. Envíenos el número de procedimiento y confirmamos si calzamos antes de postular.' },
+      ],
+    }),
+    makeBlock('map', {
+      title: 'Dónde estamos',
+      text: 'Urb. Libertad Mz. I Lt. 5, Calle Las Moras, San Vicente de Cañete, Lima, Perú.',
+      embed: 'https://maps.google.com/maps?q=Urb.+Libertad+Calle+Las+Moras+San+Vicente+de+Ca%C3%B1ete&output=embed',
     }),
   ];
 }

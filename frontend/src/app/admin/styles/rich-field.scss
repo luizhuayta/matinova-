@@ -1,0 +1,46 @@
+.cms-panel-rich {
+  min-width: 0;
+}
+
+:host ::ng-deep .ql-toolbar.ql-snow {
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+  background: var(--surface-50);
+  display: flex;
+  flex-wrap: wrap;
+}
+
+:host ::ng-deep .ql-container.ql-snow {
+  border: 1px solid var(--admin-line);
+  border-top: 0;
+  border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+  font-family: var(--font-body);
+  min-height: 120px;
+}
+
+:host ::ng-deep .ql-snow .ql-stroke {
+  stroke: var(--brand-900);
+}
+
+:host ::ng-deep .ql-snow .ql-fill {
+  fill: var(--brand-900);
+}
+
+:host ::ng-deep .ql-toolbar.ql-snow .ql-picker-label {
+  color: var(--admin-text);
+}
+
+@media (max-width: 560px) {
+  :host ::ng-deep .ql-toolbar.ql-snow {
+    padding: 4px;
+    gap: 2px;
+  }
+
+  :host ::ng-deep .ql-toolbar.ql-snow .ql-formats {
+    margin-right: 6px;
+  }
+
+  :host ::ng-deep .ql-container.ql-snow {
+    min-height: 96px;
+  }
+}

@@ -1,19 +1,22 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, ElementRef, ViewChild, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, NgForm } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import Swal from 'sweetalert2';
 import { CmsContentService } from '../../cms/cms-content.service';
 import { CmsTextDirective } from '../../cms/cms-text.directive';
 import { CmsImageDirective } from '../../cms/cms-image.directive';
 import { API_URL, JsonMap } from '../../cms/cms.models';
 import { pageBlocks, propsPath } from '../../cms/block-registry';
 import { AnalyticsService } from '../../services/analytics.service';
+import { PageHeader } from '../ui/page-header';
+import { CyberCard } from '../ui/cyber-card';
+import { HudDivider } from '../ui/hud-divider';
+import { GlowButton } from '../ui/glow-button';
 
 @Component({
   selector: 'app-libro-reclamaciones',
   standalone: true,
-  imports: [CommonModule, FormsModule, CmsTextDirective, CmsImageDirective],
+  imports: [CommonModule, FormsModule, CmsTextDirective, CmsImageDirective, PageHeader, CyberCard, HudDivider, GlowButton],
   templateUrl: './libro-reclamaciones.html',
   styleUrl: './libro-reclamaciones.scss',
 })
@@ -34,6 +37,13 @@ export class LibroReclamacionesComponent {
     return found?.props ?? this.page();
   });
   isLoading = false;
+  submitAttempted = false;
+
+  submitLabel(): string {
+    return this.isLoading ? 'Enviando...' : String(this.props()['submitLabel'] || 'Enviar Reclamación Virtual');
+  }
+  @ViewChild('reclamacionesForm') private libroForm?: NgForm;
+  @ViewChild('errorSummary') private errorSummary?: ElementRef<HTMLElement>;
 
   path(field: string): string {
     const given = this.prefix();
@@ -67,8 +77,14 @@ export class LibroReclamacionesComponent {
     this.cms.useSlug('libro-reclamaciones');
   }
 
-  enviarReclamo() {
+  async enviarReclamo() {
+    this.submitAttempted = true;
+    if (this.libroForm && this.libroForm.invalid) {
+      queueMicrotask(() => this.errorSummary?.nativeElement.focus());
+      return;
+    }
     this.isLoading = true;
+    const { default: Swal } = await import('sweetalert2');
     this.http.post<{ ticket?: string; mailSent?: boolean; message?: string }>(`${API_URL}/reclamaciones`, this.reclamo).subscribe({
       next: (response) => {
         this.isLoading = false;
@@ -81,7 +97,7 @@ export class LibroReclamacionesComponent {
           title: '¡Reclamación Registrada!',
           text: `Su caso ha sido guardado.${ticket}${mail}`,
           icon: 'success',
-          confirmButtonColor: '#1e3a8a',
+          confirmButtonColor: '#0066ff',
           confirmButtonText: 'Aceptar',
         });
         this.limpiarFormulario();

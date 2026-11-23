@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180" viewBox="0 0 320 180" role="img" aria-labelledby="aliTitle">
+  <title id="aliTitle">Alianzas institucionales</title>
+  <rect width="320" height="180" fill="#EEF2F8"/>
+  <polygon points="36,142 160,78 284,142 160,170" fill="#F7F9FC" stroke="#2C50B8" stroke-width="1"/>
+  <polygon points="70,96 108,76 108,128 70,146" fill="#1A3279"/>
+  <polygon points="108,76 146,96 146,146 108,128" fill="#0C1D4A"/>
+  <polygon points="174,90 214,70 214,126 174,144" fill="#2C50B8"/>
+  <polygon points="214,70 254,90 254,144 214,126" fill="#0C1D4A"/>
+  <path d="M146 112 C160 96 160 96 174 112" fill="none" stroke="#F26522" stroke-width="6" stroke-linecap="round"/>
+  <circle cx="160" cy="100" r="8" fill="#F26522"/>
+</svg>

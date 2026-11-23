@@ -1,52 +1,75 @@
-<main class="serviciosPage" [class.clientesPage]="isClientes()">
+<div class="listing-page">
   @switch (block().type) {
     @case ('listingHero') {
-      <section class="hero">
-        <img [src]="props()['image'] || '/carousel.jpg'" [alt]="props()['title'] || 'Banner'" class="heroImage" [cmsImage]="path('image')">
-        <div class="heroOverlay">
-          <h1 [cmsText]="path('title')"></h1>
-          <p [cmsText]="path('text')"></p>
-        </div>
-      </section>
+      <app-page-header align="center" [background]="headerBackground()" [eyebrow]="headerEyebrow()">
+        @if (editor.editMode()) {
+          <h1 page-title class="cyber-page-header__title" [cmsText]="path('title')"></h1>
+        } @else {
+          <h1 page-title class="cyber-page-header__title">
+            @for (part of titleParts(); track $index) {
+              <span [class.cyber-gradient-text]="part.accent">{{ part.text }}</span>
+            }
+          </h1>
+        }
+        <p page-text class="cyber-page-header__text" [cmsText]="path('text')"></p>
+      </app-page-header>
     }
     @case ('serviceCards') {
-      <section class="servicesGrid">
+      <section class="premium-section cyber-services">
         <div class="container">
-          <div class="servicesHeader">
-            <p class="servicesSubtitle" [cmsText]="path('subtitle')"></p>
-            <h2 class="servicesTitle" [cmsText]="path('title')"></h2>
+          <app-hud-divider />
+          <div class="premium-head premium-head--split" appReveal>
+            <h2 [cmsText]="path('title')"></h2>
           </div>
-          <div class="servicesCards" [cmsList]="path('cards')">
+          <div class="cyber-services-grid" [cmsList]="path('cards')">
             @for (card of cards(); track $index) {
-              <div class="serviceCard" [routerLink]="[card['path'] || '/']">
-                <div class="card-image-wrapper">
-                  <img [src]="card['img']" [alt]="card['title']" [cmsImage]="path('cards.' + $index + '.img')">
-                </div>
-                <div class="card-body">
-                  <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
-                  <p [cmsText]="path('cards.' + $index + '.text')"></p>
-                  <a class="serviceLink" [routerLink]="[card['path'] || '/']" [cmsText]="path('cards.' + $index + '.link')"></a>
-                </div>
-              </div>
+              <app-cyber-card class="service-card" appReveal [delay]="($index * 70) + 'ms'">
+                <a
+                  class="service-card-link"
+                  [routerLink]="isInternalPath(card) ? pathOf(card['path'] || '/') : null"
+                  [href]="isInternalPath(card) ? null : pathOf(card['path'] || '/')"
+                  [attr.target]="isInternalPath(card) ? null : '_blank'"
+                  [attr.rel]="isInternalPath(card) ? null : 'noopener'">
+                  <div class="service-media">
+                    <!-- TODO: reemplazar por foto real del equipo -->
+                    <picture>
+                      @if (webpOf(card['img']); as webp) {
+                        <source type="image/webp" [srcset]="webp">
+                      }
+                      <img
+                        [src]="rasterOf(card['img'])"
+                        [alt]="card['title']"
+                        [cmsImage]="path('cards.' + $index + '.img')"
+                        loading="lazy"
+                        width="640"
+                        height="400">
+                    </picture>
+                    <span class="service-chip" aria-hidden="true">MIS-{{ $index + 1 < 10 ? '0' + ($index + 1) : $index + 1 }}</span>
+                  </div>
+                  <div class="service-bay-body">
+                    <span class="service-icon" aria-hidden="true"><i [class]="iconOf(card, $index)"></i></span>
+                    <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
+                    <p [cmsText]="path('cards.' + $index + '.text')"></p>
+                    <span class="p-link-arrow">
+                      <span [cmsText]="path('cards.' + $index + '.link')"></span>
+                      <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                    </span>
+                  </div>
+                </a>
+              </app-cyber-card>
             }
           </div>
         </div>
       </section>
     }
     @case ('cta') {
-      <section class="ctaSection">
-        <div class="container">
-          <div class="ctaContent">
-            <h2 [cmsText]="path('title')"></h2>
-            <p [cmsText]="path('text')"></p>
-            @if (internal(ctaLink())) {
-              <a [routerLink]="ctaLink()" class="ctaBtn" [cmsText]="path('button')" [cmsLink]="path('link')"></a>
-            } @else {
-              <a [href]="ctaLink()" class="ctaBtn" [cmsText]="path('button')" [cmsLink]="path('link')"></a>
-            }
-          </div>
+      <section class="cta-bay cyber-cta studio-dark">
+        <div class="container" appReveal>
+          <h2 [cmsText]="path('title')"></h2>
+          <p [cmsText]="path('text')"></p>
+          <app-glow-button [href]="editor.editMode() ? '' : ctaHref()" [label]="ctaLabel()" [cmsLink]="path('link')" />
         </div>
       </section>
     }
   }
-</main>
+</div>

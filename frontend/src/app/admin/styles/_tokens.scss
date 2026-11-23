@@ -1,0 +1,30 @@
+@mixin vars {
+  --admin-ink: #0f1113;
+  --admin-ink-2: #0056b3;
+  --admin-paper: #f5f7fa;
+  --admin-surface: #ffffff;
+  --admin-line: #dee2e6;
+  --admin-text: #0f1113;
+  --admin-muted: #666666;
+  --admin-mark: #0066ff;
+  --admin-mark-ink: #0056b3;
+  --admin-mark-soft: rgba(0, 102, 255, 0.12);
+  --admin-danger: #b42318;
+  --admin-danger-bg: rgba(180, 35, 24, 0.08);
+  --admin-ok: #2ecc71;
+  --admin-ok-bg: rgba(46, 204, 113, 0.12);
+  --admin-warn: #9a5b12;
+  --admin-warn-bg: rgba(0, 102, 255, 0.1);
+  --admin-radius: 12px;
+  --admin-radius-ctrl: 8px;
+  --admin-shadow: 0 1px 2px rgba(15, 17, 19, 0.06), 0 2px 6px rgba(15, 17, 19, 0.04);
+  --admin-font: var(--font-body);
+  --admin-ease: 200ms var(--public-ease);
+  --admin-public-font: var(--font-body);
+  font-family: var(--font-body);
+  color: var(--admin-text);
+  background: var(--admin-paper);
+  -webkit-font-smoothing: antialiased;
+  caret-color: var(--admin-ink);
+  scrollbar-color: var(--brand-700) var(--admin-paper);
+}

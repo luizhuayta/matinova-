@@ -1,26 +1,27 @@
-<div class="top-bar"></div>
 <header class="main-header" [class.scrolled]="isScrolled">
   <div class="navbar">
-    <div class="logo-container">
-      <a routerLink="/">
-        <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="logo-img" [class.logo-entrance]="logoClass === 'logo-entrance'" cmsImage="logo" cmsScope="site">
-      </a>
-    </div>
-    <button class="mobile-menu-toggle" type="button" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" aria-label="Abrir menú">
+    <a [routerLink]="homeLink()" class="logo-container">
+      <img src="logo.svg" [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="logo-img" cmsImage="logo" cmsScope="site">
+    </a>
+    <button class="mobile-menu-toggle" type="button" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" [attr.aria-expanded]="isMobileMenuOpen" aria-controls="site-nav" [attr.aria-label]="isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'">
       <span></span><span></span><span></span>
     </button>
-    <nav class="nav" [class.mobile-open]="isMobileMenuOpen">
+    <nav id="site-nav" class="nav" [class.mobile-open]="isMobileMenuOpen">
       <ul class="nav-list">
         <li><a [routerLink]="homeLink()" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="navigateTo(homeLink())" cmsText="nav.inicio" cmsScope="site"></a></li>
         <li><a [routerLink]="aboutLink()" routerLinkActive="active" (click)="navigateTo(aboutLink())" cmsText="nav.acerca" cmsScope="site"></a></li>
-        <li><a [href]="nav()['academyUrl'] || 'https://misacademyonline.com/'" target="_blank" rel="noopener noreferrer" cmsText="nav.academy" cmsLink="nav.academyUrl" cmsScope="site"></a></li>
         <li class="dropdown" [class.open]="openMenu === 'servicios'">
-          <a class="dropbtn" (click)="toggleMenu('servicios', $event)"><span cmsText="nav.servicios" cmsScope="site"></span> <i class="bi bi-caret-down-fill"></i></a>
-          <div class="dropdown-content">
+          <button class="dropbtn" type="button" (click)="toggleMenu('servicios', $event)" [attr.aria-expanded]="openMenu === 'servicios'" aria-haspopup="true" aria-controls="menu-servicios">
+            <span cmsText="nav.servicios" cmsScope="site"></span>
+            <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#chevron"></use></svg>
+          </button>
+          <div class="dropdown-content" id="menu-servicios">
             <a *ngFor="let item of navServices(); let i = index" [routerLink]="menuPath(item['path'])" (click)="navigateTo(menuPath(item['path']))" [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></a>
           </div>
         </li>
-        <li><a [routerLink]="contactLink()" routerLinkActive="active" (click)="navigateTo(contactLink())" cmsText="nav.contacto" cmsScope="site"></a></li>
+        <li>
+          <a [href]="nav()['academyUrl'] || 'https://misacademyonline.com/'" target="_blank" rel="noopener noreferrer" cmsText="nav.academy" cmsScope="site" aria-label="MIS Academy, abre en una pestaña nueva"></a>
+        </li>
         @for (item of extraMenu(); track item.slug) {
           <li>
             <a [routerLink]="menuPath(item.path)" routerLinkActive="active" (click)="navigateTo(menuPath(item.path))">{{ item.title }}</a>
@@ -28,13 +29,12 @@
         }
         @if (showClients()) {
           <li class="dropdown" [class.open]="openMenu === 'clientes'">
-            <a class="dropbtn btn-transparencia" (click)="toggleMenu('clientes', $event)">
+            <button class="dropbtn" type="button" (click)="toggleMenu('clientes', $event)" [attr.aria-expanded]="openMenu === 'clientes'" aria-haspopup="true" aria-controls="menu-clientes">
               <span cmsText="clientsLabel" cmsScope="site"></span>
-              <i class="bi bi-caret-down-fill"></i>
-            </a>
-            <div class="dropdown-content">
+              <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#chevron"></use></svg>
+            </button>
+            <div class="dropdown-content" id="menu-clientes">
               <a [routerLink]="clientsLink()" (click)="navigateTo(clientsLink())">Ver todos los clientes</a>
-              <div class="dropdown-divider"></div>
               @for (item of clientCategories; track item.key) {
                 <a [routerLink]="clientsLink()" [queryParams]="{ category: item.key }" (click)="goClients(item.key)">{{ item.label }}</a>
               }
@@ -43,8 +43,14 @@
         }
         <li class="lang">
           @for (item of localeOptions; track item.id) {
-            <button type="button" [class.active]="locales.locale() === item.id" (click)="switchLocale(item.id)">{{ item.id.toUpperCase() }}</button>
+            <button type="button" [class.active]="locales.locale() === item.id" (click)="switchLocale(item.id)" [attr.aria-label]="'Idioma ' + item.id">{{ item.id.toUpperCase() }}</button>
           }
+        </li>
+        <li class="nav-cta">
+          <a publicBtn [routerLink]="contactLink()" routerLinkActive="active" (click)="navigateTo(contactLink())" aria-label="Hablar con un experto de Matt Innova">
+            <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#mail"></use></svg>
+            <span cmsText="nav.contacto" cmsScope="site"></span>
+          </a>
         </li>
       </ul>
     </nav>

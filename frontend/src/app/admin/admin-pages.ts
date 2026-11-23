@@ -70,21 +70,7 @@ import { AdminPageList } from './admin-page-list';
       </div>
     }
   `,
-  styles: [`
-    .wrap { max-width: 860px; }
-    .picker-backdrop {
-      position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
-      background: rgba(20,24,31,.45); padding: 1rem;
-    }
-    .create {
-      width: min(460px, 100%); display: grid; gap: 12px; padding: 1.2rem;
-      background: var(--admin-surface); border-radius: 12px; box-shadow: var(--admin-shadow);
-    }
-    .create h2 { margin: 0; }
-    .create label { display: grid; gap: 4px; font-size: 0.875rem; }
-    .switch-row { display: flex; justify-content: space-between; align-items: center; }
-    .actions { display: flex; justify-content: flex-end; gap: 8px; }
-  `],
+  styleUrl: './styles/pages.scss',
 })
 export class AdminPages implements OnInit {
   private cms = inject(CmsContentService);

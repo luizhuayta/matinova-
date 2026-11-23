@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { groupClientItems } from './client-panels';
+import { clientCountLabel, clientSubIcon, groupClientItems } from './client-panels';
 
 describe('groupClientItems', () => {
   it('agrupa por categoría y subcategoría conservando el índice original', () => {
@@ -19,5 +19,12 @@ describe('groupClientItems', () => {
     const groups = groupClientItems([{ name: 'Sin rubro' }]);
     expect(groups[0].key).toBe('empresas');
     expect(groups[0].subs[0].name).toBe('General');
+  });
+
+  it('asigna ícono de rubro y etiqueta de conteo', () => {
+    expect(clientSubIcon('Salud y Farmacia')).toBe('hospital');
+    expect(clientSubIcon('IESTP')).toBe('school');
+    expect(clientCountLabel('educativas', 1)).toBe('1 institución');
+    expect(clientCountLabel('empresas', 32)).toBe('32 clientes');
   });
 });

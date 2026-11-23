@@ -1,136 +1,144 @@
 <div class="libro-container">
-  <div class="libro-header">
-    <div class="logo-legal">
+  <app-page-header align="left" background="grid">
+    <h1 page-title class="cyber-page-header__title" [cmsText]="path('title')"></h1>
+    <p page-text class="cyber-page-header__text" [cmsText]="path('subtitle')"></p>
+  </app-page-header>
+
+  <div class="libro-body">
+    <div class="libro-meta">
       <img [src]="props()['logo'] || 'logo.svg'" [alt]="props()['company'] || 'Matt Innova Solution'" class="legal-logo-img" [cmsImage]="path('logo')">
-    </div>
-    <div class="header-text">
-      <h2 [cmsText]="path('title')"></h2>
       <p class="company-info" [cmsText]="path('company')"></p>
-      <p class="company-ruc">RUC: <span [cmsText]="path('ruc')"></span></p>
-      <p class="subtitle" [cmsText]="path('subtitle')"></p>
+      <p class="company-ruc">RUC: @if (props()['ruc']) {<span [cmsText]="path('ruc')"></span>} @else {pendiente de verificación}</p>
     </div>
+
+    <app-hud-divider />
+
+    <app-cyber-card tone="elevated" class="libro-card">
+      <form (ngSubmit)="enviarReclamo()" #reclamacionesForm="ngForm" novalidate>
+        @if (submitAttempted && reclamacionesForm.invalid) {
+          <div class="form-errors" role="alert" tabindex="-1" #errorSummary>
+            <p><strong>Faltan campos obligatorios.</strong> Completa los campos marcados antes de enviar.</p>
+          </div>
+        }
+
+        <fieldset>
+          <legend>1. Identificación del Consumidor Reclamante</legend>
+
+          <div class="form-group checkbox-minor">
+            <label class="checkbox-label">
+              <input type="checkbox" name="isMinor" [(ngModel)]="reclamo.isMinor">
+              ¿El reclamante es menor de edad?
+            </label>
+          </div>
+
+          <div class="minor-guardian-box" *ngIf="reclamo.isMinor">
+            <div class="form-group">
+              <label for="guardianName">Nombre del Apoderado / Padre o Madre:</label>
+              <input type="text" id="guardianName" name="guardianName" [(ngModel)]="reclamo.guardianName" [required]="reclamo.isMinor">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="fullname">Nombre Completo del Consumidor:</label>
+            <input type="text" id="fullname" name="fullname" [(ngModel)]="reclamo.fullname" required autocomplete="name">
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="documentType">Tipo Documento:</label>
+              <select id="documentType" name="documentType" [(ngModel)]="reclamo.documentType" required>
+                <option value="DNI">DNI</option>
+                <option value="CE">Carnet de Extranjería</option>
+                <option value="RUC">RUC</option>
+                <option value="PASAPORTE">Pasaporte</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="documentNumber">Número de Documento:</label>
+              <input type="text" id="documentNumber" name="documentNumber" [(ngModel)]="reclamo.documentNumber" required inputmode="numeric">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="phone">Teléfono / Celular:</label>
+              <input type="tel" id="phone" name="phone" [(ngModel)]="reclamo.phone" required autocomplete="tel" inputmode="tel">
+            </div>
+            <div class="form-group">
+              <label for="email">Correo Electrónico:</label>
+              <input type="email" id="email" name="email" [(ngModel)]="reclamo.email" required autocomplete="email" inputmode="email">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address">Domicilio Actual (Dirección, Distrito, Provincia, Departamento):</label>
+            <input type="text" id="address" name="address" [(ngModel)]="reclamo.address" required autocomplete="street-address">
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>2. Identificación del Bien Contratado</legend>
+
+          <div class="form-group radio-group">
+            <label class="main-label">Tipo de Bien:</label>
+            <div class="options">
+              <label class="radio-label"><input type="radio" name="typeOfBien" value="producto" [(ngModel)]="reclamo.typeOfBien" required> Producto</label>
+              <label class="radio-label"><input type="radio" name="typeOfBien" value="servicio" [(ngModel)]="reclamo.typeOfBien" required> Servicio</label>
+            </div>
+          </div>
+
+          <div class="form-row alignment-fix">
+            <div class="form-group">
+              <label for="claimedAmount">Monto Reclamado (S/):</label>
+              <input type="number" id="claimedAmount" name="claimedAmount" [(ngModel)]="reclamo.claimedAmount" [disabled]="reclamo.amountNotApplicable" [required]="!reclamo.amountNotApplicable" inputmode="decimal" min="0">
+            </div>
+            <div class="form-group checkbox-align">
+              <label class="checkbox-label">
+                <input type="checkbox" name="amountNotApplicable" [(ngModel)]="reclamo.amountNotApplicable" (change)="reclamo.claimedAmount = reclamo.amountNotApplicable ? null : reclamo.claimedAmount">
+                No aplica / Informativo
+              </label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="descriptionBien">Descripción del Producto o Servicio Contratado:</label>
+            <textarea id="descriptionBien" name="descriptionBien" [(ngModel)]="reclamo.descriptionBien" rows="3" required placeholder="Detalle brevemente el servicio o producto tecnológico consultado/adquirido..."></textarea>
+          </div>
+        </fieldset>
+
+        <fieldset>
+          <legend>3. Detalle de la Reclamación</legend>
+
+          <div class="form-group radio-group">
+            <label class="main-label">Tipo de Acción:</label>
+            <div class="options">
+              <label class="radio-label"><input type="radio" name="typeOfAccion" value="reclamo" [(ngModel)]="reclamo.typeOfAccion" required> Reclamo</label>
+              <label class="radio-label"><input type="radio" name="typeOfAccion" value="queja" [(ngModel)]="reclamo.typeOfAccion" required> Queja</label>
+            </div>
+            <div class="indecopi-definitions">
+              <p><strong>* Reclamo:</strong> Disconformidad relacionada directamente con los productos o servicios adquiridos.</p>
+              <p><strong>* Queja:</strong> Disconformidad que no se encuentra relacionada directamente con los bienes o servicios, sino con el malestar o descontento respecto a la atención al público.</p>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="details">Detalle del Reclamo o Queja:</label>
+            <textarea id="details" name="details" [(ngModel)]="reclamo.details" rows="4" required placeholder="Explique de manera clara los hechos ocurridos..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label for="consumerPedido">Pedido Concreto del Consumidor:</label>
+            <textarea id="consumerPedido" name="consumerPedido" [(ngModel)]="reclamo.consumerPedido" rows="3" required placeholder="Escriba qué solicita específicamente para solucionar esta disconformidad..."></textarea>
+          </div>
+        </fieldset>
+
+        <div class="legal-disclaimer">
+          <p [cmsText]="path('disclaimer1')"></p>
+          <p [cmsText]="path('disclaimer2')"></p>
+        </div>
+
+        <app-glow-button type="submit" [disabled]="isLoading" [label]="submitLabel()"></app-glow-button>
+      </form>
+    </app-cyber-card>
   </div>
-
-  <form (ngSubmit)="enviarReclamo()" #reclamacionesForm="ngForm" novalidate>
-
-    <fieldset>
-      <legend>1. Identificación del Consumidor Reclamante</legend>
-
-      <div class="form-group checkbox-minor">
-        <label class="checkbox-label">
-          <input type="checkbox" name="isMinor" [(ngModel)]="reclamo.isMinor">
-          ¿El reclamante es menor de edad?
-        </label>
-      </div>
-
-      <div class="minor-guardian-box" *ngIf="reclamo.isMinor">
-        <div class="form-group">
-          <label for="guardianName">Nombre del Apoderado / Padre o Madre:</label>
-          <input type="text" id="guardianName" name="guardianName" [(ngModel)]="reclamo.guardianName" [required]="reclamo.isMinor">
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="fullname">Nombre Completo del Consumidor:</label>
-        <input type="text" id="fullname" name="fullname" [(ngModel)]="reclamo.fullname" required>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="documentType">Tipo Documento:</label>
-          <select id="documentType" name="documentType" [(ngModel)]="reclamo.documentType" required>
-            <option value="DNI">DNI</option>
-            <option value="CE">Carnet de Extranjería</option>
-            <option value="RUC">RUC</option>
-            <option value="PASAPORTE">Pasaporte</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label for="documentNumber">Número de Documento:</label>
-          <input type="text" id="documentNumber" name="documentNumber" [(ngModel)]="reclamo.documentNumber" required>
-        </div>
-      </div>
-
-      <div class="form-row">
-        <div class="form-group">
-          <label for="phone">Teléfono / Celular:</label>
-          <input type="tel" id="phone" name="phone" [(ngModel)]="reclamo.phone" required>
-        </div>
-        <div class="form-group">
-          <label for="email">Correo Electrónico:</label>
-          <input type="email" id="email" name="email" [(ngModel)]="reclamo.email" required>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="address">Domicilio Actual (Dirección, Distrito, Provincia, Departamento):</label>
-        <input type="text" id="address" name="address" [(ngModel)]="reclamo.address" required>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>2. Identificación del Bien Contratado</legend>
-
-      <div class="form-group radio-group">
-        <label class="main-label">Tipo de Bien:</label>
-        <div class="options">
-          <label class="radio-label"><input type="radio" name="typeOfBien" value="producto" [(ngModel)]="reclamo.typeOfBien" required> Producto</label>
-          <label class="radio-label"><input type="radio" name="typeOfBien" value="servicio" [(ngModel)]="reclamo.typeOfBien" required> Servicio</label>
-        </div>
-      </div>
-
-      <div class="form-row alignment-fix">
-        <div class="form-group">
-          <label for="claimedAmount">Monto Reclamado (S/):</label>
-          <input type="number" id="claimedAmount" name="claimedAmount" [(ngModel)]="reclamo.claimedAmount" [disabled]="reclamo.amountNotApplicable" [required]="!reclamo.amountNotApplicable">
-        </div>
-        <div class="form-group checkbox-align">
-          <label class="checkbox-label">
-            <input type="checkbox" name="amountNotApplicable" [(ngModel)]="reclamo.amountNotApplicable" (change)="reclamo.claimedAmount = reclamo.amountNotApplicable ? null : reclamo.claimedAmount">
-            No aplica / Informativo
-          </label>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="descriptionBien">Descripción del Producto o Servicio Contratado:</label>
-        <textarea id="descriptionBien" name="descriptionBien" [(ngModel)]="reclamo.descriptionBien" rows="3" required placeholder="Detalle brevemente el servicio o producto tecnológico consultado/adquirido..."></textarea>
-      </div>
-    </fieldset>
-
-    <fieldset>
-      <legend>3. Detalle de la Reclamación</legend>
-
-      <div class="form-group radio-group">
-        <label class="main-label">Tipo de Acción:</label>
-        <div class="options">
-          <label class="radio-label"><input type="radio" name="typeOfAccion" value="reclamo" [(ngModel)]="reclamo.typeOfAccion" required> Reclamo</label>
-          <label class="radio-label"><input type="radio" name="typeOfAccion" value="queja" [(ngModel)]="reclamo.typeOfAccion" required> Queja</label>
-        </div>
-        <div class="indecopi-definitions">
-          <p><strong>* Reclamo:</strong> Disconformidad relacionada directamente con los productos o servicios adquiridos.</p>
-          <p><strong>* Queja:</strong> Disconformidad que no se encuentra relacionada directamente con los bienes o servicios, sino con el malestar o descontento respecto a la atención al público.</p>
-        </div>
-      </div>
-
-      <div class="form-group">
-        <label for="details">Detalle del Reclamo o Queja:</label>
-        <textarea id="details" name="details" [(ngModel)]="reclamo.details" rows="4" required placeholder="Explique de manera clara los hechos ocurridos..."></textarea>
-      </div>
-
-      <div class="form-group">
-        <label for="consumerPedido">Pedido Concreto del Consumidor:</label>
-        <textarea id="consumerPedido" name="consumerPedido" [(ngModel)]="reclamo.consumerPedido" rows="3" required placeholder="Escriba qué solicita específicamente para solucionar esta disconformidad..."></textarea>
-      </div>
-    </fieldset>
-
-    <div class="legal-disclaimer">
-      <p [cmsText]="path('disclaimer1')"></p>
-      <p [cmsText]="path('disclaimer2')"></p>
-    </div>
-
-    <button type="submit" class="btn-submit" [disabled]="!reclamacionesForm.valid || isLoading">
-      {{ isLoading ? 'Enviando...' : (props()['submitLabel'] || 'Enviar Reclamación Virtual') }}
-    </button>
-  </form>
 </div>

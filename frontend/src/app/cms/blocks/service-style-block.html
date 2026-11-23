@@ -1,47 +1,56 @@
-<main class="softwarePage">
+<div class="service-page">
   @switch (block().type) {
     @case ('serviceHero') {
-      <section class="hero">
-        <img [src]="props()['heroImage']" [alt]="props()['heroAlt'] || ''" class="heroImage" [cmsImage]="path('heroImage')">
-      </section>
-      <section class="reasons">
-        <div class="container">
-          <div class="serviceContent">
-            <div>
-              <img [src]="props()['image']" [alt]="props()['imageAlt'] || ''" class="serviceImage" [cmsImage]="path('image')">
-            </div>
-            <div class="serviceRight">
-              <div class="serviceLabel" [cmsText]="path('label')"></div>
-              <h2 [cmsText]="path('title')"></h2>
-              <p [cmsText]="path('text')"></p>
-              @if (internal(ctaLink())) {
-                <a [routerLink]="ctaLink()" class="contactBtn" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-              } @else {
-                <a [href]="ctaLink()" class="contactBtn" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-              }
-            </div>
-          </div>
-        </div>
-      </section>
+      <app-page-header align="left" background="grid" [eyebrow]="eyebrow()">
+        @if (editor.editMode()) {
+          <h1 page-title class="cyber-page-header__title" [cmsText]="path('title')"></h1>
+        } @else {
+          <h1 page-title class="cyber-page-header__title">
+            @for (part of titleParts(); track $index) {
+              <span [class.cyber-gradient-text]="part.accent">{{ part.text }}</span>
+            }
+          </h1>
+        }
+        <p page-text class="cyber-page-header__text" [cmsText]="path('text')"></p>
+        @if (ctaLabel()) {
+          <app-glow-button [href]="editor.editMode() ? '' : ctaHref()" [label]="ctaLabel()" [cmsLink]="path('ctaLink')" />
+        }
+      </app-page-header>
     }
     @case ('reasons') {
-      <section class="reasonsToChoose">
+      <section class="premium-section cyber-reasons">
         <div class="container">
-          <div class="reasonsHeader">
-            <p class="reasonsSubtitle" [cmsText]="path('subtitle')"></p>
-            <h2 class="reasonsTitle" [cmsText]="path('title')"></h2>
+          <app-hud-divider />
+          <div class="premium-head premium-head--left" appReveal>
+            <h2 [cmsText]="path('title')"></h2>
           </div>
-          <div class="reasonsCards" [cmsList]="path('items')">
+          <div class="reasons-list" [cmsList]="path('items')">
             @for (reason of reasons(); track $index) {
-              <div class="reasonCard">
-                <img [src]="reason['img']" [alt]="reason['title']" [cmsImage]="path('items.' + $index + '.img')">
-                <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
-                <p [cmsText]="path('items.' + $index + '.text')"></p>
-              </div>
+              <app-cyber-card class="reason-bay" appReveal [delay]="($index * 70) + 'ms'">
+                <div class="service-media">
+                  <!-- TODO: reemplazar por foto real del equipo -->
+                  <picture>
+                    @if (webpOf(reason['img']); as webp) {
+                      <source type="image/webp" [srcset]="webp">
+                    }
+                    <img
+                      [src]="rasterOf(reason['img'])"
+                      [alt]="reason['alt'] || reason['title']"
+                      [cmsImage]="path('items.' + $index + '.img')"
+                      loading="lazy"
+                      width="480"
+                      height="280">
+                  </picture>
+                </div>
+                <div class="service-bay-body">
+                  <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
+                  <p [cmsText]="path('items.' + $index + '.text')"></p>
+                </div>
+              </app-cyber-card>
             }
           </div>
         </div>
       </section>
     }
   }
-</main>
+</div>

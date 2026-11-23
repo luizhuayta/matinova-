@@ -10,8 +10,11 @@ import {
   LEGAL_STYLE_TYPES,
   LISTING_STYLE_TYPES,
   SERVICE_STYLE_TYPES,
+  blockHasBgImage,
+  blockLayoutStyle,
   pageBlocks,
   propsPath,
+  type CmsBlock,
 } from '../block-registry';
 import { HomeStyleBlock } from './home-style-block';
 import { AboutStyleBlock } from './about-style-block';
@@ -46,7 +49,10 @@ import { LibroReclamacionesComponent } from '../../components/libro-reclamacione
     .cms-block { position: relative; grid-column: span 12; }
     .cms-block.w-half { grid-column: span 6; }
     .cms-block.w-third { grid-column: span 4; }
-    @media (max-width: 800px) {
+    @media (max-width: 900px) {
+      .cms-block.w-half, .cms-block.w-third { grid-column: span 12; }
+    }
+    @container cms-preview (max-width: 900px) {
       .cms-block.w-half, .cms-block.w-third { grid-column: span 12; }
     }
     .cms-block.is-hidden {
@@ -96,7 +102,7 @@ export class CmsPageBlocks {
 
   group(type: string): string {
     const slug = this.slug() || this.cms.currentSlug();
-    if (slug === 'acerca-de' && (type === 'about' || type === 'contactCards')) {
+    if ((slug === 'acerca-de' || slug === 'contacto') && (type === 'about' || type === 'contactCards')) {
       return 'about';
     }
     if (HOME_STYLE_TYPES.has(type)) return 'home';
@@ -126,10 +132,11 @@ export class CmsPageBlocks {
     return '';
   }
 
-  layoutStyle(block: { layout?: { padding?: string; background?: string } }): Record<string, string> {
-    const style: Record<string, string> = {};
-    if (block.layout?.padding) style['padding'] = block.layout.padding;
-    if (block.layout?.background) style['background'] = block.layout.background;
-    return style;
+  hasBgImage(block: CmsBlock): boolean {
+    return blockHasBgImage(block);
+  }
+
+  layoutStyle(block: CmsBlock): Record<string, string> {
+    return blockLayoutStyle(block);
   }
 }

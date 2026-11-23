@@ -1,0 +1,79 @@
+<button
+  class="accessibility-toggle"
+  type="button"
+  (click)="togglePanel()"
+  [attr.aria-expanded]="isOpen"
+  aria-label="Ayuda de accesibilidad"
+  [class.active]="isOpen">
+  <i class="bi bi-universal-access a11y-keep" aria-hidden="true"></i>
+</button>
+
+<div
+  #dialog
+  class="accessibility-panel"
+  [class.open]="isOpen"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="accessibility-title"
+  [attr.hidden]="isOpen ? null : true">
+  <div class="panel-header">
+    <h2 id="accessibility-title">Accesibilidad</h2>
+    <button class="close-btn" type="button" (click)="closePanel()" aria-label="Cerrar panel">
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="tabs-container" role="tablist">
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'tools'" (click)="activeTab = 'tools'" role="tab" [attr.aria-selected]="activeTab === 'tools'">Herramientas</button>
+    <button type="button" class="tab-btn" [class.active]="activeTab === 'report'" (click)="activeTab = 'report'" role="tab" [attr.aria-selected]="activeTab === 'report'">Informar un problema</button>
+  </div>
+
+  <div class="panel-content">
+    @if (activeTab === 'tools') {
+      <div class="tools-grid">
+        <button type="button" class="tool-btn" [class.active]="tools.focus" (click)="toggleTool('focus')">Enfoque</button>
+        <button type="button" class="tool-btn" [class.active]="tools.largeCursor" (click)="toggleTool('largeCursor')">Cursor grande</button>
+        <button type="button" class="tool-btn" [class.active]="tools.highlightLinks" (click)="toggleTool('highlightLinks')">Destacar enlaces</button>
+        <button type="button" class="tool-btn" [class.active]="tools.highContrast" (click)="toggleTool('highContrast')">Alto contraste</button>
+        <button type="button" class="tool-btn" [class.active]="tools.stopAnimation" (click)="toggleTool('stopAnimation')">Detener animación</button>
+        <button type="button" class="tool-btn" [class.active]="tools.textSize !== 'normal'" (click)="cycleText()">Tamaño del texto</button>
+        <button type="button" class="tool-btn" [class.active]="tools.spacing === 'increased'" (click)="toggleSpacing()">Espaciado</button>
+        <button type="button" class="tool-btn" [class.active]="tools.readableFont" (click)="toggleTool('readableFont')">Fuente legible</button>
+        <button type="button" class="tool-btn" [class.active]="tools.readingGuide" (click)="toggleTool('readingGuide')">Guía de lectura</button>
+        <button type="button" class="tool-btn" [class.active]="tools.windowMask" (click)="toggleTool('windowMask')">Máscara</button>
+        <button type="button" class="tool-btn" [class.active]="tools.hideImages" (click)="toggleTool('hideImages')">Ocultar imágenes</button>
+        <button type="button" class="tool-btn" [class.active]="tools.highlightHeadings" (click)="toggleTool('highlightHeadings')">Destacar títulos</button>
+      </div>
+      <button type="button" class="reset-tools-btn" (click)="resetTools()">Restablecer</button>
+      <p class="shortcuts">Atajos: Shift+R restablece. Esc cierra el panel.</p>
+    } @else {
+      <form class="report-form" (ngSubmit)="submitReport()">
+        @if (sent) {
+          <p role="status">El reporte quedó registrado. El equipo lo verá en el panel de mensajes.</p>
+        }
+        @if (error) {
+          <p class="form-error" role="alert">{{ error }}</p>
+        }
+        <label>Nombre
+          <input type="text" name="reportName" [(ngModel)]="reportForm.name" required autocomplete="name">
+        </label>
+        <label>Correo
+          <input type="email" name="reportEmail" [(ngModel)]="reportForm.email" required autocomplete="email">
+        </label>
+        <label>Teléfono
+          <input type="tel" name="reportPhone" [(ngModel)]="reportForm.phone" autocomplete="tel" inputmode="tel">
+        </label>
+        <fieldset>
+          <legend>Tipo</legend>
+          <label class="radio-row"><input type="radio" name="assistance-type" [(ngModel)]="reportForm.assistanceType" value="accessibility"> <span>Accesibilidad</span></label>
+          <label class="radio-row"><input type="radio" name="assistance-type" [(ngModel)]="reportForm.assistanceType" value="general"> <span>Consulta</span></label>
+          <label class="radio-row"><input type="radio" name="assistance-type" [(ngModel)]="reportForm.assistanceType" value="bug"> <span>Error</span></label>
+        </fieldset>
+        <label>Descripción
+          <textarea name="reportDescription" [(ngModel)]="reportForm.description" rows="4" required></textarea>
+        </label>
+        <button type="submit" class="submit-btn" [disabled]="sending">{{ sending ? 'Enviando...' : 'Enviar reporte' }}</button>
+      </form>
+    }
+  </div>
+</div>

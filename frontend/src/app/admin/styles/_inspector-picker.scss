@@ -1,0 +1,75 @@
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 17, 19, 0.45);
+  padding: var(--space-16);
+}
+
+.picker {
+  width: min(720px, 100%);
+  max-height: min(80vh, 720px);
+  overflow: auto;
+  padding: var(--space-16);
+  border-radius: var(--radius-md);
+  background: var(--admin-surface);
+  box-shadow: var(--shadow-md);
+}
+
+.picker-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  margin-bottom: 10px;
+}
+
+.picker-head h3 {
+  margin: 0;
+  font-size: var(--text-16);
+}
+
+.picker-cat {
+  margin: var(--space-16) 0 var(--space-8);
+  font-size: var(--text-12);
+  letter-spacing: 0.04em;
+  color: var(--admin-muted);
+}
+
+.picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: var(--space-8);
+}
+
+.picker-card {
+  display: grid;
+  gap: var(--space-4);
+  text-align: left;
+  padding: 0.8rem;
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-sm);
+  background: var(--admin-paper);
+  cursor: pointer;
+}
+
+.picker-card:hover {
+  border-color: var(--brand-500);
+}
+
+.picker-card i {
+  font-size: 1.2rem;
+  color: var(--brand-900);
+}
+
+.picker-card strong {
+  font-size: var(--text-14);
+}
+
+.picker-card small {
+  color: var(--admin-muted);
+  font-size: var(--text-12);
+  line-height: 1.35;
+}

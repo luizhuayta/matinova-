@@ -1,4 +1,14 @@
-export const API_URL = '/api';
+import { PAGE_GROUPS, SLUG_PATHS } from './cms-routes';
+
+export { PAGE_GROUPS, PAGE_LABELS, PAGE_META, SLUG_PATHS } from './cms-routes';
+
+const apiOverride =
+  typeof globalThis !== 'undefined'
+    ? (globalThis as Record<string, unknown>)['__API_URL__']
+    : undefined;
+
+export const API_URL: string =
+  typeof apiOverride === 'string' && apiOverride ? apiOverride : '/api';
 
 export type JsonMap = Record<string, unknown>;
 
@@ -42,49 +52,22 @@ export interface CmsMediaItem {
   created_at: string;
   width?: number | null;
   height?: number | null;
-  variants?: Array<{ width: number; file: string; url: string }>;
+  variants?: Array<{ width: number; file: string; url: string; kind?: string }>;
+  parent_id?: number | null;
+  kind?: 'upload' | 'crop' | string;
+  original_url?: string | null;
 }
 
-export const PAGE_LABELS: Record<string, string> = {
-  inicio: 'Inicio',
-  'acerca-de': 'Acerca de',
-  servicios: 'Servicios',
-  'servicios-software': 'Software',
-  'servicios-hardware': 'Hardware',
-  'servicios-saas': 'SaaS',
-  'servicios-consultoria': 'Consultoría',
-  'servicios-soluciones-ti': 'Soluciones TI',
-  contacto: 'Contacto',
-  privacidad: 'Privacidad',
-  terminos: 'Términos',
-  'libro-reclamaciones': 'Libro de reclamaciones',
-  clientes: 'Clientes',
-  sitio: 'Apariencia del sitio',
-};
-
-export const PAGE_META: Record<string, { icon: string; blurb: string }> = {
-  sitio: { icon: 'bi-palette', blurb: 'Logo, menú, WhatsApp y pie' },
-  inicio: { icon: 'bi-house', blurb: 'Banner, servicios y opiniones' },
-  'acerca-de': { icon: 'bi-people', blurb: 'Equipo, cifras y videos' },
-  contacto: { icon: 'bi-envelope', blurb: 'Formulario y datos de contacto' },
-  servicios: { icon: 'bi-grid', blurb: 'Listado de servicios' },
-  'servicios-software': { icon: 'bi-code-slash', blurb: 'Página de software' },
-  'servicios-hardware': { icon: 'bi-pc-display', blurb: 'Página de hardware' },
-  'servicios-saas': { icon: 'bi-cloud', blurb: 'Página de SaaS' },
-  'servicios-consultoria': { icon: 'bi-chat-dots', blurb: 'Página de consultoría' },
-  'servicios-soluciones-ti': { icon: 'bi-hdd-network', blurb: 'Página de soluciones TI' },
-  privacidad: { icon: 'bi-shield-check', blurb: 'Texto legal' },
-  terminos: { icon: 'bi-file-text', blurb: 'Texto legal' },
-  'libro-reclamaciones': { icon: 'bi-journal-text', blurb: 'Textos y correo del libro' },
-  clientes: { icon: 'bi-building', blurb: 'Logos, casos y fases' },
-};
-
-export const PAGE_GROUPS: { title: string; slugs: string[] }[] = [
-  { title: 'Apariencia', slugs: ['sitio'] },
-  { title: 'Páginas', slugs: ['inicio', 'acerca-de', 'contacto', 'clientes'] },
-  { title: 'Servicios', slugs: ['servicios', 'servicios-software', 'servicios-hardware', 'servicios-saas', 'servicios-consultoria', 'servicios-soluciones-ti'] },
-  { title: 'Legal', slugs: ['privacidad', 'terminos', 'libro-reclamaciones'] },
-];
+export interface CmsMediaVersion {
+  id: number;
+  url: string;
+  mime: string;
+  size_bytes: number;
+  width?: number | null;
+  height?: number | null;
+  reason: string;
+  created_at: string;
+}
 
 export function groupPages(pages: CmsPageSummary[]): { title: string; pages: CmsPageSummary[] }[] {
   const bySlug = new Map(pages.map((page) => [page.slug, page]));
@@ -122,6 +105,8 @@ export const MESSAGE_FIELD_LABELS: Record<string, string> = {
   consumerPedido: 'Pedido del consumidor',
   isMinor: 'Menor de edad',
   guardianName: 'Apoderado',
+  assistanceType: 'Tipo de asistencia',
+  description: 'Descripción',
 };
 
 export function labeledMessageFields(payload: JsonMap): { label: string; value: string }[] {
@@ -189,23 +174,6 @@ export function setByPath<T>(obj: T, path: string, value: unknown): T {
 export function cmsControlId(path: string): string {
   return 'cms-' + path.replace(/[^a-z0-9]+/gi, '-');
 }
-
-export const SLUG_PATHS: Record<string, string> = {
-  inicio: '/',
-  'acerca-de': '/acerca-de',
-  servicios: '/servicios',
-  'servicios-software': '/servicios/software',
-  'servicios-hardware': '/servicios/hardware',
-  'servicios-saas': '/servicios/saas',
-  'servicios-consultoria': '/servicios/consultoria',
-  'servicios-soluciones-ti': '/servicios/soluciones-ti',
-  contacto: '/contacto',
-  privacidad: '/privacidad',
-  terminos: '/terminos',
-  'libro-reclamaciones': '/libro-reclamaciones',
-  clientes: '/clientes',
-  sitio: '/',
-};
 
 let extraRouteSlugs: Record<string, string> = {};
 

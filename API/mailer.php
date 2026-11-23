@@ -26,6 +26,8 @@ function send_mail(string $to, string $subject, string $html, string $toName = '
         };
         $port = (int) cfg('SMTP_PORT', $portDefault);
         $mail->isSMTP();
+        $mail->Timeout = 10;
+        $mail->getSMTPInstance()->Timelimit = 20;
         $mail->Host = $host;
         $mail->SMTPAuth = cfg('SMTP_USER') !== '';
         $mail->Username = cfg('SMTP_USER');

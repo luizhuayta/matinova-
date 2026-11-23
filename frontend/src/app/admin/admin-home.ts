@@ -29,9 +29,7 @@ import { AdminPageList } from './admin-page-list';
       }
     </section>
   `,
-  styles: [`
-    .dash { max-width: 860px; }
-  `],
+  styleUrl: './styles/home.scss',
 })
 export class AdminHome implements OnInit {
   private cms = inject(CmsContentService);

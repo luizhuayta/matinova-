@@ -208,9 +208,8 @@ function cms_pages_delete(string $slug): never
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
-    db()->prepare('DELETE FROM revisions WHERE slug = ?')->execute([$slug]);
-    db()->prepare('DELETE FROM preview_tokens WHERE slug = ?')->execute([$slug]);
-    db()->prepare('DELETE FROM pages WHERE slug = ?')->execute([$slug]);
+    $locale = cms_request_locale();
+    cms_pages_delete_locale($slug, $locale);
     json_out(['ok' => true]);
 }
 
@@ -375,6 +374,7 @@ function handle_sitemap(): never
         $bySlug[$slug][$locale] = $row;
     }
     header('Content-Type: application/xml; charset=UTF-8');
+    header('Cache-Control: public, max-age=3600');
     echo '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
     echo '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">' . "\n";
     foreach ($bySlug as $slug => $locales) {

@@ -1,6 +1,13 @@
 <?php
 declare(strict_types=1);
 
+if (!function_exists('cms_revisions_insert')) {
+    require_once __DIR__ . '/Repos/RevisionsRepository.php';
+}
+if (!function_exists('cms_pages_delete_locale')) {
+    require_once __DIR__ . '/Repos/PagesRepository.php';
+}
+
 function decode_json_col(mixed $raw): array
 {
     if (is_array($raw)) {
@@ -304,8 +311,7 @@ function cms_doc_publish(string $slug): never
     if ($guard) {
         json_out($guard, 400);
     }
-    db()->prepare('INSERT INTO revisions (slug, author, snapshot) VALUES (?, ?, ?)')
-        ->execute([$slug, $_SESSION['admin_username'] ?? 'admin', json_encode($next, JSON_UNESCAPED_UNICODE)]);
+    cms_revisions_insert($slug, cms_request_locale(), (string) ($_SESSION['admin_username'] ?? 'admin'), $next);
     $ver = $current + 1;
     if (cms_doc_write_publish($slug, $next, $ver, $current) === 0) {
         json_out(['message' => cms_doc_publish_conflict_message()], 409);
@@ -321,9 +327,7 @@ function cms_doc_publish(string $slug): never
 
 function cms_doc_restore(string $slug, int $id): never
 {
-    $stmt = db()->prepare('SELECT snapshot FROM revisions WHERE id = ? AND slug = ?');
-    $stmt->execute([$id, $slug]);
-    $row = $stmt->fetch();
+    $row = cms_revisions_get($slug, $id, cms_request_locale());
     if (!$row) {
         json_out(['message' => 'Revisión no encontrada'], 404);
     }
@@ -339,14 +343,7 @@ function cms_doc_restore(string $slug, int $id): never
 
 function list_revisions(string $slug): array
 {
-    $stmt = db()->prepare('SELECT id, author, created_at, snapshot FROM revisions WHERE slug = ? ORDER BY id DESC LIMIT 40');
-    $stmt->execute([$slug]);
-    $rows = $stmt->fetchAll();
-    foreach ($rows as &$row) {
-        $row['snapshot'] = decode_json_col($row['snapshot']);
-        $row['id'] = (int) $row['id'];
-    }
-    return $rows;
+    return cms_revisions_list($slug, cms_request_locale());
 }
 
 function publish_document(string $slug): never

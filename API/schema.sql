@@ -40,7 +40,24 @@ CREATE TABLE IF NOT EXISTS media (
   width INT UNSIGNED NULL,
   height INT UNSIGNED NULL,
   variants TEXT NULL,
+  parent_id INT UNSIGNED NULL,
+  kind VARCHAR(20) NOT NULL DEFAULT 'upload',
+  original_stored VARCHAR(255) NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE IF NOT EXISTS media_versions (
+  id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  media_id INT UNSIGNED NOT NULL,
+  stored_name VARCHAR(255) NOT NULL,
+  url VARCHAR(400) NOT NULL,
+  mime VARCHAR(80) NOT NULL,
+  size_bytes INT UNSIGNED NOT NULL DEFAULT 0,
+  width INT UNSIGNED NULL,
+  height INT UNSIGNED NULL,
+  reason VARCHAR(20) NOT NULL DEFAULT 'crop',
+  created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_media_versions_media (media_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS messages (
@@ -54,16 +71,19 @@ CREATE TABLE IF NOT EXISTS messages (
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_messages_kind (kind),
   INDEX idx_messages_status (status),
-  INDEX idx_messages_ticket (ticket)
+  INDEX idx_messages_ticket (ticket),
+  UNIQUE KEY uq_messages_ticket (ticket)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS revisions (
   id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   slug VARCHAR(80) NOT NULL,
+  locale VARCHAR(8) NOT NULL DEFAULT 'es',
   author VARCHAR(80) NOT NULL DEFAULT '',
   snapshot LONGTEXT NOT NULL,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-  INDEX idx_rev_slug (slug)
+  INDEX idx_rev_slug (slug),
+  INDEX idx_rev_slug_locale (slug, locale)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 CREATE TABLE IF NOT EXISTS preview_tokens (

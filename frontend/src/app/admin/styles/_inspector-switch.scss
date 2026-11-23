@@ -1,0 +1,60 @@
+.switch-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-12);
+  min-width: 0;
+  padding: var(--space-4) 0;
+  font-weight: 600;
+  font-size: var(--text-14);
+  color: var(--admin-text);
+}
+
+.switch-row span {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.switch-row input {
+  appearance: none;
+  width: 40px;
+  height: 24px;
+  flex-shrink: 0;
+  margin: 0;
+  border-radius: 999px;
+  background: var(--ink-500);
+  position: relative;
+  cursor: pointer;
+}
+
+.switch-row input::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  transition: transform 160ms ease;
+}
+
+.switch-row input:checked {
+  background: var(--brand-900);
+}
+
+.switch-row input:checked::after {
+  transform: translateX(16px);
+}
+
+.switch-row input:focus-visible {
+  outline: 2px solid var(--accent-600);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .switch-row input::after {
+    transition: none;
+  }
+}

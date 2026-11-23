@@ -1,0 +1,174 @@
+.wrap {
+  max-width: 900px;
+}
+
+.admin-seg {
+  margin: var(--space-16) 0 0;
+  width: fit-content;
+}
+
+.admin-toolbar select.fixed {
+  flex: 0 1 180px;
+  min-width: 150px;
+}
+
+.msg-card {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.msg-card:hover {
+  border-color: var(--brand-500);
+}
+
+.msg-card.expanded {
+  border-color: var(--brand-900);
+  box-shadow: var(--shadow-sm);
+}
+
+.msg-head {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: 0.8rem 0.9rem;
+  background: transparent;
+  border: 0;
+  text-align: left;
+  font-family: inherit;
+  cursor: pointer;
+  color: var(--admin-text);
+}
+
+.msg-copy {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.msg-copy strong {
+  font-family: var(--font-display);
+  font-size: var(--text-16);
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.msg-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.msg-meta time {
+  color: var(--admin-muted);
+  font-size: var(--text-12);
+}
+
+.ticket-inline {
+  font-family: ui-monospace, monospace;
+  font-size: var(--text-12);
+  font-weight: 700;
+  color: var(--admin-mark-ink);
+  background: var(--admin-mark-soft);
+  border: 1px solid rgba(0, 102, 255, 0.28);
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+}
+
+.pill.sm {
+  min-height: 24px;
+  font-size: 0.68rem;
+}
+
+.chev {
+  color: var(--admin-muted);
+  flex: 0 0 auto;
+}
+
+.msg-body {
+  border-top: 1px solid var(--admin-line);
+  background: var(--surface-50);
+  padding: var(--space-16);
+  display: grid;
+  gap: var(--space-12);
+}
+
+.mail-line {
+  margin: 0;
+  font-size: var(--text-14);
+  color: var(--admin-muted);
+}
+
+.fields {
+  margin: 0;
+  display: grid;
+  gap: var(--space-8);
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.field {
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+  min-width: 0;
+}
+
+.field dt {
+  font-size: var(--text-12);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--admin-muted);
+  margin-bottom: 2px;
+}
+
+.field dd {
+  margin: 0;
+  font-size: var(--text-14);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.msg-actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.pager {
+  display: flex;
+  gap: var(--space-12);
+  align-items: center;
+  justify-content: center;
+  margin-top: var(--space-16);
+  font-size: var(--text-14);
+  color: var(--admin-muted);
+}
+
+.empty-state {
+  margin-top: var(--space-16);
+}
+
+@media (max-width: 560px) {
+  .msg-head .pill.sm {
+    display: none;
+  }
+
+  .msg-copy strong {
+    white-space: normal;
+  }
+
+  .page-head {
+    flex-wrap: wrap;
+  }
+
+  .admin-toolbar select.fixed {
+    min-width: 0;
+    flex: 1 1 100%;
+  }
+}

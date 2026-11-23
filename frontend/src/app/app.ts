@@ -1,16 +1,16 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
-import { RouterOutlet, RouterLink, Router, NavigationEnd } from '@angular/router';
+import { Component, inject, signal, OnInit } from '@angular/core';
+import { RouterOutlet, Router, NavigationEnd } from '@angular/router';
 import { Header } from './components/header/header';
 import { Footer } from './components/footer/footer';
 import { ChatbotComponent } from './components/chatbot/chatbot';
 import { WhatsappBubble } from './components/whatsapp-bubble/whatsapp-bubble';
-import { AccessibilityComponent } from './components/accessibility/accesibility';
+import { AccessibilityComponent } from './components/accessibility/accessibility';
+import { SkipLink } from './components/public/skip-link';
+import { SiteChrome } from './components/public/site-chrome';
 import { filter } from 'rxjs/operators';
 import { CmsContentService } from './cms/cms-content.service';
 import { CmsEditorService } from './cms/cms-editor.service';
 import { CmsSeoService } from './cms/cms-seo.service';
-import { CmsTextDirective } from './cms/cms-text.directive';
-import { CmsImageDirective } from './cms/cms-image.directive';
 import { slugFromRoute } from './cms/cms.models';
 import { LocaleService } from './cms/locale.service';
 
@@ -18,14 +18,13 @@ import { LocaleService } from './cms/locale.service';
   selector: 'app-root',
   imports: [
     RouterOutlet,
-    RouterLink,
     Header,
     Footer,
     ChatbotComponent,
     WhatsappBubble,
     AccessibilityComponent,
-    CmsTextDirective,
-    CmsImageDirective,
+    SkipLink,
+    SiteChrome,
   ],
   templateUrl: './app.html',
   styleUrl: './app.scss'
@@ -37,69 +36,67 @@ export class App implements OnInit {
   private locales = inject(LocaleService);
   editor = inject(CmsEditorService);
   isAdmin = signal(false);
-  showCtaBanner = signal(true);
-  showCookieBanner = signal(true);
-  showLoading = signal(true);
 
-  site = computed(() => this.cms.site());
-  showSplash = computed(() => this.site()['showSplash'] !== false && this.showLoading() && !this.isAdmin() && !this.editor.editMode());
-  showCta = computed(() => this.site()['showCtaBanner'] !== false && this.showCtaBanner() && !this.isAdmin());
-  showCookies = computed(() => this.showCookieBanner() && !this.isAdmin() && !this.editor.editMode());
-  showWhatsapp = computed(() => this.site()['showWhatsapp'] !== false && !this.isAdmin());
-  showChat = computed(() => this.site()['showChatbot'] !== false && !this.isAdmin());
+  site = this.cms.site;
+  showWhatsapp = () => this.site()['showWhatsapp'] !== false && !this.isAdmin();
+  showChat = () => this.site()['showChatbot'] !== false && !this.isAdmin();
 
   ngOnInit() {
     void this.seo;
-    if (!this.router.url.startsWith('/admin')) {
-      this.locales.setFromUrl(this.router.url);
-    }
-    this.cms.loadAll().catch(() => undefined);
-
-    const cookiesAccepted = localStorage.getItem('cookiesAccepted');
-    if (cookiesAccepted === 'true' || cookiesAccepted === 'false') {
-      this.showCookieBanner.set(false);
-    }
-    if (localStorage.getItem('ctaBannerClosed') === 'true') {
-      this.showCtaBanner.set(false);
-    }
-
-    const splashMs = Number(this.site()['splashSeconds'] ?? 3) * 1000;
-    setTimeout(() => this.showLoading.set(false), Number.isFinite(splashMs) ? splashMs : 3000);
-
+    // Sin boot ansioso con router.url: durante el bootstrap la navegación inicial
+    // aún no completa y url es '/' (locale es), lo que disparaba toda la shell en
+    // español antes de descubrir /en. La primera NavigationEnd trae la URL real.
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd)
     ).subscribe((event) => {
-      const url = event.urlAfterRedirects.split('?')[0];
-      this.isAdmin.set(url.startsWith('/admin'));
-      if (!url.startsWith('/admin')) {
-        const prev = this.locales.locale();
-        const parsed = this.locales.parseUrl(url);
-        this.locales.locale.set(parsed.locale);
-        if (parsed.locale !== prev) {
-          this.cms.loadAll().catch(() => undefined);
-        }
-        const slug = slugFromRoute(parsed.path);
-        if (slug && !this.editor.editMode()) {
-          this.cms.useSlug(slug);
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      this.boot(event.urlAfterRedirects);
+      this.redirectToSavedLocaleIfNeeded(event.urlAfterRedirects);
+      if (!event.urlAfterRedirects.split('?')[0].startsWith('/admin')) {
+        window.scrollTo({ top: 0, behavior: this.reducedMotion() ? 'auto' : 'smooth' });
       }
     });
-    this.isAdmin.set(this.router.url.startsWith('/admin'));
   }
 
-  closeCtaBanner() {
-    this.showCtaBanner.set(false);
-    localStorage.setItem('ctaBannerClosed', 'true');
+  private redirectToSavedLocaleIfNeeded(url: string): void {
+    const path = url.split('?')[0];
+    // Solo redirigir si es la raíz sin prefijo de idioma y no es admin
+    if (path === '/' || path === '') {
+      const savedLocale = this.locales.locale();
+      if (savedLocale === 'en') {
+        void this.router.navigateByUrl('/en');
+      }
+    }
   }
 
-  acceptCookies() {
-    this.showCookieBanner.set(false);
-    localStorage.setItem('cookiesAccepted', 'true');
+  private boot(rawUrl: string): void {
+    const url = rawUrl.split('?')[0];
+    const admin = url.startsWith('/admin');
+    this.isAdmin.set(admin);
+    if (admin) {
+      if (!this.cms.hasAllPages()) {
+        this.cms.loadAll().catch(() => undefined);
+      }
+      return;
+    }
+    const prev = this.locales.locale();
+    const parsed = this.locales.parseUrl(url);
+    // Si la URL tiene prefijo de idioma, usar ese. Si no, mantener el idioma guardado
+    if (url.startsWith('/en') || url.startsWith('/es')) {
+      this.locales.locale.set(parsed.locale);
+    }
+    if (typeof document !== 'undefined') {
+      document.documentElement.lang = this.locales.locale() === 'en' ? 'en' : 'es';
+    }
+    const slug = slugFromRoute(parsed.path) || 'inicio';
+    if (!this.editor.editMode()) {
+      this.cms.useSlug(slug);
+      if (this.locales.locale() !== prev || !this.cms.pages()[slug]) {
+        this.cms.loadPublic(slug).catch(() => undefined);
+      }
+    }
   }
 
-  rejectCookies() {
-    this.showCookieBanner.set(false);
-    localStorage.setItem('cookiesAccepted', 'false');
+  private reducedMotion(): boolean {
+    return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 }

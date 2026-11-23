@@ -1,0 +1,30 @@
+@for (group of groups(); track group.title) {
+  <div class="admin-group">
+    <div class="group-head">
+      <h2 class="admin-group-title">{{ group.title }}</h2>
+      <span class="admin-chip admin-num">{{ group.pages.length }} {{ group.pages.length === 1 ? 'página' : 'páginas' }}</span>
+    </div>
+    <div class="page-grid">
+      @for (page of group.pages; track page.slug) {
+        <div class="card-wrap">
+          <a class="page-card accent-{{ accentFor(group.title) }}" [routerLink]="['/admin/paginas', page.slug]">
+            <span class="page-top">
+              <span class="page-icon"><i class="bi {{ icon(page) }}" aria-hidden="true"></i></span>
+              <i class="bi bi-arrow-up-right page-goto" aria-hidden="true"></i>
+            </span>
+            <span class="row-copy">
+              <strong>{{ label(page) }}</strong>
+              <small>{{ blurb(page) }}</small>
+            </span>
+            <span class="card-cta">Editar <i class="bi bi-arrow-right" aria-hidden="true"></i></span>
+          </a>
+          @if (!page.protected && page.slug !== 'sitio') {
+            <button type="button" class="del" (click)="remove.emit(page)" aria-label="Eliminar página">
+              <i class="bi bi-trash" aria-hidden="true"></i>
+            </button>
+          }
+        </div>
+      }
+    </div>
+  </div>
+}

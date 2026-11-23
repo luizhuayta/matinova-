@@ -3,7 +3,10 @@ declare(strict_types=1);
 
 function csrf_token(): string
 {
-    start_admin_session();
+    start_admin_session(false);
+    if (!admin_session_ready()) {
+        return '';
+    }
     if (empty($_SESSION['csrf'])) {
         $_SESSION['csrf'] = bin2hex(random_bytes(32));
     }
@@ -12,9 +15,9 @@ function csrf_token(): string
 
 function require_csrf(): void
 {
-    start_admin_session();
+    start_admin_session(false);
     $sent = (string) ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? '');
-    $expected = (string) ($_SESSION['csrf'] ?? '');
+    $expected = admin_session_ready() ? (string) ($_SESSION['csrf'] ?? '') : '';
     if ($expected === '' || $sent === '' || !hash_equals($expected, $sent)) {
         json_out(['message' => 'Token CSRF inválido'], 403);
     }
@@ -49,13 +52,16 @@ function rate_limit(string $bucket, int $max, int $windowSeconds): void
 
 function admin_logged_in(): bool
 {
-    start_admin_session();
-    return !empty($_SESSION['admin_id']);
+    start_admin_session(false);
+    return admin_session_ready() && !empty($_SESSION['admin_id']);
 }
 
 function admin_role(): string
 {
-    start_admin_session();
+    start_admin_session(false);
+    if (!admin_session_ready()) {
+        return '';
+    }
     $role = (string) ($_SESSION['admin_role'] ?? '');
     if ($role !== '') {
         return $role;

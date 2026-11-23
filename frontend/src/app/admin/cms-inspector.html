@@ -231,6 +231,11 @@
                   <span>Espaciado</span>
                   <input class="admin-control" type="text" [ngModel]="layoutPad(item)" (ngModelChange)="setStr('blocks.' + i + '.layout.padding', $event)" placeholder="2rem 0">
                 </label>
+                <div class="layout-row layout-row--media">
+                  <span>Imagen de fondo</span>
+                  <app-cms-image-field [path]="'blocks.' + i + '.layout.backgroundImage'" />
+                  <p class="micro">Apaisada (16:9). Tapa el color de fondo; las tarjetas y letras se adaptan solas.</p>
+                </div>
                 <app-cms-inspector [rootPath]="'blocks.' + i + '.props'" />
               </details>
             }

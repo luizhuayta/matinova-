@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="620" viewBox="0 0 800 620" role="img" aria-labelledby="whyTitle whyDesc">
+  <title id="whyTitle">Operación TI entre sedes</title>
+  <desc id="whyDesc">Dos edificios isométricos conectados a un nodo de servidores, paleta navy y naranja.</desc>
+  <rect width="800" height="620" fill="#F7F9FC"/>
+  <g opacity="0.45" stroke="#2C50B8" stroke-width="1" fill="none">
+    <path d="M70 450 L400 280 L730 450 L400 620 Z"/>
+    <path d="M180 395 L400 280 L620 395"/>
+    <path d="M70 450 L400 620"/>
+    <path d="M400 280 L400 620"/>
+    <path d="M730 450 L400 620"/>
+  </g>
+  <!-- Cañete building -->
+  <g>
+    <polygon points="160,250 250,205 250,365 160,410" fill="#1A3279"/>
+    <polygon points="250,205 340,250 340,410 250,365" fill="#0C1D4A"/>
+    <polygon points="160,250 250,205 340,250 250,295" fill="#2C50B8"/>
+    <g fill="#EEF2F8">
+      <rect x="178" y="280" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="206" y="266" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="178" y="318" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="206" y="304" width="18" height="14" transform="skewY(-26)"/>
+    </g>
+    <polygon points="196,360 232,342 232,390 196,408" fill="#F26522"/>
+  </g>
+  <!-- Lima building -->
+  <g>
+    <polygon points="470,210 560,165 560,355 470,400" fill="#2C50B8"/>
+    <polygon points="560,165 670,220 670,410 560,355" fill="#0C1D4A"/>
+    <polygon points="470,210 560,165 670,220 580,265" fill="#4A6BD0"/>
+    <g fill="#EEF2F8">
+      <rect x="492" y="250" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="520" y="236" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="492" y="288" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="520" y="274" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="492" y="326" width="18" height="14" transform="skewY(-26)"/>
+      <rect x="520" y="312" width="18" height="14" transform="skewY(-26)"/>
+    </g>
+    <polygon points="508,348 548,328 548,376 508,396" fill="#F26522"/>
+  </g>
+  <!-- Central node -->
+  <g>
+    <polygon points="340,300 400,270 460,300 400,330" fill="#2C50B8"/>
+    <polygon points="340,300 400,330 400,390 340,360" fill="#1A3279"/>
+    <polygon points="400,330 460,300 460,360 400,390" fill="#0C1D4A"/>
+    <circle cx="400" cy="328" r="10" fill="#F26522"/>
+  </g>
+  <path d="M232 342 C280 320, 320 330, 360 318" fill="none" stroke="#F26522" stroke-width="5" stroke-linecap="round"/>
+  <path d="M508 348 C470 330, 450 328, 440 318" fill="none" stroke="#F26522" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="232" cy="342" r="6" fill="#F26522"/>
+  <circle cx="508" cy="348" r="6" fill="#F26522"/>
+</svg>

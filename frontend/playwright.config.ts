@@ -3,7 +3,12 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 
-const localChrome = join(homedir(), '.cache/ms-playwright/chromium-1187/chrome-linux/chrome');
+const localChrome = [
+  join(homedir(), '.cache/ms-playwright/chromium-1187/chrome-linux/chrome'),
+  '/opt/helium/chrome',
+  '/usr/bin/brave-browser',
+  '/usr/bin/google-chrome-stable',
+].find((path) => existsSync(path));
 
 export default defineConfig({
   testDir: './e2e',
@@ -27,5 +32,8 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 120_000,
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
+  projects: [
+    { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
+    { name: 'mobile', use: { ...devices['Pixel 5'] } },
+  ],
 });

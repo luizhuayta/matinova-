@@ -1,0 +1,48 @@
+.wrap {
+  max-width: 720px;
+}
+
+form {
+  display: grid;
+  gap: var(--space-16);
+}
+
+.admin-seg {
+  width: fit-content;
+  max-width: 100%;
+}
+
+.mode-hint {
+  margin-top: var(--space-8);
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12);
+}
+
+.form-grid .span {
+  grid-column: 1 / -1;
+}
+
+.admin-card .admin-banner {
+  margin-top: var(--space-12);
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-8);
+  margin-top: var(--space-16);
+}
+
+@media (max-width: 560px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .page-head {
+    flex-wrap: wrap;
+  }
+}

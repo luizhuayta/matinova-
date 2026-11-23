@@ -7,18 +7,16 @@ import { ChatLink, ChatService, ChatbotMode } from '../../services/chat';
 import { ChatDataService, ChatMessage } from '../../services/chat-data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CmsContentService } from '../../cms/cms-content.service';
+import { LocaleService } from '../../cms/locale.service';
+import { CHATBOT_WELCOME_LINKS, publicPathLabel } from '../../cms/cms-routes';
 
 const WELCOME: ChatMessage = {
-  text: '¡Hola! 👋 Soy el asistente de *Matt Innova Solution*. Puedo orientarte sobre servicios, clientes, precios, contacto y el libro de reclamaciones. ¿En qué te ayudo?',
+  text: 'Hola. Soy el asistente de *Matt Innova Solution*. Puedo orientarte sobre servicios, clientes, contacto y el libro de reclamaciones.',
   type: 'bot',
-  links: [
-    { label: 'Servicios', path: '/servicios' },
-    { label: 'Clientes', path: '/clientes' },
-    { label: 'Contacto', path: '/contacto' },
-  ]
+  links: [...CHATBOT_WELCOME_LINKS],
 };
 
-const LOGO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/8943/8943377.png';
+const LOGO_FALLBACK = 'logo.svg';
 
 @Component({
   selector: 'app-chatbot',
@@ -29,11 +27,18 @@ const LOGO_FALLBACK = 'https://cdn-icons-png.flaticon.com/512/8943/8943377.png';
 })
 export class ChatbotComponent implements AfterViewInit, OnDestroy {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef<HTMLElement>;
+  @ViewChild('chatInput') private chatInput?: ElementRef<HTMLInputElement>;
+  @ViewChild('chatFab') private chatFab?: ElementRef<HTMLButtonElement>;
   private cms = inject(CmsContentService);
+  private locales = inject(LocaleService);
   private chatData = inject(ChatDataService);
   private analytics = inject(AnalyticsService);
 
   readonly logoFallback = LOGO_FALLBACK;
+
+  siteLogo(): string {
+    return String(this.cms.site()['logo'] || LOGO_FALLBACK);
+  }
 
   isOpen = false;
   userInput = '';
@@ -87,6 +92,17 @@ export class ChatbotComponent implements AfterViewInit, OnDestroy {
     if (this.isOpen) {
       this.hasInteracted = true;
       this.scrollToBottom();
+      // El foco entra al campo de texto cuando se abre.
+      queueMicrotask(() => this.chatInput?.nativeElement.focus());
+    } else {
+      // Al cerrar, el foco vuelve al botón flotante.
+      queueMicrotask(() => this.chatFab?.nativeElement.focus());
+    }
+  }
+
+  closeFromKeyboard(): void {
+    if (this.isOpen) {
+      this.toggleChat();
     }
   }
 
@@ -152,21 +168,7 @@ export class ChatbotComponent implements AfterViewInit, OnDestroy {
   }
 
   private friendlyPath(path: string): string {
-    const map: Record<string, string> = {
-      '/servicios': 'Servicios',
-      '/servicios/software': 'Software y web',
-      '/servicios/saas': 'SaaS',
-      '/servicios/consultoria': 'Consultoría TI',
-      '/servicios/soluciones-ti': 'Soluciones TI',
-      '/servicios/hardware': 'Hardware',
-      '/acerca-de': 'Acerca de',
-      '/contacto': 'Contacto',
-      '/libro-reclamaciones': 'Libro de reclamaciones',
-      '/clientes': 'Clientes',
-      '/privacidad': 'Privacidad',
-      '/terminos': 'Términos',
-    };
-    return map[path] ?? path;
+    return publicPathLabel(path);
   }
 
   /** Delegación de clics en enlaces internos renderizados dentro del mensaje. */
@@ -261,7 +263,7 @@ export class ChatbotComponent implements AfterViewInit, OnDestroy {
   }
 
   navigateTo(path: string) {
-    this.router.navigateByUrl(path);
+    void this.router.navigateByUrl(this.locales.hrefFor(path));
     this.isOpen = false;
     this.syncBodyScroll();
   }

@@ -1,186 +1,339 @@
-<div class="home-wrapper">
+<div class="home-wrapper premium-home">
   @switch (block().type) {
     @case ('hero') {
-      <section class="hero" [ngStyle]="{'background-image': 'url(' + heroImage() + ')'}">
-        <div class="hero-overlay">
-          <div class="slider-indicators" [cmsList]="path('slides')">
-            @for (slide of slides(); track $index) {
-              <div class="dot" [class.active]="currentSlide === $index" (click)="setSlide($index)"></div>
-            }
-          </div>
-          <div class="container hero-content">
-            <span class="badge" [cmsText]="path('slides.' + currentSlide + '.badge')"></span>
-            <h1 [cmsText]="path('slides.' + currentSlide + '.title')"></h1>
-            @if (internal(linkOf())) {
-              <a class="btn-primary" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-            } @else if (linkOf()) {
-              <a class="btn-primary" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
+      <section class="premium-hero studio-dark">
+        <div class="container studio-grid premium-hero-grid">
+          <div class="premium-hero-copy span-7" appReveal>
+            @if (editor.editMode() || slideBadge()) {
+              <p class="premium-kicker"><span [cmsText]="path('slides.' + currentSlide() + '.badge')"></span></p>
             }
             @if (editor.editMode()) {
-              <img class="cms-hero-pick" [cmsImage]="path('slides.' + currentSlide + '.image')" [src]="heroImage()" alt="Foto del banner">
+              <h1 [cmsText]="path('slides.' + currentSlide() + '.title')"></h1>
+            } @else {
+              <h1>
+                @for (part of titleParts(); track $index) {
+                  <span [class.accent]="part.accent">{{ part.text }}</span>
+                }
+              </h1>
+            }
+            @if (subtitle()) {
+              <p class="premium-hero-sub" [cmsText]="path('subtitle')"></p>
+            } @else {
+              <p class="premium-hero-sub"><!-- i18n -->30 años integrando software, hardware y operación para empresas y entidades educativas en Perú. Migraciones, ERPs, redes y soporte 24/7.</p>
+            }
+            <div class="premium-hero-ctas">
+              @if (isInternalHref(href())) {
+                <a publicBtn tone="accent" class="p-btn-premium" [routerLink]="href()" aria-label="Ver servicios de Matt Innova">
+                  <span [cmsText]="path('cta')"></span>
+                  <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                </a>
+              } @else {
+                <a publicBtn tone="accent" class="p-btn-premium" [href]="href()" target="_blank" rel="noopener" aria-label="Ver servicios de Matt Innova">
+                  <span [cmsText]="path('cta')"></span>
+                  <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                </a>
+              }
+              @if (isInternalHref(secondaryHref())) {
+                <a class="p-btn-ghost-light" [routerLink]="secondaryHref()" aria-label="Ver presentación de Matt Innova">
+                  <svg class="ui-icon ui-icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <span [cmsText]="path('secondaryCta')"></span>
+                </a>
+              } @else {
+                <a class="p-btn-ghost-light" [href]="secondaryHref()" target="_blank" rel="noopener" aria-label="Ver presentación de Matt Innova">
+                  <svg class="ui-icon ui-icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  <span [cmsText]="path('secondaryCta')"></span>
+                </a>
+              }
+              @if (slides().length > 1 && animate()) {
+                <button type="button" class="hero-pause" (click)="toggleAuto()" [attr.aria-pressed]="autoPaused()" [attr.aria-label]="autoPaused() ? 'Reanudar banners' : 'Pausar banners'">
+                  @if (autoPaused()) {
+                    <svg class="ui-icon ui-icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                  } @else {
+                    <svg class="ui-icon ui-icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
+                  }
+                </button>
+              }
+            </div>
+            @if (editor.editMode()) {
+              <div class="hero-edit-strip">
+                <div class="carousel-arrows">
+                  <button type="button" class="car-btn" (click)="prevSlide()" aria-label="Banner anterior">
+                    <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#chevron"></use></svg>
+                  </button>
+                  <button type="button" class="car-btn" (click)="nextSlide()" aria-label="Banner siguiente">
+                    <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                  </button>
+                </div>
+                <span class="slide-count">{{ slideIndexLabel() }}</span>
+                <div class="u-rail premium-ticks" [cmsList]="path('slides')" role="tablist" aria-label="Banners">
+                  @for (slide of slides(); track $index) {
+                    <button
+                      type="button"
+                      class="u-tick"
+                      role="tab"
+                      [class.active]="currentSlide() === $index"
+                      [attr.aria-selected]="currentSlide() === $index"
+                      (click)="setSlide($index)"
+                      [attr.aria-label]="'Banner ' + ($index + 1)"></button>
+                  }
+                </div>
+              </div>
             }
           </div>
+          <div class="premium-hero-visual span-5" appReveal delay="80ms">
+            <div class="visual-frame">
+              @if (showHeroPhoto()) {
+                <picture>
+                  @if (webpOf(heroImage()); as webp) {
+                    <source type="image/webp" [srcset]="webp">
+                  }
+                  <img
+                    [src]="rasterOf(heroImage()) || heroImage()"
+                    [cmsImage]="path('slides.' + currentSlide() + '.image')"
+                    (error)="onHeroError()"
+                    width="720"
+                    height="560"
+                    loading="eager"
+                    fetchpriority="high"
+                    decoding="async"
+                    [alt]="current()['title'] || 'Banner'">
+                </picture>
+              } @else {
+                <img
+                  src="/assets/illustrations/hero.svg"
+                  [cmsImage]="path('slides.' + currentSlide() + '.image')"
+                  width="720"
+                  height="560"
+                  alt="Gabinetes de servidores e infraestructura TI en proyección isométrica">
+              }
+            </div>
+          </div>
+        </div>
+        <div class="container studio-grid premium-trustbar" appReveal [cmsList]="path('stats')">
+          @for (stat of heroStats(); track $index) {
+            <div class="trust-item span-3">
+              <span class="trust-icon" aria-hidden="true">
+                <svg class="ui-icon"><use [attr.href]="'assets/icons/ui.svg#' + heroStatIcon(stat['icon'], $index)"></use></svg>
+              </span>
+              @if (stats().length) {
+                <strong [cmsText]="path('stats.' + $index + '.number')"></strong>
+                <span class="trust-label" [cmsText]="path('stats.' + $index + '.label')"></span>
+              } @else {
+                <strong>{{ stat['number'] }}</strong>
+                <span class="trust-label">{{ stat['label'] }}</span>
+              }
+            </div>
+          }
         </div>
       </section>
     }
     @case ('about') {
-      <section class="about container">
-        <div class="about-grid">
-          <div class="about-img">
-            <img [src]="props()['image'] || 'about-image.jpg'" [alt]="props()['imageAlt'] || ''" [cmsImage]="path('image')">
+      <section class="premium-section premium-about" id="nosotros">
+        <div class="container studio-grid premium-about-grid">
+          <div class="about-visual span-5" appReveal>
+            <div class="about-frame">
+              @if (aboutPhoto()) {
+                <picture>
+                  @if (webpOf(aboutPhoto()); as webp) {
+                    <source type="image/webp" [srcset]="webp">
+                  }
+                  <img
+                    [src]="rasterOf(aboutPhoto()) || aboutPhoto()"
+                    width="640"
+                    height="500"
+                    loading="lazy"
+                    decoding="async"
+                    [alt]="props()['imageAlt'] || 'Operación TI entre sedes'"
+                    [cmsImage]="path('image')">
+                </picture>
+              } @else {
+                <img
+                  src="/assets/illustrations/why-us.svg"
+                  width="640"
+                  height="500"
+                  alt="Operación TI entre sedes, ilustración isométrica">
+              }
+            </div>
           </div>
-          <div class="about-text">
-            <span class="section-tag" [cmsText]="path('tag')"></span>
-            <h2 [cmsText]="path('title')"></h2>
-            <p [cmsText]="path('text')"></p>
+          <div class="about-copy span-7">
+            <div class="premium-head premium-head--left">
+              <h2 [cmsText]="path('title')"></h2>
+            </div>
+            <p class="lead" [cmsText]="path('text')"></p>
             @if (features().length) {
-              <div class="features-list">
+              <div class="check-grid">
                 @for (feature of features(); track $index) {
-                  <div class="feature-item">
-                    <span class="feature-icon">✓</span>
+                  <div class="check-card" appReveal [delay]="($index * 80) + 'ms'">
+                    <span class="check-icon" aria-hidden="true">
+                      <svg class="ui-icon ui-icon--sm"><use href="assets/icons/ui.svg#check"></use></svg>
+                    </span>
                     <span [cmsText]="featurePath($index)"></span>
                   </div>
                 }
               </div>
             }
-            @if (internal(linkOf())) {
-              <a class="btn-read-more" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-            } @else if (linkOf()) {
-              <a class="btn-read-more" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-            }
+            <div class="about-ctas">
+              <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="navy" cssClass="p-btn-premium p-btn-premium--navy" />
+              <a class="p-link-phone" [routerLink]="contactHref()" aria-label="Escribir a Matt Innova por el formulario de contacto">
+                <span class="phone-icon" aria-hidden="true">
+                  <svg class="ui-icon"><use href="assets/icons/ui.svg#phone"></use></svg>
+                </span>
+                <span>
+                  <small><!-- i18n -->Escríbenos hoy</small>
+                  <strong>(+51) 992 422 219</strong>
+                </span>
+              </a>
+            </div>
           </div>
         </div>
       </section>
     }
     @case ('contactCards') {
-      <section class="contact-section container">
-        <div class="contact-grid">
+      <section class="premium-section premium-contact">
+        <div class="container studio-grid premium-contact-grid" [cmsList]="path('items')">
           @for (card of items(); track $index) {
-            <div class="info-card">
-              <div class="icon-box"><i class="bi" [class]="card['icon'] || 'bi-geo-alt-fill'"></i></div>
-              <div class="text-box">
-                <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
+            <article
+              class="p-card contact-card span-4"
+              appReveal
+              [delay]="($index * 90) + 'ms'"
+              [attr.data-todo]="isAddressCard(card) ? 'verificar-direccion' : null">
+              <span class="p-icon" aria-hidden="true">
+                <svg class="ui-icon">
+                  <use [attr.href]="'assets/icons/ui.svg#' + iconName(card['icon'], $index)"></use>
+                </svg>
+              </span>
+              <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
+              @if (cardHref(card); as href) {
+                <p>
+                  <a [href]="href" [attr.target]="href.startsWith('http') ? '_blank' : null" rel="noopener noreferrer" [cmsText]="path('items.' + $index + '.text')"></a>
+                </p>
+              } @else {
                 <p [cmsText]="path('items.' + $index + '.text')"></p>
-              </div>
-            </div>
+              }
+            </article>
           }
         </div>
       </section>
     }
     @case ('services') {
-      <hr class="section-divider">
-      <section class="services-main container">
-        <span class="section-tag" [cmsText]="path('tag')"></span>
-        <h2 class="title-left" [cmsText]="path('title')"></h2>
-        <div class="services-grid" [cmsList]="path('cards')">
-          @for (card of serviceCards(); track $index) {
-            <div class="service-card">
-              <div class="card-img">
-                <img [src]="card['img']" [alt]="card['alt'] || card['title']" [cmsImage]="path('cards.' + $index + '.img')">
-              </div>
-              <div class="card-body">
-                <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
-                <p [cmsText]="path('cards.' + $index + '.text')"></p>
-              </div>
-            </div>
-          }
+      <section class="premium-section premium-services" id="servicios-inicio">
+        <div class="container">
+          <div class="premium-head premium-head--center" appReveal>
+            @if (editor.editMode()) {
+              <h2 [cmsText]="path('title')"></h2>
+            } @else {
+              <h2>
+                @for (part of serviceTitleParts(); track $index) {
+                  <span [class.accent]="part.accent">{{ part.text }}</span>
+                }
+              </h2>
+            }
+            <p class="premium-sub" [cmsText]="path('text')"></p>
+          </div>
+          <div class="studio-grid services-grid premium-services-grid" [cmsList]="path('cards')">
+            @for (card of serviceCards(); track $index) {
+              <article class="premium-service-card span-4" appReveal [delay]="($index * 70) + 'ms'">
+                <picture class="service-media">
+                  @if (webpOf(card['img']); as webp) {
+                    <source type="image/webp" [srcset]="webp">
+                  }
+                  <img
+                    [src]="rasterOf(card['img'])"
+                    [alt]="card['alt'] || card['title']"
+                    [cmsImage]="path('cards.' + $index + '.img')"
+                    loading="lazy"
+                    width="640"
+                    height="400">
+                </picture>
+                <span class="service-overlay" aria-hidden="true"></span>
+                <div class="service-bay-body">
+                  <span class="service-icon" aria-hidden="true"><i [class]="cardIcon(card, $index)"></i></span>
+                  <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
+                  <p [cmsText]="path('cards.' + $index + '.text')"></p>
+                  @if (isInternalHref(cardLink(card))) {
+                    <a class="service-link" [routerLink]="cardLink(card)">
+                      {{ cardLinkLabel() }}
+                      <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                    </a>
+                  } @else {
+                    <a class="service-link" [href]="cardLink(card)" target="_blank" rel="noopener">
+                      {{ cardLinkLabel() }}
+                      <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                    </a>
+                  }
+                </div>
+              </article>
+            }
+          </div>
         </div>
       </section>
     }
     @case ('innovative') {
-      <hr class="section-divider">
-      <section class="innovative-services">
-        <div class="container innovative-grid">
-          <div class="innovative-intro">
-            <span class="section-tag-light" [cmsText]="path('tag')"></span>
-            <h2 [cmsText]="path('title')"></h2>
-            <p [cmsText]="path('text')"></p>
-            @if (internal(linkOf())) {
-              <a class="btn-discover" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-            } @else if (linkOf()) {
-              <a class="btn-discover" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-            }
+      <section class="premium-dark studio-dark">
+        <div class="container premium-dark-grid">
+          <div class="dark-copy">
+            <div class="premium-head premium-head--left">
+              <h2 [cmsText]="path('title')"></h2>
+            </div>
+            <p class="lead-light" [cmsText]="path('text')"></p>
+            <ul class="dark-points">
+              @for (point of innovativePoints(); track $index) {
+                <li>
+                  <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#check"></use></svg>
+                  {{ point }}
+                </li>
+              }
+            </ul>
+            <div class="dark-ctas">
+              <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="soft" cssClass="p-btn-premium p-btn-premium--white" />
+              <a class="p-btn-ghost-light" [routerLink]="contactHref()" [attr.aria-label]="contactCtaLabel()">{{ contactCtaLabel() }}</a>
+            </div>
           </div>
-          <div class="innovative-carousel-viewport">
-            <div class="innovative-items" [cmsList]="path('items')" [ngStyle]="{'transform': 'translateX(-' + (currentServiceSlide * 33.33) + '%)'}">
-              @for (service of items(); track $index) {
-                <div class="mini-card">
-                  <div class="card-img">
-                    <img [src]="service['img']" [alt]="service['title']" [cmsImage]="path('items.' + $index + '.img')">
-                  </div>
-                  <div class="card-info">
-                    <h4 [cmsText]="path('items.' + $index + '.title')"></h4>
-                    <p [cmsText]="path('items.' + $index + '.desc')"></p>
-                  </div>
+          <div class="innovative-mosaic premium-bento" [cmsList]="path('items')">
+            @for (service of items(); track $index) {
+              <article class="glass-card" appReveal [delay]="($index * 80) + 'ms'">
+                <div class="glass-media">
+                  <!-- TODO: reemplazar por foto real del equipo -->
+                  <picture>
+                    @if (webpOf(service['img']); as webp) {
+                      <source type="image/webp" [srcset]="webp">
+                    }
+                    <img [src]="rasterOf(service['img'])" [alt]="service['title']" [cmsImage]="path('items.' + $index + '.img')" loading="lazy" width="480" height="280">
+                  </picture>
                 </div>
-              }
-            </div>
-            <div class="service-indicators">
-              @for (service of items(); track $index) {
-                @if ($index < serviceSlideCount()) {
-                  <div
-                    class="service-dot"
-                    [class.active]="currentServiceSlide === $index"
-                    (click)="setServiceSlide($index)"
-                  ></div>
-                }
-              }
-            </div>
+                <div class="card-info">
+                  <h3 [cmsText]="path('items.' + $index + '.title')"></h3>
+                  <p [cmsText]="path('items.' + $index + '.desc')"></p>
+                </div>
+              </article>
+            }
           </div>
         </div>
       </section>
     }
     @case ('testimonials') {
-      <hr class="section-divider">
-      <section class="testimonials-section">
-        <div class="container testimonials-grid">
-          <div class="testimonials-intro">
-            <span class="section-tag" [cmsText]="path('tag')"></span>
+      <section class="premium-section premium-testimonials">
+        <div class="container">
+          <div class="premium-head premium-head--center">
             <h2 [cmsText]="path('title')"></h2>
-            <p [cmsText]="path('text')"></p>
-            @if (internal(linkOf())) {
-              <a class="btn-cta-testimonials" [routerLink]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-            } @else if (linkOf()) {
-              <a class="btn-cta-testimonials" [href]="linkOf()" [cmsText]="path('cta')" [cmsLink]="path('ctaLink')"></a>
-            }
+            <p class="home-quote" [cmsText]="path('text')"></p>
           </div>
-          <div class="testimonials-carousel">
-            <div class="testimonial-track" [cmsList]="path('items')" [ngStyle]="{'transform': 'translateX(-' + (currentTestimonialSlide * 50) + '%)'}">
-              @for (item of items(); track $index) {
-                <div class="testimonial-card">
-                  <div class="testimonial-bubble">
-                    <div class="quote-icon"><i class="bi bi-quote"></i></div>
-                    <p [cmsText]="path('items.' + $index + '.text')"></p>
-                    <div class="rating" aria-label="Valoración">
-                      @for (star of stars(item); track $index) {
-                        <i class="bi bi-star-fill"></i>
-                      }
-                    </div>
-                  </div>
-                  <div class="client-info">
-                    <div class="client-avatar">
-                      <img [src]="item['logo']" [alt]="item['client']" [cmsImage]="path('items.' + $index + '.logo')">
-                    </div>
-                    <div class="client-details">
-                      <h4 [cmsText]="path('items.' + $index + '.client')"></h4>
-                      <span class="client-role">{{ item['role'] || 'Cliente Satisfecho' }}</span>
-                      <span class="client-company">{{ item['company'] || 'Matt Innova Solution' }}</span>
-                    </div>
+          <div class="testimonial-list premium-t-grid" [cmsList]="path('items')">
+            @for (item of items(); track $index) {
+              <article class="p-card t-card" [class.is-featured]="$index === 0" appReveal [delay]="($index * 90) + 'ms'">
+                <p class="t-text" [cmsText]="path('items.' + $index + '.text')"></p>
+                <div class="t-foot">
+                  <img [src]="item['logo']" [alt]="item['client']" [cmsImage]="path('items.' + $index + '.logo')" loading="lazy" width="56" height="56">
+                  <div>
+                    <h3 [cmsText]="path('items.' + $index + '.client')"></h3>
+                    <p class="client-role">{{ item['role'] }}</p>
                   </div>
                 </div>
-              }
-            </div>
-            <div class="testimonial-indicators">
-              @for (item of items(); track $index) {
-                @if ($index < testimonialSlideCount()) {
-                  <div
-                    class="dot"
-                    [class.active]="currentTestimonialSlide === $index"
-                    (click)="setTestimonialSlide($index)"
-                  ></div>
-                }
-              }
-            </div>
+              </article>
+            }
+          </div>
+          <div class="t-cta">
+            <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="navy" cssClass="p-btn-premium p-btn-premium--navy" />
           </div>
         </div>
       </section>

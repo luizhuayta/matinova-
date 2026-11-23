@@ -62,7 +62,7 @@ function json_out_public(mixed $data, ?string $updatedAt = null): never
     $ifNone = preg_replace('/^W\//i', '', $ifNone) ?? $ifNone;
     $ifNone = trim($ifNone, " \t\"");
     $headers = [
-        'Cache-Control' => 'public, max-age=30, must-revalidate',
+        'Cache-Control' => 'public, max-age=3600, stale-while-revalidate=86400',
         'ETag' => $etag,
     ];
     if (is_string($updatedAt) && $updatedAt !== '') {
@@ -117,10 +117,29 @@ function cms_public_path(string $path, string $locale = 'es'): string
     return $normalized === '/' ? '/en' : '/en' . $normalized;
 }
 
+function request_uri_path(): string
+{
+    return rawurldecode(parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/');
+}
+
+function cms_should_serve_spa(string $method): bool
+{
+    if ($method !== 'GET' && $method !== 'HEAD') {
+        return false;
+    }
+    if (array_key_exists('cms_path', $_GET)) {
+        return true;
+    }
+    $uri = request_uri_path();
+    if (str_starts_with($uri, '/api/') || $uri === '/api' || str_starts_with($uri, '/api/index.php')) {
+        return false;
+    }
+    return $uri === '/admin' || str_starts_with($uri, '/admin/');
+}
+
 function route_path(): string
 {
-    $uri = parse_url($_SERVER['REQUEST_URI'] ?? '/', PHP_URL_PATH) ?: '/';
-    $uri = rawurldecode($uri);
+    $uri = request_uri_path();
     if (str_starts_with($uri, '/api/index.php')) {
         $uri = substr($uri, strlen('/api/index.php')) ?: '/';
     } elseif (str_starts_with($uri, '/index.php')) {
@@ -137,26 +156,46 @@ function route_path(): string
     return '/' . trim($uri, '/');
 }
 
-function start_admin_session(): void
+function admin_session_lifetime(): int
 {
-    if (session_status() === PHP_SESSION_ACTIVE) {
-        return;
-    }
-    session_name('matt_admin');
-    session_set_cookie_params([
-        'lifetime' => 8 * 3600,
+    return 8 * 3600;
+}
+
+function admin_session_cookie_params(): array
+{
+    return [
+        'lifetime' => admin_session_lifetime(),
         'path' => '/',
         'httponly' => true,
         'samesite' => 'Lax',
         'secure' => request_is_https(),
-    ]);
+    ];
+}
+
+function admin_session_ready(): bool
+{
+    return session_status() === PHP_SESSION_ACTIVE;
+}
+
+function start_admin_session(bool $create = true): void
+{
+    if (admin_session_ready()) {
+        return;
+    }
+    session_name('matt_admin');
+    session_set_cookie_params(admin_session_cookie_params());
+    ini_set('session.use_strict_mode', '1');
+    ini_set('session.gc_maxlifetime', (string) admin_session_lifetime());
+    if (!$create && empty($_COOKIE[session_name()])) {
+        return;
+    }
     session_start();
 }
 
 function require_admin(): void
 {
-    start_admin_session();
-    if (empty($_SESSION['admin_id'])) {
+    start_admin_session(false);
+    if (!admin_session_ready() || empty($_SESSION['admin_id'])) {
         json_out(['message' => 'Debes iniciar sesión'], 401);
     }
 }

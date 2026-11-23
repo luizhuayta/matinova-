@@ -1,0 +1,109 @@
+.side-panel {
+  min-width: 0;
+  max-width: 100%;
+  background: var(--admin-surface);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-md);
+  padding: var(--space-12) 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: auto;
+}
+
+.side-panel.is-viewing app-cms-inspector {
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.side-head {
+  flex-shrink: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.side-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+
+.side-tools {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+}
+
+.side-title .admin-link {
+  font-size: var(--text-12);
+  font-weight: 600;
+  background: none;
+  border: 0;
+  padding: 0;
+  min-height: 32px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.side-title .admin-btn-ghost {
+  min-height: 32px;
+  padding: 0 0.7rem;
+  font-size: var(--text-12);
+}
+
+.side-panel app-cms-inspector {
+  min-width: 0;
+}
+
+.revisions {
+  display: grid;
+  gap: var(--space-8);
+  margin-bottom: var(--space-12);
+}
+
+.changes {
+  border-bottom: 1px solid var(--admin-line);
+  padding: 0 0 var(--space-8);
+}
+
+.changes ul {
+  margin: var(--space-8) 0 0;
+  padding-left: 1.1rem;
+}
+
+.changes button {
+  text-align: left;
+  background: none;
+  border: 0;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+
+.revisions details {
+  border-bottom: 1px solid var(--admin-line);
+  padding: var(--space-8) 0;
+}
+
+.revisions .hint {
+  margin: 6px 0;
+}
+
+.empty {
+  margin: 0;
+  font-size: var(--text-14);
+  color: var(--admin-muted);
+}
+
+.menu-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  margin-top: 10px;
+  font-size: var(--text-14);
+}

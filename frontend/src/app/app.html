@@ -1,71 +1,26 @@
 @if (isAdmin()) {
   <router-outlet></router-outlet>
 } @else {
-  @if (showSplash()) {
-    <div class="loading-screen">
-      <div class="loading-content">
-        <div class="logo-animation">
-          <img [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="loading-logo" cmsImage="logo" cmsScope="site">
-        </div>
-        <div class="founder-section">
-          <img [src]="site()['founderImage'] || 'taya.jpg'" [alt]="site()['founderName'] || ''" class="founder-image" cmsImage="founderImage" cmsScope="site">
-          <div class="founder-info">
-            <h3 class="founder-name" cmsText="founderName" cmsScope="site"></h3>
-            <p class="founder-role" cmsText="founderRole" cmsScope="site"></p>
-          </div>
-        </div>
-        <div class="loading-tagline" cmsText="splashTagline" cmsScope="site"></div>
-        <div class="loading-spinner"></div>
-      </div>
-    </div>
-  }
-
-  <app-header></app-header>
-
-  @if (showCta()) {
-    <div class="cta-banner">
-      <div class="container">
-        <div class="cta-content">
-          <p class="cta-text" cmsText="ctaText" cmsScope="site"></p>
-          <div class="cta-actions">
-            <a [href]="'mailto:' + (site()['ctaEmail'] || '')" class="cta-email">
-              <i class="bi bi-envelope-fill"></i>
-              <span cmsText="ctaEmail" cmsScope="site"></span>
-            </a>
-            <a routerLink="/contacto" class="cta-button" cmsText="ctaButton" cmsScope="site"></a>
-            <button class="cta-close" type="button" (click)="closeCtaBanner()" aria-label="Cerrar aviso">
-              <i class="bi bi-x-lg"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
-
-  <div class="router-transition">
-    <router-outlet></router-outlet>
+  <div class="public-theme">
+    <app-skip-link />
+    <app-header></app-header>
+    <app-site-chrome />
+    <main id="contenido" class="public-main">
+      <router-outlet></router-outlet>
+    </main>
+    <app-footer></app-footer>
+    @if (showChat()) {
+      @defer (on idle) {
+        <app-chatbot></app-chatbot>
+      }
+    }
+    @if (showWhatsapp()) {
+      @defer (on idle) {
+        <app-whatsapp-bubble></app-whatsapp-bubble>
+      }
+    }
+    @defer (on idle) {
+      <app-accessibility></app-accessibility>
+    }
   </div>
-
-  <app-footer></app-footer>
-  @if (showChat()) {
-    <app-chatbot></app-chatbot>
-  }
-  @if (showWhatsapp()) {
-    <app-whatsapp-bubble></app-whatsapp-bubble>
-  }
-  <app-accessibility></app-accessibility>
-
-  @if (showCookies()) {
-    <div class="cookie-banner">
-      <div class="container">
-        <div class="cookie-content">
-          <p class="cookie-text" cmsText="cookieText" cmsScope="site"></p>
-          <div class="cookie-actions">
-            <button class="cookie-accept" type="button" (click)="acceptCookies()" cmsText="cookieAccept" cmsScope="site"></button>
-            <button class="cookie-reject" type="button" (click)="rejectCookies()" cmsText="cookieReject" cmsScope="site"></button>
-          </div>
-        </div>
-      </div>
-    </div>
-  }
 }

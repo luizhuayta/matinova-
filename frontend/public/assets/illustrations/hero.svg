@@ -1,0 +1,76 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="620" viewBox="0 0 800 620" role="img" aria-labelledby="heroTitle heroDesc">
+  <title id="heroTitle">Racks e infraestructura TI</title>
+  <desc id="heroDesc">Tres gabinetes de servidores en proyección isométrica, unidos por un jumper naranja.</desc>
+  <defs>
+    <linearGradient id="floor" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1A3279"/>
+      <stop offset="1" stop-color="#0C1D4A"/>
+    </linearGradient>
+  </defs>
+  <rect width="800" height="620" fill="#0C1D4A"/>
+  <g opacity="0.35" stroke="#2C50B8" stroke-width="1" fill="none">
+    <path d="M80 430 L400 270 L720 430 L400 590 Z"/>
+    <path d="M160 390 L400 270 L640 390"/>
+    <path d="M240 350 L400 270 L560 350"/>
+    <path d="M80 430 L400 590"/>
+    <path d="M240 430 L400 510"/>
+    <path d="M400 430 L400 590"/>
+    <path d="M560 430 L400 510"/>
+    <path d="M720 430 L400 590"/>
+  </g>
+  <!-- Rack left -->
+  <g>
+    <polygon points="220,210 310,165 310,355 220,400" fill="#1A3279"/>
+    <polygon points="310,165 400,210 400,400 310,355" fill="#0C1D4A"/>
+    <polygon points="220,210 310,165 400,210 310,255" fill="#2C50B8"/>
+    <g fill="#0C1D4A">
+      <rect x="236" y="250" width="58" height="10" transform="skewY(-26)"/>
+      <rect x="236" y="278" width="58" height="10" transform="skewY(-26)"/>
+      <rect x="236" y="306" width="58" height="10" transform="skewY(-26)"/>
+    </g>
+    <circle cx="250" cy="268" r="3" fill="#F26522"/>
+    <circle cx="250" cy="296" r="3" fill="#7C93D8"/>
+    <circle cx="250" cy="324" r="3" fill="#F26522"/>
+  </g>
+  <!-- Rack center -->
+  <g>
+    <polygon points="360,150 450,105 450,330 360,375" fill="#2C50B8"/>
+    <polygon points="450,105 540,150 540,375 450,330" fill="#0C1D4A"/>
+    <polygon points="360,150 450,105 540,150 450,195" fill="#4A6BD0"/>
+    <g fill="#0C1D4A">
+      <rect x="378" y="198" width="58" height="11" transform="skewY(-26)"/>
+      <rect x="378" y="228" width="58" height="11" transform="skewY(-26)"/>
+      <rect x="378" y="258" width="58" height="11" transform="skewY(-26)"/>
+      <rect x="378" y="288" width="58" height="11" transform="skewY(-26)"/>
+    </g>
+    <circle cx="392" cy="216" r="3.2" fill="#F26522"/>
+    <circle cx="392" cy="246" r="3.2" fill="#F26522"/>
+    <circle cx="392" cy="276" r="3.2" fill="#7C93D8"/>
+    <circle cx="392" cy="306" r="3.2" fill="#F26522"/>
+  </g>
+  <!-- Rack right -->
+  <g>
+    <polygon points="500,205 590,160 590,350 500,395" fill="#1A3279"/>
+    <polygon points="590,160 680,205 680,395 590,350" fill="#0C1D4A"/>
+    <polygon points="500,205 590,160 680,205 590,250" fill="#2C50B8"/>
+    <g fill="#0C1D4A">
+      <rect x="516" y="246" width="58" height="10" transform="skewY(-26)"/>
+      <rect x="516" y="274" width="58" height="10" transform="skewY(-26)"/>
+      <rect x="516" y="302" width="58" height="10" transform="skewY(-26)"/>
+    </g>
+    <circle cx="530" cy="264" r="3" fill="#7C93D8"/>
+    <circle cx="530" cy="292" r="3" fill="#F26522"/>
+    <circle cx="530" cy="320" r="3" fill="#7C93D8"/>
+  </g>
+  <!-- Orange jumper -->
+  <path d="M250 324 C320 300, 360 250, 392 276 C430 308, 500 250, 530 292" fill="none" stroke="#F26522" stroke-width="6" stroke-linecap="round"/>
+  <path d="M250 324 C320 300, 360 250, 392 276 C430 308, 500 250, 530 292" fill="none" stroke="#D6551A" stroke-width="2" stroke-linecap="round" opacity="0.7"/>
+  <!-- Monitor plate -->
+  <g>
+    <polygon points="430,400 560,335 650,380 520,445" fill="#EEF2F8"/>
+    <polygon points="430,400 520,445 520,470 430,425" fill="#2A3142"/>
+    <polygon points="520,445 650,380 650,405 520,470" fill="#0B0F1A"/>
+    <polygon points="460,412 545,370 610,402 525,444" fill="#1A3279"/>
+    <rect x="488" y="392" width="70" height="8" fill="#F26522" transform="skewX(-32)"/>
+  </g>
+</svg>

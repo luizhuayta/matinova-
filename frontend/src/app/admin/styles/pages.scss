@@ -1,0 +1,45 @@
+.wrap {
+  max-width: 860px;
+}
+
+.picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  background: rgba(15, 17, 19, 0.45);
+  padding: var(--space-16);
+}
+
+.create {
+  width: min(460px, 100%);
+  display: grid;
+  gap: var(--space-12);
+  padding: var(--space-16);
+  background: var(--admin-surface);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+}
+
+.create h2 {
+  margin: 0;
+}
+
+.create label {
+  display: grid;
+  gap: var(--space-4);
+  font-size: var(--text-14);
+}
+
+.switch-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-8);
+}

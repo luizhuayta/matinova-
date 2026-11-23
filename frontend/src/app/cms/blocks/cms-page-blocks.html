@@ -3,6 +3,7 @@
   <div
     class="cms-block"
     [class.is-hidden]="!!block.hidden && editor.editMode()"
+    [class.has-bg-image]="hasBgImage(block)"
     [class.w-half]="widthClass(block) === 'w-half'"
     [class.w-third]="widthClass(block) === 'w-third'"
     [ngStyle]="layoutStyle(block)">

@@ -1,0 +1,85 @@
+@mixin rules {
+  .admin-field {
+    display: grid;
+    gap: var(--space-8);
+  }
+
+  .admin-field label {
+    font-weight: 600;
+    font-size: var(--text-14);
+    color: var(--admin-text);
+  }
+
+  .admin-control,
+  .admin-field input,
+  .admin-field textarea,
+  .admin-field select {
+    min-height: 44px;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    border: 1px solid var(--admin-line);
+    border-radius: var(--admin-radius-ctrl);
+    padding: 0 0.75rem;
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    font-family: inherit;
+    font-size: var(--text-16);
+  }
+
+  .admin-field textarea,
+  textarea.admin-control {
+    min-height: 72px;
+    padding: 0.55rem 0.75rem;
+    resize: vertical;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+  }
+
+  .admin-control:hover:not(:disabled),
+  .admin-field input:hover:not(:disabled),
+  .admin-field textarea:hover:not(:disabled),
+  .admin-field select:hover:not(:disabled) {
+    border-color: var(--brand-500);
+  }
+
+  .admin-control:focus,
+  .admin-field input:focus,
+  .admin-field textarea:focus,
+  .admin-field select:focus {
+    border-color: var(--accent-600);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.18);
+  }
+
+  .admin-control:disabled,
+  .admin-field input:disabled,
+  .admin-field textarea:disabled,
+  .admin-field select:disabled {
+    background: var(--admin-paper);
+    color: var(--admin-muted);
+    cursor: not-allowed;
+  }
+
+  .admin-control:user-invalid,
+  .admin-field input:user-invalid,
+  .admin-field textarea:user-invalid {
+    border-color: var(--admin-danger);
+  }
+
+  .admin-check {
+    display: flex;
+    gap: var(--space-8);
+    align-items: flex-start;
+    min-height: 44px;
+    font-size: var(--text-14);
+    color: var(--admin-text);
+    overflow-wrap: anywhere;
+  }
+
+  .admin-check input {
+    width: 1.1rem;
+    height: 1.1rem;
+    accent-color: var(--brand-900);
+  }
+}

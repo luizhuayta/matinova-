@@ -2,10 +2,56 @@ import { JsonMap } from './cms.models';
 
 export const CLIENT_CATEGORY_ORDER = ['empresas', 'educativas', 'alianzas'] as const;
 
-export const CLIENT_CATEGORY_META: Record<string, { label: string; icon: string }> = {
-  empresas: { label: 'Empresas y E-commerce', icon: 'bi-building' },
-  educativas: { label: 'Instituciones Educativas', icon: 'bi-mortarboard' },
-  alianzas: { label: 'Alianzas Institucionales', icon: 'bi-handshake' },
+export const CLIENT_CATEGORY_META: Record<string, { label: string; icon: string; art: string; countLabel: string }> = {
+  empresas: {
+    label: 'Empresas y comercio',
+    icon: 'building',
+    art: 'assets/illustrations/clients-empresas.svg',
+    countLabel: 'clientes',
+  },
+  educativas: {
+    label: 'Instituciones educativas',
+    icon: 'school',
+    art: 'assets/illustrations/clients-educativas.svg',
+    countLabel: 'instituciones',
+  },
+  alianzas: {
+    label: 'Alianzas',
+    icon: 'handshake',
+    art: 'assets/illustrations/clients-alianzas.svg',
+    countLabel: 'alianzas',
+  },
+};
+
+const CLIENT_SUB_ICONS: Record<string, string> = {
+  'salud y farmacia': 'hospital',
+  automotriz: 'car',
+  'tecnología y software': 'laptop',
+  'tecnologia y software': 'laptop',
+  'retail y moda': 'shopping-bag',
+  agropecuario: 'sprout',
+  'servicios y reparación': 'wrench',
+  'servicios y reparacion': 'wrench',
+  gastronomía: 'utensils',
+  gastronomia: 'utensils',
+  'educación y consultoría': 'graduation-cap',
+  'educacion y consultoria': 'graduation-cap',
+  'servicios profesionales': 'briefcase',
+  entretenimiento: 'clapperboard',
+  ceba: 'school',
+  eespp: 'school',
+  iespp: 'school',
+  iestp: 'school',
+  iei: 'school',
+  'i.e. primaria/secundaria': 'school',
+  'academias y formación': 'graduation-cap',
+  'academias y formacion': 'graduation-cap',
+  ugel: 'landmark',
+  corporativas: 'building',
+  tecnológicas: 'laptop',
+  tecnologicas: 'laptop',
+  gubernamentales: 'landmark',
+  educativas: 'school',
 };
 
 export interface ClientSubPanel {
@@ -36,7 +82,36 @@ export function clientCategoryLabel(key: string): string {
 }
 
 export function clientCategoryIcon(key: string): string {
-  return CLIENT_CATEGORY_META[key]?.icon ?? 'bi-folder';
+  return CLIENT_CATEGORY_META[key]?.icon ?? 'building';
+}
+
+export function clientSectorArt(key: string): string {
+  return CLIENT_CATEGORY_META[key]?.art ?? 'assets/illustrations/clients-empresas.svg';
+}
+
+export function clientCountLabel(key: string, count: number): string {
+  const word = CLIENT_CATEGORY_META[key]?.countLabel ?? 'nombres';
+  if (count === 1) {
+    if (word === 'instituciones') {
+      return '1 institución';
+    }
+    if (word === 'alianzas') {
+      return '1 alianza';
+    }
+    if (word === 'clientes') {
+      return '1 cliente';
+    }
+    return `1 ${word}`;
+  }
+  return `${count} ${word}`;
+}
+
+export function clientSubIcon(name: string): string {
+  return CLIENT_SUB_ICONS[name.trim().toLowerCase()] ?? 'building';
+}
+
+export function panelItemCount(panel: ClientPanel): number {
+  return panel.subs.reduce((sum, sub) => sum + sub.indices.length, 0);
 }
 
 export function groupClientItems(items: JsonMap[]): ClientPanel[] {

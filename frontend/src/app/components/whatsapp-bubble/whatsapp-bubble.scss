@@ -1,64 +1,40 @@
 .whatsapp-float {
   position: fixed;
-  right: 20px;
-  bottom: 20px;
-  width: 55px;
-  height: 55px;
-  background: linear-gradient(135deg, #25d366, #128c7e);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4);
-  z-index: 9999;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  animation: pulse-green 2s infinite;
+  right: 16px;
+  bottom: 16px;
+  z-index: var(--z-fab);
+  width: 52px;
+  height: 52px;
+  display: grid;
+  place-items: center;
+  background: var(--dt-blue);
+  color: #fff;
+  border-radius: 999px;
+  text-decoration: none;
+  box-shadow: var(--shadow-md);
+  border: 1px solid rgba(255, 255, 255, 0.12);
 }
 
-@keyframes pulse-green {
-  0%, 100% { box-shadow: 0 4px 20px rgba(37, 211, 102, 0.4); }
-  50% { box-shadow: 0 6px 30px rgba(37, 211, 102, 0.6); }
-}
-
-.whatsapp-float img {
-  width: 32px;
-  height: 32px;
-}
-
-.whatsapp-float:hover {
-  transform: scale(1.1);
-  background: linear-gradient(135deg, #128c7e, #25d366);
-
-  .whatsapp-tooltip {
-    opacity: 1;
-    visibility: visible;
-    transform: translateX(0);
-  }
+.whatsapp-float .ui-icon {
+  width: 30px;
+  height: 30px;
 }
 
 .whatsapp-tooltip {
   position: absolute;
-  right: 75px;
-  background: #333;
-  color: white;
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 13px;
+  right: 52px;
+  background: var(--dt-bg-2);
+  color: #fff;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--text-14);
   white-space: nowrap;
   opacity: 0;
-  visibility: hidden;
-  transition: 0.3s;
-  transform: translateX(10px);
   pointer-events: none;
+}
 
-  &::before {
-    content: '';
-    position: absolute;
-    right: -5px;
-    top: 50%;
-    transform: translateY(-50%);
-    border-top: 5px solid transparent;
-    border-bottom: 5px solid transparent;
-    border-left: 5px solid #333;
-  }
+.whatsapp-float:hover .whatsapp-tooltip,
+.whatsapp-float:focus-visible .whatsapp-tooltip {
+  opacity: 1;
 }

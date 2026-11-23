@@ -1,0 +1,144 @@
+@mixin rules {
+  .admin-btn-primary,
+  .admin-btn-ghost,
+  .admin-btn-danger,
+  .admin-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-8);
+    min-height: 44px;
+    padding: 0 1rem;
+    border-radius: var(--radius-md);
+    font-family: var(--font-display);
+    font-size: var(--text-14);
+    font-weight: 600;
+    border: 1px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: transform var(--admin-ease), box-shadow var(--admin-ease), background var(--admin-ease);
+  }
+
+  @media (max-width: 560px) {
+    .admin-btn-primary,
+    .admin-btn-ghost,
+    .admin-btn-danger,
+    .admin-btn {
+      white-space: normal;
+      height: auto;
+      text-align: center;
+      padding-block: 0.45rem;
+    }
+  }
+
+  .admin-btn-primary,
+  .admin-btn {
+    background: linear-gradient(180deg, var(--accent-500), var(--accent-600));
+    color: #fff;
+    box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+
+  .admin-btn-primary:hover:not(:disabled),
+  .admin-btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+
+  .admin-btn-ghost,
+  .admin-btn.ghost {
+    background: var(--admin-surface);
+    color: var(--admin-text);
+    border-color: var(--admin-line);
+    box-shadow: none;
+  }
+
+  .admin-btn-ghost:hover:not(:disabled),
+  .admin-btn.ghost:hover:not(:disabled) {
+    background: var(--surface-50);
+    border-color: var(--brand-500);
+    transform: none;
+  }
+
+  .admin-btn-danger,
+  .admin-btn.danger {
+    background: var(--admin-danger-bg);
+    color: var(--admin-danger);
+    box-shadow: none;
+  }
+
+  .admin-btn-danger:hover:not(:disabled),
+  .admin-btn.danger:hover:not(:disabled) {
+    background: rgba(180, 35, 24, 0.14);
+    transform: none;
+  }
+
+  .admin-btn.sm {
+    min-height: 36px;
+    padding: 0 0.8rem;
+    font-size: var(--text-12);
+  }
+
+  .admin-btn-primary:disabled,
+  .admin-btn-ghost:disabled,
+  .admin-btn-danger:disabled,
+  .admin-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    transform: none;
+  }
+
+  .admin-icon-btn {
+    width: 36px;
+    min-height: 36px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: var(--admin-muted);
+    border-radius: var(--admin-radius-ctrl);
+    display: inline-grid;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .admin-icon-btn:hover:not(:disabled) {
+    background: var(--surface-100);
+    color: var(--admin-ink);
+  }
+
+  .admin-icon-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+  }
+
+  .admin-seg {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2px;
+    padding: 3px;
+    background: var(--admin-surface);
+    border: 1px solid var(--admin-line);
+    border-radius: var(--admin-radius-ctrl);
+  }
+
+  .admin-seg button {
+    min-height: 36px;
+    padding: 0 0.75rem;
+    border-radius: 6px;
+    border: 0;
+    background: transparent;
+    color: var(--admin-muted);
+    font-family: inherit;
+    font-weight: 600;
+    font-size: var(--text-14);
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    cursor: pointer;
+  }
+
+  .admin-seg button.active,
+  .admin-seg button[aria-pressed='true'] {
+    background: var(--brand-900);
+    color: #fff;
+  }
+}

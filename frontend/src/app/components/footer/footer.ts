@@ -6,6 +6,7 @@ import { CmsTextDirective } from '../../cms/cms-text.directive';
 import { CmsImageDirective } from '../../cms/cms-image.directive';
 import { CmsLinkDirective } from '../../cms/cms-link.directive';
 import { LocaleService } from '../../cms/locale.service';
+import { isLiveHref } from '../../cms/public-url';
 
 @Component({
   selector: 'app-footer',
@@ -22,5 +23,9 @@ export class Footer {
   navServices = computed(() => (this.site()['navServices'] as Array<Record<string, string>>) ?? []);
   pathOf(path: string): string {
     return this.locales.prefix(path);
+  }
+
+  live(url: unknown): boolean {
+    return isLiveHref(url);
   }
 }

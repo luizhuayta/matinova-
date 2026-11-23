@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { changedPaths, getByPath, setByPath, slugFromRoute, SLUG_PATHS, registerPageRoutes } from './cms.models';
 import {
   CMS_SCHEMA_VERSION,
+  DEFAULT_SPLASH_IMAGES,
   altPathForImage,
   humanChangeLine,
   inspectorRootSchema,
@@ -9,7 +10,7 @@ import {
   minListLength,
   schemaForSlug,
 } from './cms-schema';
-import { pageBlocks, templateBlocks } from './block-registry';
+import { blockHasBgImage, blockLayoutStyle, DEFAULT_BG_IMAGE, pageBlocks, templateBlocks } from './block-registry';
 
 describe('migrateCmsDocument', () => {
   it('añade seo, schemaVersion y bloques en inicio', () => {
@@ -19,8 +20,24 @@ describe('migrateCmsDocument', () => {
     const blocks = pageBlocks(migrated);
     expect(blocks.map((item) => item.type)).toContain('hero');
     expect(blocks[0]?.layout?.width).toBe('full');
+    expect(blocks[0]?.layout?.backgroundImage).toBe(DEFAULT_BG_IMAGE);
     expect(blocks.length).toBeGreaterThanOrEqual(1);
     expect(migrated['decorativeImagePaths']).toEqual([]);
+  });
+
+  it('v6 pone el fondo por defecto en bloques sin imagen y respeta la propia', () => {
+    const doc = {
+      schemaVersion: 5,
+      blocks: [
+        { id: 'a', type: 'cta', hidden: false, layout: { width: 'full', padding: '', background: '', backgroundImage: '' }, props: {} },
+        { id: 'b', type: 'cta', hidden: false, layout: { width: 'full', padding: '', background: '', backgroundImage: '/api/uploads/x.webp' }, props: {} },
+      ],
+    };
+    const migrated = migrateCmsDocument(doc, 'inicio');
+    expect(migrated['schemaVersion']).toBe(CMS_SCHEMA_VERSION);
+    const blocks = pageBlocks(migrated);
+    expect(blocks[0]?.layout?.backgroundImage).toBe(DEFAULT_BG_IMAGE);
+    expect(blocks[1]?.layout?.backgroundImage).toBe('/api/uploads/x.webp');
   });
 
   it('es idempotente si el documento ya está al día', () => {
@@ -86,6 +103,16 @@ describe('SITE_SCHEMA chatbot', () => {
     expect(paths).not.toContain('chatbotMode');
     expect(paths).not.toContain('aiProvider');
     expect(paths.join(' ')).not.toMatch(/apiKey|aiKey/i);
+    expect(paths).toContain('splashImages');
+    expect(paths).toContain('splashLabel');
+  });
+
+  it('rellena splashImages si el sitio no las trae y respeta una lista vacía', () => {
+    const filled = migrateCmsDocument({ schemaVersion: 5 }, 'sitio');
+    expect(filled['splashImages']).toEqual(DEFAULT_SPLASH_IMAGES);
+    expect(filled['splashLabel']).toBe('CARGANDO…');
+    const empty = migrateCmsDocument({ schemaVersion: 5, splashImages: [] }, 'sitio');
+    expect(empty['splashImages']).toEqual([]);
   });
 
   it('conserva chatbotMode ia al migrar el sitio', () => {
@@ -141,5 +168,39 @@ describe('migración de páginas de servicio', () => {
       'servicios-software'
     );
     expect(pageBlocks(migrated).map((item) => item.type)).toEqual(['serviceHero', 'reasons']);
+  });
+});
+
+describe('blockLayoutStyle / blockHasBgImage', () => {
+  it('pasa padding y color como antes', () => {
+    const block = { id: 'x', type: 'cta', props: {}, layout: { padding: '2rem 0', background: '#123456' } };
+    expect(blockHasBgImage(block)).toBe(false);
+    expect(blockLayoutStyle(block)).toEqual({ padding: '2rem 0', background: '#123456' });
+  });
+
+  it('la imagen tapa el color y añade velo', () => {
+    const block = {
+      id: 'x',
+      type: 'cta',
+      props: {},
+      layout: { background: '#123456', backgroundImage: '/api/uploads/abc123.webp' },
+    };
+    expect(blockHasBgImage(block)).toBe(true);
+    const style = blockLayoutStyle(block);
+    expect(style['backgroundImage']).toContain('url("/api/uploads/abc123.webp")');
+    expect(style['backgroundImage']).toContain('linear-gradient');
+    expect(style['backgroundSize']).toBe('cover');
+    expect(style['backgroundColor']).toBe('#123456');
+    expect(style['background']).toBeUndefined();
+  });
+
+  it('usa el token de fondo cuando el campo background trae otra capa', () => {
+    const block = {
+      id: 'x',
+      type: 'cta',
+      props: {},
+      layout: { background: 'url(/x.png)', backgroundImage: '/bg.webp' },
+    };
+    expect(blockLayoutStyle(block)['backgroundColor']).toBe('var(--dt-bg)');
   });
 });

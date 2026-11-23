@@ -2,6 +2,23 @@
 
 Sitio público en Angular, panel CMS y API PHP + MariaDB. El chatbot clásico (respuestas predefinidas y enlaces a páginas) está activo por defecto; la IA se enciende desde el panel cuando hay una clave.
 
+## Si recibiste este zip
+
+Trae el código, el frontend, la API y `API/.env`. No trae `node_modules`, la caché de Angular ni el paquete de cPanel. Para levantarlo en local:
+
+```bash
+docker compose up --build
+cd frontend
+npm install
+npm start
+```
+
+- Web: http://127.0.0.1:4200
+- API: http://127.0.0.1:8000
+- Admin local: http://127.0.0.1:4200/admin — `admin` / `admin123`
+
+Docker usa su propia base (MariaDB del compose). `API/.env` solo completa lo que el contenedor no define; en local no sustituye usuario, base ni origen. Necesitas Docker, Node.js 20+ y npm. PHPMailer se instala solo la primera vez que arranca la API.
+
 ## Requisitos
 
 - Node.js 20+
@@ -64,6 +81,11 @@ Los mensajes y reclamos se ven en `/admin/mensajes` (filtro, ticket, estado, CSV
 
 ## Publicar en cPanel
 
+Para recuperar una web vacía, subir sin perder datos y verificar el hosting:
+[guía de recuperación de cPanel](docs/CPANEL-RECUPERACION.md).
+El endpoint `/api.php/health` comprueba PHP, base, esquema y permisos sin ejecutar
+migraciones ni mostrar credenciales.
+
 El zip **no incluye** `.env`. Créalo en el servidor para no pisar credenciales al subir.
 
 1. En cPanel, crea la base MariaDB y el usuario. Anota host (casi siempre `localhost`), nombre, usuario y clave.
@@ -74,7 +96,7 @@ chmod +x tools/build-cpanel.sh
 ./tools/build-cpanel.sh
 ```
 
-3. Sube **el contenido** de `dist-upload/` a `public_html/` (queda `public_html/index.html`, `public_html/api/`, etc.). No subas `node_modules/`, Docker ni tests.
+3. Sube **el contenido** de `dist-upload/` a `public_html/` (queda `public_html/index.html`, `public_html/api/`, `public_html/api.php`, etc.). No subas `node_modules/`, Docker ni tests. El `api.php` de la raíz es un frontal alternativo: el frontend lo usa (`/api.php/...`) para que el API funcione aunque el hosting regenere el `.htaccess` sin las reglas de `/api/`.
 4. Crea `public_html/api/.env` con los valores reales (sin comillas, una variable por línea):
 
 ```

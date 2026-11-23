@@ -1,0 +1,214 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.insp-search {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  margin-bottom: var(--space-8);
+  padding: 0 0 var(--space-8);
+  background: var(--admin-surface);
+}
+
+.insp {
+  display: grid;
+  gap: 14px;
+  min-width: 0;
+}
+
+.insp.nested {
+  gap: 10px;
+  margin-top: var(--space-8);
+  padding-top: var(--space-8);
+}
+
+.help {
+  margin: 0;
+}
+
+.help summary {
+  list-style: none;
+  cursor: pointer;
+  display: inline;
+  width: auto;
+  height: auto;
+  border: 0;
+  background: none;
+  color: var(--admin-muted);
+  font-size: var(--text-12);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.help summary::-webkit-details-marker {
+  display: none;
+}
+
+.help p {
+  margin: 6px 0 0;
+  font-size: var(--text-14);
+  color: var(--admin-muted);
+}
+
+.len-note {
+  margin: 0;
+  font-size: var(--text-12);
+  color: var(--admin-warn);
+}
+
+.stack,
+.group {
+  min-width: 0;
+  display: grid;
+  gap: var(--space-8);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--admin-line);
+}
+
+.box-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+.box-head h3,
+.group > summary span {
+  flex: 1;
+  min-width: 0;
+  margin: 0;
+  font-size: var(--text-14);
+  font-weight: 600;
+  color: var(--admin-text);
+  overflow-wrap: anywhere;
+}
+
+.count {
+  flex-shrink: 0;
+  font-size: var(--text-12);
+  font-weight: 600;
+  color: var(--admin-muted);
+}
+
+.empty {
+  margin: 0;
+  font-size: var(--text-14);
+  color: var(--admin-muted);
+}
+
+details.item,
+details.group {
+  min-width: 0;
+}
+
+details.item {
+  border-bottom: 1px solid var(--admin-line);
+  padding: 6px 0;
+}
+
+details > summary {
+  cursor: pointer;
+  list-style: none;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-8);
+  min-width: 0;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+.group > summary {
+  font-weight: 600;
+}
+
+.group > summary .chev {
+  margin-left: auto;
+  color: var(--admin-muted);
+  transition: transform 160ms ease;
+}
+
+details.group[open] > summary .chev {
+  transform: rotate(180deg);
+}
+
+.item-title {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  font-size: var(--text-14);
+  font-weight: 600;
+  color: var(--admin-text);
+  line-height: 1.35;
+}
+
+details.item summary img {
+  width: 36px;
+  height: 36px;
+  object-fit: cover;
+  border-radius: var(--radius-sm);
+  background: var(--surface-100);
+  flex-shrink: 0;
+}
+
+.item-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0;
+  margin-left: auto;
+}
+
+.drag-handle {
+  flex-shrink: 0;
+  width: 32px;
+  min-height: 32px;
+  border: 0;
+  background: transparent;
+  color: var(--admin-muted);
+  cursor: grab;
+}
+
+.list-items {
+  display: grid;
+  gap: 0;
+}
+
+.string-row {
+  display: flex;
+  gap: 6px;
+  min-width: 0;
+  align-items: center;
+}
+
+.string-row .admin-control {
+  flex: 1;
+}
+
+.add {
+  width: 100%;
+  justify-content: center;
+  white-space: normal;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.cms-field-active {
+  outline: 2px solid var(--admin-mark);
+  outline-offset: 4px;
+  border-radius: 2px;
+}
+
+input[type='color'].admin-control {
+  padding: 4px;
+  min-height: 40px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .group > summary .chev {
+    transition: none;
+  }
+}

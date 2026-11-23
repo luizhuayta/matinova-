@@ -2,17 +2,18 @@ import { CommonModule } from '@angular/common';
 import { Component, computed, inject, input } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
-import Swal from 'sweetalert2';
 import { API_URL } from '../cms.models';
 import { CmsBlock, asRecord, propsPath } from '../block-registry';
 import { AnalyticsService } from '../../services/analytics.service';
+import { CyberCard } from '../../components/ui/cyber-card';
+import { HudDivider } from '../../components/ui/hud-divider';
+import { GlowButton } from '../../components/ui/glow-button';
 
 @Component({
   selector: 'app-contact-form-block',
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, CyberCard, HudDivider, GlowButton],
   templateUrl: './contact-form-block.html',
-  styleUrl: '../../pages/contacto/contacto.scss',
 })
 export class ContactFormBlock {
   private http = inject(HttpClient);
@@ -38,7 +39,12 @@ export class ContactFormBlock {
     return this.fields()[key] !== false;
   }
 
-  enviar(): void {
+  submitLabel(): string {
+    return this.isLoading ? 'Enviando...' : String(this.props()['submitLabel'] || 'Enviar mensaje');
+  }
+
+  async enviar(): Promise<void> {
+    const { default: Swal } = await import('sweetalert2');
     const fields = this.props()['fields'] as Record<string, boolean> | undefined;
     const showPhone = fields?.['phone'] !== false;
     if (!this.nombre.trim() || !this.email.trim() || !this.mensaje.trim()) {

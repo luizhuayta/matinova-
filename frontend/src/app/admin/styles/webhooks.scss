@@ -1,0 +1,105 @@
+.wrap {
+  max-width: 800px;
+}
+
+.create {
+  display: grid;
+  grid-template-columns: 2fr 1fr auto;
+  gap: var(--space-12);
+  align-items: end;
+}
+
+.admin-banner.ok code,
+.card-sub code,
+.wh-sub code {
+  font-family: ui-monospace, monospace;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+.empty-state {
+  margin-top: var(--space-16);
+}
+
+.wh-row strong.url {
+  display: block;
+  font-size: var(--text-14);
+  overflow-wrap: anywhere;
+}
+
+.wh-sub {
+  display: flex;
+  gap: var(--space-8);
+  align-items: center;
+  margin-top: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.wh-sub code {
+  font-size: var(--text-12);
+  background: var(--admin-paper);
+  border: 1px solid var(--admin-line);
+  padding: 0.1rem 0.45rem;
+  border-radius: var(--radius-sm);
+  color: var(--admin-muted);
+}
+
+.pill.sm {
+  min-height: 24px;
+  font-size: 0.68rem;
+}
+
+.actions {
+  display: flex;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.log-card {
+  margin-top: var(--space-16);
+}
+
+.log {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: var(--space-8);
+}
+
+.log li {
+  display: flex;
+  gap: var(--space-12);
+  align-items: flex-start;
+  background: var(--surface-50);
+  border: 1px solid var(--admin-line);
+  border-radius: var(--radius-sm);
+  padding: 0.55rem 0.7rem;
+}
+
+.log-copy {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.log-copy strong {
+  font-size: var(--text-14);
+}
+
+.log-copy small {
+  color: var(--admin-muted);
+  font-size: var(--text-12);
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 640px) {
+  .create {
+    grid-template-columns: 1fr;
+  }
+
+  .wh-row {
+    flex-wrap: wrap;
+  }
+}

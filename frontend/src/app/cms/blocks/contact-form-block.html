@@ -1,28 +1,42 @@
-<div class="contacto-container">
-  <div class="formulario">
+<div class="form-shell">
+  <app-hud-divider />
+  <app-cyber-card tone="elevated">
     <form (ngSubmit)="enviar()">
       @if (show('name') || show('email')) {
-        <div class="fila">
+        <div class="form-row">
           @if (show('name')) {
-            <input type="text" [placeholder]="placeholders()['name'] || 'Su nombre'" [(ngModel)]="nombre" name="nombre" required>
+            <label>
+              Nombre
+              <input type="text" [placeholder]="placeholders()['name'] || 'Su nombre'" [(ngModel)]="nombre" name="nombre" required autocomplete="name">
+            </label>
           }
           @if (show('email')) {
-            <input type="email" [placeholder]="placeholders()['email'] || 'Su correo'" [(ngModel)]="email" name="email" required>
+            <label>
+              Correo
+              <input type="email" [placeholder]="placeholders()['email'] || 'Su correo'" [(ngModel)]="email" name="email" required autocomplete="email">
+            </label>
           }
         </div>
       }
       @if (show('phone')) {
-        <div class="fila">
-          <input type="tel" [placeholder]="placeholders()['phone'] || 'Teléfono'" [(ngModel)]="telefono" name="telefono" maxlength="9">
-        </div>
+        <label>
+          Teléfono
+          <input type="tel" [placeholder]="placeholders()['phone'] || 'Teléfono'" [(ngModel)]="telefono" name="telefono" maxlength="9" autocomplete="tel" inputmode="numeric">
+        </label>
       }
       @if (show('subject')) {
-        <input type="text" [placeholder]="placeholders()['subject'] || 'Asunto'" [(ngModel)]="asunto" name="asunto" required>
+        <label>
+          Asunto
+          <input type="text" [placeholder]="placeholders()['subject'] || 'Asunto'" [(ngModel)]="asunto" name="asunto" required>
+        </label>
       }
       @if (show('message')) {
-        <textarea [placeholder]="placeholders()['message'] || 'Mensaje'" [(ngModel)]="mensaje" name="mensaje" required></textarea>
+        <label>
+          Mensaje
+          <textarea [placeholder]="placeholders()['message'] || 'Mensaje'" [(ngModel)]="mensaje" name="mensaje" required rows="5"></textarea>
+        </label>
       }
-      <button type="submit" [disabled]="isLoading">{{ isLoading ? 'Enviando...' : (props()['submitLabel'] || 'Enviar Mensaje') }}</button>
+      <app-glow-button type="submit" [disabled]="isLoading" [label]="submitLabel()"></app-glow-button>
     </form>
-  </div>
+  </app-cyber-card>
 </div>
