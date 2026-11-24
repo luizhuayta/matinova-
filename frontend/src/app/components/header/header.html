@@ -41,6 +41,9 @@
             </div>
           </li>
         }
+        <li>
+          <a [routerLink]="contactLink()" routerLinkActive="active" (click)="navigateTo(contactLink())" cmsText="nav.contacto" cmsScope="site"></a>
+        </li>
         <li class="lang">
           @for (item of localeOptions; track item.id) {
             <button type="button" [class.active]="locales.locale() === item.id" (click)="switchLocale(item.id)" [attr.aria-label]="'Idioma ' + item.id">{{ item.id.toUpperCase() }}</button>
