@@ -20,6 +20,7 @@ respaldos/
 docs/*
 !docs/contratos-cms.md
 !docs/CPANEL-RECUPERACION.md
+!docs/LEVANTAR-EN-OTRO-EQUIPO.md
 
 # Herramientas de IA / temporales
 .atl/
@@ -48,3 +49,4 @@ videos_tour/
 
 # Capturas locales de QA
 prueba/
+capturas/

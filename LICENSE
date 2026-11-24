@@ -1,0 +1,51 @@
+MATT INNOVA SOLUTION — LICENCIA PROPIETARIA
+
+Copyright © 2026 Matt Innova Solution. Todos los derechos reservados.
+
+1. Titularidad. El presente repositorio —incluyendo, de manera enunciativa y no
+   limitativa, el código fuente del frontend y de la API, el panel de
+   administración (CMS), el diseño visual y sistema de diseño, los textos,
+   logotipos, imágenes, fotografías, ilustraciones, bases de datos y su
+   contenido, la documentación y cualquier otro elemento original— constituye
+   una obra de titularidad exclusiva de Matt Innova Solution (en adelante, "el
+   Titular").
+
+2. Protección legal. Esta obra se encuentra protegida por la legislación de
+   derechos de autor de la República del Perú (Ley N.° 13714, modificada por el
+   Decreto Legislativo N.° 822), por el Convenio de Berna y por los demás
+   tratados internacionales aplicables. Los derechos de autor nacen con la
+   creación de la obra, con independencia de su registro ante INDECOPI.
+
+3. Prohibiciones. Queda terminantemente prohibido, sin autorización previa y
+   por escrito del Titular:
+   a) Copiar, reproducir, clonar o descargar la totalidad o parte de esta obra;
+   b) Distribuir, publicar, sub-licenciar, vender, alquilar, ceder o transmitir
+      la obra a terceros por cualquier medio;
+   c) Modificar, adaptar, traducir, realizar ingeniería inversa o crear obras
+      derivadas;
+   d) Utilizar la obra, o cualquier parte de ella, con fines comerciales,
+      publicitarios o de competencia;
+   e) Retirar o alterar avisos de propiedad, marcas o atribuciones.
+
+4. Sin licencia implícita. La posesión de una copia de este repositorio
+   (incluido el paquete de transferencia) no otorga licencia, cesión ni
+   franquicia alguna. El acceso se concede exclusivamente al destinatario
+   autorizado para los fines de desarrollo, integración u operación acordados
+   con el Titular, y cesa con la finalización de dicho encargo.
+
+5. Confidencialidad. Este material puede contener información confidencial del
+   Titular. Quien lo recibe se obliga a custodiarlo, a no divulgarlo y a
+   eliminarlo cuando el Titular lo requiera.
+
+6. Sanciones. El incumplimiento de estas condiciones constituye infracción a
+   los derechos de autor y dará lugar a las acciones administrativas ante la
+   Comisión de Derechos de Autor de INDECOPI (Perú), así como a las acciones
+   civiles y penales previstas en la Ley N.° 13714, el Decreto Legislativo
+   N.° 822 y el Código Penal peruano (arts. 217 a 222), y a las indemnizaciones
+   por daños y perjuicios a que haya lugar.
+
+7. Software de terceros. Las dependencias de terceros (p. ej. Angular,
+   PHPMailer, bibliotecas npm/Composer) conservan sus propias licencias, las
+   cuales se respetan y no se ven afectadas por este aviso.
+
+Para solicitar permisos de uso: contacto@mattinnovasolution.com

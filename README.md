@@ -1,5 +1,8 @@
 # Matt Innova Solution
 
+> **Propiedad privada.** Código y contenido de titularidad de Matt Innova Solution.
+> Todos los derechos reservados — ver [Licencia y propiedad](#licencia-y-propiedad).
+
 Sitio público en Angular, panel CMS y API PHP + MariaDB. El chatbot clásico (respuestas predefinidas y enlaces a páginas) está activo por defecto; la IA se enciende desde el panel cuando hay una clave.
 
 ## Si recibiste este zip
@@ -18,6 +21,8 @@ npm start
 - Admin local: http://127.0.0.1:4200/admin — `admin` / `admin123`
 
 Docker usa su propia base (MariaDB del compose). `API/.env` solo completa lo que el contenedor no define; en local no sustituye usuario, base ni origen. Necesitas Docker, Node.js 20+ y npm. PHPMailer se instala solo la primera vez que arranca la API.
+
+**¿No tienes Docker?** El proyecto también corre con **Podman** (`podman-compose up --build` / `podman compose up --build`) o **sin contenedores** (PHP + MariaDB + Node nativos, en Linux, macOS o Windows/XAMPP). Guía completa con verificación y consejos para agentes de IA: [docs/LEVANTAR-EN-OTRO-EQUIPO.md](docs/LEVANTAR-EN-OTRO-EQUIPO.md).
 
 ## Requisitos
 
@@ -136,3 +141,17 @@ Si el sitio se abre con `www`, usa ese mismo origen en `APP_ORIGIN` (también se
 - `API/` — PHP (CMS, correos, chatbot, media)
 - `deploy/mattinnova-cpanel.sql` — esquema vacío para phpMyAdmin
 - `tools/build-cpanel.sh` — build + zip de subida
+- `docs/LEVANTAR-EN-OTRO-EQUIPO.md` — transferencia a otro equipo (Docker, Podman, sin contenedores, agentes)
+
+## Licencia y propiedad
+
+**Copyright © 2026 Matt Innova Solution. Todos los derechos reservados.**
+
+Este repositorio es **propiedad privada** de Matt Innova Solution. El código fuente, el diseño, los textos, las imágenes y el contenido del CMS son obra protegida por la legislación peruana de derechos de autor (Ley N.° 13714, modificada por el Decreto Legislativo N.° 822) y por los tratados internacionales aplicables.
+
+- **No** se otorga licencia MIT ni ninguna otra licencia de código abierto o libre.
+- Queda prohibida la reproducción, distribución, comunicación pública, modificación, reutilización o comercialización total o parcial de este proyecto sin autorización escrita del titular.
+- El plagio, la copia o el uso no autorizado serán sancionados conforme a la ley, incluidas las acciones administrativas ante INDECOPI y las acciones civiles y penales que correspondan.
+- El acceso a este repositorio (por invitación o por entrega del paquete zip) se concede únicamente para fines de desarrollo, integración u operación autorizados por Matt Innova Solution, y no transfiere derecho alguno de propiedad intelectual.
+
+Texto legal completo en el archivo [LICENSE](LICENSE).
