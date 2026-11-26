@@ -360,9 +360,11 @@
   z-index: 1;
 }
 
+/* La imagen termina en el borde del container (alineada con el header), no en
+   el borde de la pantalla: en monitores anchos el sangrado la estiraba y la
+   desalineaba del resto del contenido. */
 @container cms-hero (min-width: 992px) {
   .premium-hero-visual {
-    margin-inline-end: calc(-1 * max(var(--layout-gutter, clamp(1.25rem, 4vw, 4rem)), (100cqi - var(--layout-max, 1360px)) / 2));
     align-self: stretch;
   }
 }
@@ -374,7 +376,8 @@
   overflow: hidden;
   border: 0;
   background: var(--dt-panel);
-  clip-path: polygon(14% 0, 100% 0, 100% 100%, 0 100%, 0 16%);
+  /* Esquinas cortadas en espejo (sup. izq. e inf. der.), estilo HUD. */
+  clip-path: polygon(14% 0, 100% 0, 100% 84%, 86% 100%, 0 100%, 0 16%);
   box-shadow: 0 0 80px var(--dt-glow);
 }
 
@@ -393,6 +396,9 @@
   min-height: 22rem;
   max-height: 30rem;
   object-fit: cover;
+  /* El lado izquierdo ya queda bajo el velo y el corte en diagonal: si hay que
+     recortar, que sea por ahí y no por el borde derecho. */
+  object-position: 75% center;
 }
 
 .visual-frame img[src$='.svg'] {
