@@ -1,7 +1,7 @@
 import { Component, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
-import { AuthService } from '../cms/auth.service';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { AuthService, adminReturnUrl } from '../cms/auth.service';
 
 @Component({
   selector: 'app-admin-login',
@@ -14,6 +14,7 @@ import { AuthService } from '../cms/auth.service';
 export class AdminLogin {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   username = 'admin';
   password = '';
   error = '';
@@ -28,6 +29,6 @@ export class AdminLogin {
       this.error = message;
       return;
     }
-    await this.router.navigateByUrl('/admin');
+    await this.router.navigateByUrl(adminReturnUrl(this.route.snapshot.queryParamMap.get('returnUrl')));
   }
 }

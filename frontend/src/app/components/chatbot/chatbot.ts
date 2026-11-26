@@ -1,8 +1,7 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectorRef, ViewChild, ElementRef, AfterViewInit, OnDestroy, computed, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, ViewChild, ElementRef, OnDestroy, computed, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router, NavigationEnd } from '@angular/router';
-import { filter } from 'rxjs/operators';
+import { Router } from '@angular/router';
 import { ChatLink, ChatService, ChatbotMode } from '../../services/chat';
 import { ChatDataService, ChatMessage } from '../../services/chat-data.service';
 import { AnalyticsService } from '../../services/analytics.service';
@@ -25,7 +24,7 @@ const LOGO_FALLBACK = 'logo.svg';
   templateUrl: './chatbot.html',
   styleUrl: './chatbot.scss',
 })
-export class ChatbotComponent implements AfterViewInit, OnDestroy {
+export class ChatbotComponent implements OnDestroy {
   @ViewChild('scrollMe') private myScrollContainer!: ElementRef<HTMLElement>;
   @ViewChild('chatInput') private chatInput?: ElementRef<HTMLInputElement>;
   @ViewChild('chatFab') private chatFab?: ElementRef<HTMLButtonElement>;
@@ -71,14 +70,6 @@ export class ChatbotComponent implements AfterViewInit, OnDestroy {
     } else {
       this.chatData.addMessage(this.messages[0]);
     }
-  }
-
-  ngAfterViewInit() {
-    this.router.events
-      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
   }
 
   ngOnDestroy(): void {

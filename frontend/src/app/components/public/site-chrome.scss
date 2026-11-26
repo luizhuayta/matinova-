@@ -275,7 +275,7 @@
   left: var(--space-16);
   right: var(--space-16);
   bottom: var(--space-16);
-  z-index: var(--z-cookie);
+  z-index: calc(var(--z-a11y) + 1);
   pointer-events: none;
 }
 
@@ -321,10 +321,6 @@
 .cookie-banner .public-btn--ghost:hover {
   background: rgba(255, 255, 255, 0.06);
   color: #fff;
-}
-
-.cookie-spacer {
-  height: 7rem;
 }
 
 html[data-a11y-contrast="high"] .splash-mark {
@@ -379,10 +375,6 @@ html[data-a11y-contrast="high"] .splash-mark {
     justify-content: center;
     min-height: 44px;
     padding: 0.55rem 0.75rem;
-  }
-
-  .cookie-spacer {
-    height: 8.5rem;
   }
 }
 

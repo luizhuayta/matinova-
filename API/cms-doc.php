@@ -58,14 +58,14 @@ function cms_doc_publish_conflict_message(): string
     return 'Alguien publicó o guardó antes. Recarga para no pisar cambios.';
 }
 
-function cms_doc_read(string $slug): ?array
+function cms_doc_read(string $slug, bool $allowFallback = true): ?array
 {
     $locale = cms_request_locale();
     if (cms_doc_is_site($slug)) {
         $stmt = db()->prepare('SELECT content, draft, version, updated_at, locale FROM site_settings WHERE locale = ?');
         $stmt->execute([$locale]);
         $row = $stmt->fetch() ?: null;
-        if (!$row && $locale !== 'es') {
+        if (!$row && $allowFallback && $locale !== 'es') {
             $stmt->execute(['es']);
             $row = $stmt->fetch() ?: null;
         }
@@ -80,7 +80,7 @@ function cms_doc_read(string $slug): ?array
     $stmt = db()->prepare('SELECT slug, locale, title, content, draft, version, updated_at, path, show_in_menu, menu_order FROM pages WHERE slug = ? AND locale = ?');
     $stmt->execute([$slug, $locale]);
     $row = $stmt->fetch();
-    if (!$row && $locale !== 'es') {
+    if (!$row && $allowFallback && $locale !== 'es') {
         $stmt->execute([$slug, 'es']);
         $row = $stmt->fetch();
     }
@@ -209,6 +209,21 @@ function cms_doc_read_meta(string $slug): array
     return $fresh->fetch() ?: [];
 }
 
+function cms_doc_conflict(string $slug, string $message): never
+{
+    $row = cms_doc_read($slug, false);
+    if (!$row) {
+        json_out(['message' => cms_doc_not_found_message($slug)], 404);
+    }
+    $draft = decode_json_col($row['draft'] ?? '');
+    json_out([
+        'message' => $message,
+        'version' => (int) $row['version'],
+        'updated_at' => $row['updated_at'] ?? null,
+        'content' => cms_prepare_document($draft !== [] ? $draft : decode_json_col($row['content']), $slug),
+    ], 409);
+}
+
 function cms_doc_save_draft(string $slug): never
 {
     $input = json_input();
@@ -227,33 +242,12 @@ function cms_doc_save_draft(string $slug): never
         }
     }
 
-    if (cms_doc_is_site($slug)) {
-        $stmt = db()->prepare('SELECT version, content, draft, updated_at FROM site_settings WHERE locale = ?');
-        $stmt->execute([cms_request_locale()]);
-        $row = $stmt->fetch();
-    } else {
-        $stmt = db()->prepare('SELECT version, content, draft FROM pages WHERE slug = ? AND locale = ?');
-        $stmt->execute([$slug, cms_request_locale()]);
-        $row = $stmt->fetch();
-    }
+    $row = cms_doc_read($slug, false);
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
-    $current = (int) $row['version'];
-    $verErr = cms_version_guard($current, $input['version'] ?? null);
-    if ($verErr) {
-        if ($verErr['status'] === 400) {
-            json_out($verErr['body'], 400);
-        }
-        $draft = decode_json_col($row['draft'] ?? '');
-        $shown = $draft !== [] ? $draft : decode_json_col($row['content']);
-        json_out([
-            'message' => cms_doc_save_conflict_message($slug),
-            'version' => $current,
-            'updated_at' => $row['updated_at'] ?? null,
-            'content' => cms_prepare_document($shown, $slug),
-        ], 409);
-    }
+    $message = cms_doc_save_conflict_message($slug);
+    $current = cms_doc_require_version($slug, $row, $input['version'] ?? null, $message);
     if (cms_doc_is_site($slug)) {
         $stored = decode_json_col($row['draft'] ?? '');
         if ($stored === []) {
@@ -271,38 +265,34 @@ function cms_doc_save_draft(string $slug): never
     $prepared = cms_prepare_document($content, $slug);
     $next = $current + 1;
     if (cms_doc_write_draft($slug, $prepared, $next, $current) === 0) {
-        json_out(['message' => cms_doc_save_conflict_message($slug)], 409);
+        cms_doc_conflict($slug, $message);
     }
     $meta = cms_doc_read_meta($slug);
-    json_out(['ok' => true, 'version' => (int) ($meta['version'] ?? $next), 'updated_at' => $meta['updated_at'] ?? null, 'content' => $prepared]);
+    $updatedAt = (int) ($meta['version'] ?? 0) === $next ? ($meta['updated_at'] ?? null) : null;
+    json_out(['ok' => true, 'version' => $next, 'updated_at' => $updatedAt, 'content' => $prepared]);
 }
 
-function cms_doc_require_version(int $current): int
+function cms_doc_require_version(string $slug, array $row, mixed $given, string $message): int
 {
-    $input = json_input();
-    $err = cms_version_guard($current, $input['version'] ?? null);
+    $current = (int) $row['version'];
+    $err = cms_version_guard($current, $given);
     if ($err) {
-        $body = $err['body'];
         if ($err['status'] === 409) {
-            $body['message'] = cms_doc_publish_conflict_message();
+            cms_doc_conflict($slug, $message);
         }
-        json_out($body, $err['status']);
+        json_out($err['body'], $err['status']);
     }
     return $current;
 }
 
-function cms_read_expected_version(int $current): int
-{
-    return cms_doc_require_version($current);
-}
-
 function cms_doc_publish(string $slug): never
 {
-    $row = cms_doc_read($slug);
+    $row = cms_doc_read($slug, false);
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
-    $current = cms_doc_require_version((int) $row['version']);
+    $message = cms_doc_publish_conflict_message();
+    $current = cms_doc_require_version($slug, $row, json_input()['version'] ?? null, $message);
     $draft = decode_json_col($row['draft'] ?? '');
     $published = decode_json_col($row['content'] ?? '{}');
     $next = $draft !== [] ? $draft : $published;
@@ -311,10 +301,21 @@ function cms_doc_publish(string $slug): never
     if ($guard) {
         json_out($guard, 400);
     }
-    cms_revisions_insert($slug, cms_request_locale(), (string) ($_SESSION['admin_username'] ?? 'admin'), $next);
     $ver = $current + 1;
-    if (cms_doc_write_publish($slug, $next, $ver, $current) === 0) {
-        json_out(['message' => cms_doc_publish_conflict_message()], 409);
+    $conn = db();
+    $conn->beginTransaction();
+    try {
+        if (cms_doc_write_publish($slug, $next, $ver, $current) === 0) {
+            $conn->rollBack();
+            cms_doc_conflict($slug, $message);
+        }
+        cms_revisions_insert($slug, cms_request_locale(), (string) ($_SESSION['admin_username'] ?? 'admin'), $next);
+        $conn->commit();
+    } catch (Throwable $err) {
+        if ($conn->inTransaction()) {
+            $conn->rollBack();
+        }
+        throw $err;
     }
     cms_dispatch_webhooks('publish', [
         'slug' => $slug,
@@ -332,11 +333,15 @@ function cms_doc_restore(string $slug, int $id): never
         json_out(['message' => 'Revisión no encontrada'], 404);
     }
     $snapshot = cms_prepare_document(decode_json_col($row['snapshot']), $slug);
-    $curRow = cms_doc_read($slug) ?? [];
-    $current = cms_doc_require_version((int) ($curRow['version'] ?? 1));
+    $curRow = cms_doc_read($slug, false);
+    if (!$curRow) {
+        json_out(['message' => cms_doc_not_found_message($slug)], 404);
+    }
+    $message = cms_doc_publish_conflict_message();
+    $current = cms_doc_require_version($slug, $curRow, json_input()['version'] ?? null, $message);
     $ver = $current + 1;
     if (cms_doc_write_draft($slug, $snapshot, $ver, $current) === 0) {
-        json_out(['message' => cms_doc_publish_conflict_message()], 409);
+        cms_doc_conflict($slug, $message);
     }
     json_out(['ok' => true, 'version' => $ver, 'content' => $snapshot]);
 }

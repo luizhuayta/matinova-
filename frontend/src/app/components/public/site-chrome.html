@@ -98,9 +98,9 @@
 }
 
 @if (showCookies()) {
-  <div class="cookie-banner" role="dialog" aria-modal="false" aria-label="Cookies" (keydown.escape)="rejectCookies()">
-    <div class="container cookie-content studio-dark">
-      <p class="cookie-text" cmsText="cookieText" cmsScope="site"></p>
+  <div class="cookie-banner" role="dialog" aria-modal="false" aria-label="Aviso de cookies" aria-describedby="cookie-description" (keydown.escape)="rejectCookies()">
+    <div #cookieContent class="container cookie-content studio-dark">
+      <p id="cookie-description" class="cookie-text" cmsText="cookieText" cmsScope="site"></p>
       <div class="cookie-actions">
         <button publicBtn type="button" (click)="acceptCookies()" cmsText="cookieAccept" cmsScope="site"></button>
         <button publicBtn tone="ghost" type="button" (click)="rejectCookies()" cmsText="cookieReject" cmsScope="site"></button>

@@ -1,25 +1,49 @@
 import { JsonMap } from './cms.models';
+import { CmsLocale, activeCmsLocale } from './locale.service';
 
 export const CLIENT_CATEGORY_ORDER = ['empresas', 'educativas', 'alianzas'] as const;
 
-export const CLIENT_CATEGORY_META: Record<string, { label: string; icon: string; art: string; countLabel: string }> = {
+export interface ClientCategoryMeta {
+  label: string;
+  labelEn: string;
+  icon: string;
+  art: string;
+  countLabel: string;
+  countSingular: string;
+  countLabelEn: string;
+  countSingularEn: string;
+}
+
+export const CLIENT_CATEGORY_META: Record<string, ClientCategoryMeta> = {
   empresas: {
     label: 'Empresas y comercio',
+    labelEn: 'Companies & retail',
     icon: 'building',
     art: 'assets/illustrations/clients-empresas.svg',
     countLabel: 'clientes',
+    countSingular: 'cliente',
+    countLabelEn: 'clients',
+    countSingularEn: 'client',
   },
   educativas: {
     label: 'Instituciones educativas',
+    labelEn: 'Educational institutions',
     icon: 'school',
     art: 'assets/illustrations/clients-educativas.svg',
     countLabel: 'instituciones',
+    countSingular: 'institución',
+    countLabelEn: 'institutions',
+    countSingularEn: 'institution',
   },
   alianzas: {
     label: 'Alianzas',
+    labelEn: 'Alliances',
     icon: 'handshake',
     art: 'assets/illustrations/clients-alianzas.svg',
     countLabel: 'alianzas',
+    countSingular: 'alianza',
+    countLabelEn: 'alliances',
+    countSingularEn: 'alliance',
   },
 };
 
@@ -67,6 +91,24 @@ export interface ClientPanel {
   subs: ClientSubPanel[];
 }
 
+function resolveClientLocale(locale?: CmsLocale): CmsLocale {
+  if (locale) {
+    return locale;
+  }
+  const active = activeCmsLocale();
+  if (typeof window !== 'undefined' && typeof window.location?.pathname === 'string') {
+    const path = window.location.pathname;
+    if (path === '/admin' || path.startsWith('/admin/')) {
+      return active;
+    }
+    if (path === '/en' || path.startsWith('/en/')) {
+      return 'en';
+    }
+    return 'es';
+  }
+  return active;
+}
+
 function categoryKey(item: JsonMap): string {
   const raw = String(item['category'] ?? '').trim().toLowerCase();
   return raw || 'empresas';
@@ -77,8 +119,12 @@ function subcategoryName(item: JsonMap): string {
   return raw || 'General';
 }
 
-export function clientCategoryLabel(key: string): string {
-  return CLIENT_CATEGORY_META[key]?.label ?? key;
+export function clientCategoryLabel(key: string, locale?: CmsLocale): string {
+  const meta = CLIENT_CATEGORY_META[key];
+  if (!meta) {
+    return key;
+  }
+  return resolveClientLocale(locale) === 'en' ? meta.labelEn : meta.label;
 }
 
 export function clientCategoryIcon(key: string): string {
@@ -89,21 +135,16 @@ export function clientSectorArt(key: string): string {
   return CLIENT_CATEGORY_META[key]?.art ?? 'assets/illustrations/clients-empresas.svg';
 }
 
-export function clientCountLabel(key: string, count: number): string {
-  const word = CLIENT_CATEGORY_META[key]?.countLabel ?? 'nombres';
-  if (count === 1) {
-    if (word === 'instituciones') {
-      return '1 institución';
-    }
-    if (word === 'alianzas') {
-      return '1 alianza';
-    }
-    if (word === 'clientes') {
-      return '1 cliente';
-    }
-    return `1 ${word}`;
+export function clientCountLabel(key: string, count: number, locale?: CmsLocale): string {
+  const meta = CLIENT_CATEGORY_META[key];
+  if (resolveClientLocale(locale) === 'en') {
+    const singular = meta?.countSingularEn ?? 'entry';
+    const plural = meta?.countLabelEn ?? 'entries';
+    return `${count} ${count === 1 ? singular : plural}`;
   }
-  return `${count} ${word}`;
+  const singular = meta?.countSingular ?? 'nombre';
+  const plural = meta?.countLabel ?? 'nombres';
+  return `${count} ${count === 1 ? singular : plural}`;
 }
 
 export function clientSubIcon(name: string): string {
@@ -114,7 +155,8 @@ export function panelItemCount(panel: ClientPanel): number {
   return panel.subs.reduce((sum, sub) => sum + sub.indices.length, 0);
 }
 
-export function groupClientItems(items: JsonMap[]): ClientPanel[] {
+export function groupClientItems(items: JsonMap[], locale?: CmsLocale): ClientPanel[] {
+  const resolvedLocale = resolveClientLocale(locale);
   const map = new Map<string, Map<string, ClientSubPanel>>();
   items.forEach((item, index) => {
     const key = categoryKey(item);
@@ -144,7 +186,7 @@ export function groupClientItems(items: JsonMap[]): ClientPanel[] {
 
   return keys.map((key) => ({
     key,
-    label: clientCategoryLabel(key),
+    label: clientCategoryLabel(key, resolvedLocale),
     icon: clientCategoryIcon(key),
     subs: [...(map.get(key)?.values() ?? [])],
   }));

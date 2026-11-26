@@ -23,40 +23,15 @@
           </div>
           <div class="cyber-services-grid" [cmsList]="path('cards')">
             @for (card of cards(); track $index) {
-              <app-cyber-card class="service-card" appReveal [delay]="($index * 70) + 'ms'">
-                <a
-                  class="service-card-link"
-                  [routerLink]="isInternalPath(card) ? pathOf(card['path'] || '/') : null"
-                  [href]="isInternalPath(card) ? null : pathOf(card['path'] || '/')"
-                  [attr.target]="isInternalPath(card) ? null : '_blank'"
-                  [attr.rel]="isInternalPath(card) ? null : 'noopener'">
-                  <div class="service-media">
-                    <!-- TODO: reemplazar por foto real del equipo -->
-                    <picture>
-                      @if (webpOf(card['img']); as webp) {
-                        <source type="image/webp" [srcset]="webp">
-                      }
-                      <img
-                        [src]="rasterOf(card['img'])"
-                        [alt]="card['title']"
-                        [cmsImage]="path('cards.' + $index + '.img')"
-                        loading="lazy"
-                        width="640"
-                        height="400">
-                    </picture>
-                    <span class="service-chip" aria-hidden="true">MIS-{{ $index + 1 < 10 ? '0' + ($index + 1) : $index + 1 }}</span>
-                  </div>
-                  <div class="service-bay-body">
-                    <span class="service-icon" aria-hidden="true"><i [class]="iconOf(card, $index)"></i></span>
-                    <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
-                    <p [cmsText]="path('cards.' + $index + '.text')"></p>
-                    <span class="p-link-arrow">
-                      <span [cmsText]="path('cards.' + $index + '.link')"></span>
-                      <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
-                    </span>
-                  </div>
-                </a>
-              </app-cyber-card>
+              <app-service-photo-card class="service-card" appReveal [delay]="($index * 70) + 'ms'"
+                [field]="path('cards.' + $index)"
+                [image]="card['img'] || ''"
+                [title]="card['title'] || ''"
+                [icon]="iconOf(card, $index)"
+                [href]="cardHref(card)"
+                [linkLabel]="cardLabel(card)"
+                linkField="path"
+                [editableLabel]="true" />
             }
           </div>
         </div>

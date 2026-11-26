@@ -167,10 +167,12 @@ export class AccessibilityComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (typeof localStorage === 'undefined') {
+    let saved: string | null = null;
+    try {
+      saved = typeof window === 'undefined' ? null : window.localStorage.getItem('accessibilityTools');
+    } catch {
       return;
     }
-    const saved = localStorage.getItem('accessibilityTools');
     if (!saved) {
       return;
     }
@@ -178,11 +180,18 @@ export class AccessibilityComponent implements OnInit, OnDestroy {
       this.tools = { ...this.tools, ...JSON.parse(saved) };
       this.apply();
     } catch {
-      localStorage.removeItem('accessibilityTools');
+      try {
+        window.localStorage.removeItem('accessibilityTools');
+      } catch {
+        /* private */
+      }
     }
   }
 
   ngOnDestroy(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
     document.getElementById('a11y-reading-guide')?.remove();
     document.getElementById('a11y-window-mask')?.remove();
   }

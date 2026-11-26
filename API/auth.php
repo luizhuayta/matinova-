@@ -26,6 +26,7 @@ function handle_auth(string $path, string $method): void
         $_SESSION['admin_id'] = (int) $user['id'];
         $_SESSION['admin_username'] = $user['username'];
         $_SESSION['admin_role'] = (string) ($user['role'] ?? 'admin');
+        $_SESSION['last_activity'] = time();
         unset($_SESSION['csrf']);
         json_out([
             'ok' => true,

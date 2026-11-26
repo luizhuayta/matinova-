@@ -1,0 +1,225 @@
+@use './cyber' as cyber;
+
+html:has(.public-theme),
+body:has(.public-theme) {
+  background: var(--cyber-bg);
+}
+
+html:has(.public-theme) {
+  color-scheme: dark;
+}
+
+.public-theme {
+  position: relative;
+  isolation: isolate;
+  background: transparent;
+}
+
+.public-theme::before,
+.public-theme::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.public-theme::before {
+  z-index: -2;
+  background: var(--cyber-bg);
+}
+
+.public-theme::after {
+  z-index: -1;
+  background-image:
+    repeating-linear-gradient(
+      135deg,
+      rgba(0, 122, 255, 0) 0,
+      rgba(0, 122, 255, 0) 4.2rem,
+      rgba(0, 122, 255, 0.16) 4.85rem,
+      rgba(56, 189, 248, 0.48) 5.25rem,
+      rgba(125, 211, 252, 0.78) 5.5rem,
+      rgba(56, 189, 248, 0.5) 5.85rem,
+      rgba(0, 122, 255, 0.18) 6.55rem,
+      rgba(0, 122, 255, 0) 7.3rem,
+      rgba(0, 122, 255, 0) 15rem
+    ),
+    repeating-linear-gradient(
+      45deg,
+      rgba(0, 122, 255, 0) 0,
+      rgba(0, 122, 255, 0) 4.2rem,
+      rgba(0, 122, 255, 0.16) 4.85rem,
+      rgba(56, 189, 248, 0.48) 5.25rem,
+      rgba(125, 211, 252, 0.78) 5.5rem,
+      rgba(56, 189, 248, 0.5) 5.85rem,
+      rgba(0, 122, 255, 0.18) 6.55rem,
+      rgba(0, 122, 255, 0) 7.3rem,
+      rgba(0, 122, 255, 0) 15rem
+    ),
+    radial-gradient(ellipse 46% 38% at 6% 18%, rgba(0, 122, 255, 0.16), rgba(0, 122, 255, 0) 70%),
+    radial-gradient(ellipse 46% 38% at 94% 18%, rgba(0, 122, 255, 0.16), rgba(0, 122, 255, 0) 70%);
+  background-size: clamp(7.5rem, 10vw, 13rem) 100%, clamp(7.5rem, 10vw, 13rem) 100%, 100% 100%, 100% 100%;
+  background-position: left top, right top, center, center;
+  background-repeat: no-repeat;
+  opacity: 1;
+  mask-image: linear-gradient(90deg, #000 0%, transparent clamp(7.5rem, 10vw, 13rem), transparent calc(100% - clamp(7.5rem, 10vw, 13rem)), #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent clamp(7.5rem, 10vw, 13rem), transparent calc(100% - clamp(7.5rem, 10vw, 13rem)), #000 100%);
+}
+
+.public-theme .cms-block.has-bg-image[style*='url("/images/redesign/section-bg.webp")'] {
+  background-color: transparent !important;
+  background-image: none !important;
+}
+
+.public-theme .cms-block {
+  background-color: transparent;
+}
+
+.public-theme .cms-block :is(
+  .glass-card,
+  .p-card,
+  .check-card
+) {
+  @include cyber.hud-panel;
+  color: var(--cyber-text);
+}
+
+.public-theme .cms-block :is(
+  .glass-card,
+  .p-card,
+  .check-card
+):hover {
+  @include cyber.hud-panel-hover;
+}
+
+body .public-theme .cms-block .service-panel {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(6, 19, 41, 0) 42%),
+    var(--cyber-surface);
+  border-color: var(--cyber-border);
+  border-radius: var(--cyber-radius);
+  box-shadow: var(--cyber-glow), inset 0 1px 0 rgba(248, 250, 252, 0.04);
+  backdrop-filter: blur(14px);
+}
+
+body .public-theme .cms-block .service-panel:hover,
+body .public-theme .cms-block .service-panel:focus-within {
+  border-color: var(--cyber-border-strong);
+  box-shadow: var(--cyber-glow-strong), inset 0 1px 0 rgba(248, 250, 252, 0.06);
+}
+
+.public-theme .cms-block :is(.glass-card, .p-card) {
+  border-color: var(--cyber-border);
+}
+
+.public-theme .cms-block :is(.stat-bay, .team-bay, .reason-bay) {
+  padding: 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.public-theme .cms-block :is(.stat-bay, .team-bay, .reason-bay):hover {
+  transform: none;
+  border-color: transparent;
+  box-shadow: none;
+}
+
+@media (max-width: 640px) {
+  .public-theme::after {
+    background-image:
+      repeating-linear-gradient(
+        135deg,
+        rgba(0, 122, 255, 0) 0,
+        rgba(0, 122, 255, 0) 4.9rem,
+        rgba(0, 122, 255, 0.12) 5.25rem,
+        rgba(56, 189, 248, 0.38) 5.5rem,
+        rgba(125, 211, 252, 0.58) 5.62rem,
+        rgba(56, 189, 248, 0.36) 5.78rem,
+        rgba(0, 122, 255, 0.12) 6.2rem,
+        rgba(0, 122, 255, 0) 6.75rem,
+        rgba(0, 122, 255, 0) 13rem
+      ),
+      repeating-linear-gradient(
+        45deg,
+        rgba(0, 122, 255, 0) 0,
+        rgba(0, 122, 255, 0) 4.9rem,
+        rgba(0, 122, 255, 0.12) 5.25rem,
+        rgba(56, 189, 248, 0.38) 5.5rem,
+        rgba(125, 211, 252, 0.58) 5.62rem,
+        rgba(56, 189, 248, 0.36) 5.78rem,
+        rgba(0, 122, 255, 0.12) 6.2rem,
+        rgba(0, 122, 255, 0) 6.75rem,
+        rgba(0, 122, 255, 0) 13rem
+      ),
+      radial-gradient(ellipse 46% 38% at 6% 18%, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0) 70%),
+      radial-gradient(ellipse 46% 38% at 94% 18%, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0) 70%);
+    background-size: 22vw 100%, 22vw 100%, 100% 100%, 100% 100%;
+    opacity: 0.92;
+    mask-image: linear-gradient(90deg, #000 0%, transparent 22vw, transparent calc(100% - 22vw), #000 100%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent 22vw, transparent calc(100% - 22vw), #000 100%);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .public-theme .cms-block :is(
+    .glass-card,
+    .p-card,
+    .check-card
+  ),
+  body .public-theme .cms-block .service-panel {
+    transition: none;
+  }
+
+  .public-theme .cms-block :is(
+    .glass-card,
+    .p-card,
+    .check-card
+  ):hover,
+  body .public-theme .cms-block .service-panel:hover {
+    transform: none;
+  }
+}
+
+html[data-a11y-contrast='high'] .public-theme {
+  background: var(--dt-bg);
+}
+
+html[data-a11y-contrast='high'] .public-theme::before,
+html[data-a11y-contrast='high'] .public-theme::after {
+  display: none;
+}
+
+html[data-a11y-contrast='high'] .public-theme .cms-block[style*='url("/images/redesign/section-bg.webp")'] {
+  background: transparent !important;
+}
+
+html[data-a11y-contrast='high'] .public-theme .cms-block :is(
+  .glass-card,
+  .p-card,
+  .check-card
+),
+html[data-a11y-contrast='high'] body .public-theme .cms-block .service-panel {
+  background: var(--dt-panel);
+  border-color: var(--dt-text);
+  box-shadow: none;
+  backdrop-filter: none;
+}
+
+@media (forced-colors: active) {
+  .public-theme::before,
+  .public-theme::after {
+    display: none;
+  }
+
+  .public-theme .cms-block :is(
+    .glass-card,
+    .p-card,
+    .check-card
+  ),
+  body .public-theme .cms-block .service-panel {
+    border-color: CanvasText;
+    box-shadow: none;
+    backdrop-filter: none;
+  }
+}

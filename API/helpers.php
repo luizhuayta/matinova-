@@ -19,11 +19,12 @@ function allowed_origins(): array
 function cors(): void
 {
     $origin = $_SERVER['HTTP_ORIGIN'] ?? '';
+    header('Vary: Origin');
     if (in_array($origin, allowed_origins(), true)) {
         header("Access-Control-Allow-Origin: $origin");
         header('Access-Control-Allow-Credentials: true');
     }
-    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token, X-CMS-Locale');
+    header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token, X-CMS-Locale, Cache-Control');
     header('Access-Control-Allow-Methods: GET, POST, PUT, PATCH, DELETE, OPTIONS');
     header('Content-Type: application/json; charset=UTF-8');
 }
@@ -38,7 +39,7 @@ function json_input(): array
 function json_out(mixed $data, int $code = 200, array $headers = []): never
 {
     http_response_code($code);
-    $cache = $headers['Cache-Control'] ?? 'no-store';
+    $cache = $headers['Cache-Control'] ?? (empty($_SESSION['admin_id']) ? 'no-store' : 'private, no-store');
     header('Cache-Control: ' . $cache);
     unset($headers['Cache-Control']);
     foreach ($headers as $name => $value) {
@@ -53,29 +54,29 @@ function json_out(mixed $data, int $code = 200, array $headers = []): never
 
 function json_out_public(mixed $data, ?string $updatedAt = null): never
 {
-    if (function_exists('admin_logged_in') && admin_logged_in()) {
-        json_out($data);
+    $vary = 'Origin, Cookie, X-CMS-Locale, Accept-Language';
+    if ((function_exists('admin_logged_in') && admin_logged_in()) || !empty($_GET['preview'])) {
+        json_out($data, 200, ['Cache-Control' => 'private, no-store', 'Vary' => $vary]);
     }
     $body = json_encode($data, JSON_UNESCAPED_UNICODE);
     $etag = '"' . sha1((string) $body) . '"';
-    $ifNone = trim((string) ($_SERVER['HTTP_IF_NONE_MATCH'] ?? ''));
-    $ifNone = preg_replace('/^W\//i', '', $ifNone) ?? $ifNone;
-    $ifNone = trim($ifNone, " \t\"");
     $headers = [
-        'Cache-Control' => 'public, max-age=3600, stale-while-revalidate=86400',
+        'Cache-Control' => 'no-cache',
         'ETag' => $etag,
+        'Vary' => $vary,
     ];
     if (is_string($updatedAt) && $updatedAt !== '') {
         $headers['Last-Modified'] = gmdate('D, d M Y H:i:s', strtotime($updatedAt) ?: time()) . ' GMT';
     }
-    if ($ifNone !== '' && hash_equals(trim($etag, '"'), $ifNone)) {
-        http_response_code(304);
-        header('Cache-Control: ' . $headers['Cache-Control']);
-        header('ETag: ' . $etag);
-        if (!empty($headers['Last-Modified'])) {
-            header('Last-Modified: ' . $headers['Last-Modified']);
+    foreach (explode(',', (string) ($_SERVER['HTTP_IF_NONE_MATCH'] ?? '')) as $candidate) {
+        $candidate = trim($candidate);
+        if ($candidate === '*' || $candidate === $etag || $candidate === 'W/' . $etag) {
+            http_response_code(304);
+            foreach ($headers as $name => $value) {
+                header($name . ': ' . $value);
+            }
+            exit;
         }
-        exit;
     }
     json_out($data, 200, $headers);
 }
@@ -190,6 +191,25 @@ function start_admin_session(bool $create = true): void
         return;
     }
     session_start();
+    if (!admin_session_ready() || empty($_SESSION['admin_id'])) {
+        return;
+    }
+    $now = time();
+    $lastActivity = (int) ($_SESSION['last_activity'] ?? 0);
+    if ($lastActivity > 0 && $now - $lastActivity >= admin_session_lifetime()) {
+        $_SESSION = [];
+        return;
+    }
+    if ($lastActivity === $now) {
+        return;
+    }
+    $_SESSION['last_activity'] = $now;
+    if (ini_get('session.use_cookies')) {
+        $cookie = admin_session_cookie_params();
+        $cookie['expires'] = $now + $cookie['lifetime'];
+        unset($cookie['lifetime']);
+        setcookie(session_name(), session_id(), $cookie);
+    }
 }
 
 function require_admin(): void

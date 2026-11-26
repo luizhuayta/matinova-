@@ -34,6 +34,13 @@ export class CmsApiService {
     return { locale: this.locale?.locale() || 'es' };
   }
 
+  private readOptions(editor: boolean) {
+    const params = this.locParams();
+    return editor
+      ? { params: { ...params, editor: '1' }, headers: { 'Cache-Control': 'no-cache' }, cache: 'no-store' as const, transferCache: false }
+      : { params, cache: 'no-cache' as const };
+  }
+
   private requireDoc(res: CmsDocResponse): CmsDocResponse {
     if (!res || !res.content || typeof res.content !== 'object' || Array.isArray(res.content)) {
       throw new Error('La API no devolvió un documento CMS válido.');
@@ -41,13 +48,13 @@ export class CmsApiService {
     return res;
   }
 
-  getSite(preview = ''): Promise<CmsDocResponse> {
-    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`, { params: this.locParams() }).pipe(timeout(15000)))
+  getSite(preview = '', editor = false): Promise<CmsDocResponse> {
+    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`, this.readOptions(editor)).pipe(timeout(15000)))
       .then((res) => this.requireDoc(res));
   }
 
-  getPagesCatalog(): Promise<{ pages: CmsPageSummary[]; menu: CmsMenuItem[] }> {
-    return firstValueFrom(this.http.get<{ pages: CmsPageSummary[]; menu?: CmsMenuItem[] }>(`${API_URL}/pages`, { params: this.locParams() }).pipe(timeout(15000))).then(
+  getPagesCatalog(editor = false): Promise<{ pages: CmsPageSummary[]; menu: CmsMenuItem[] }> {
+    return firstValueFrom(this.http.get<{ pages: CmsPageSummary[]; menu?: CmsMenuItem[] }>(`${API_URL}/pages`, this.readOptions(editor)).pipe(timeout(15000))).then(
       (res) => {
         if (!res || !Array.isArray(res.pages)) {
           throw new Error('La API no devolvió un catálogo CMS válido.');
@@ -92,8 +99,8 @@ export class CmsApiService {
     return firstValueFrom(this.http.patch<{ page: CmsPageSummary }>(`${API_URL}/pages/${slug}/meta`, body, { params: this.locParams() }));
   }
 
-  getPage(slug: string, preview = ''): Promise<CmsDocResponse> {
-    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/pages/${slug}${preview}`, { params: this.locParams() }).pipe(timeout(15000)))
+  getPage(slug: string, preview = '', editor = false): Promise<CmsDocResponse> {
+    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/pages/${slug}${preview}`, this.readOptions(editor)).pipe(timeout(15000)))
       .then((res) => this.requireDoc(res));
   }
 

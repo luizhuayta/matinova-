@@ -9,6 +9,16 @@
   margin-top: var(--space-64);
 }
 
+:host-context(body.has-cookie-banner) .footer {
+  padding-bottom: 7rem;
+}
+
+@media (max-width: 768px) {
+  :host-context(body.has-cookie-banner) .footer {
+    padding-bottom: 8.5rem;
+  }
+}
+
 .footer-grid {
   position: relative;
   z-index: 1;

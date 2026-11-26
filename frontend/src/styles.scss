@@ -2,6 +2,7 @@
 @use './styles/tokens';
 @use './styles/cyber';
 @use './app/cms/blocks/public-blocks.scss';
+@use './styles/shared';
 @use './app/admin/admin-theme.scss';
 
 *,
@@ -394,16 +395,6 @@ html[data-a11y-cursor="large"] {
 .cms-list-handle button:disabled {
   opacity: 0.35;
   cursor: default;
-}
-
-body.has-cookie-banner {
-  padding-bottom: 7rem;
-}
-
-@media (max-width: 768px) {
-  body.has-cookie-banner {
-    padding-bottom: 8.5rem;
-  }
 }
 
 body.chatbot-open {

@@ -1,17 +1,21 @@
 @use '../../../styles/bp' as *;
 
 .main-header {
+  --hdr-underline: var(--cyber-blue, #007aff);
+  --hdr-cyan: var(--cyber-cyan, #38bdf8);
+
   position: sticky;
   top: 0;
   z-index: var(--z-header);
-  background: rgba(5, 11, 24, 0.6);
+  background: rgba(5, 11, 24, 0.72);
   border-bottom: 1px solid var(--dt-line);
-  backdrop-filter: blur(14px);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   transition: background 200ms ease-out;
 }
 
 .main-header.scrolled {
-  background: rgba(5, 11, 24, 0.9);
+  background: rgba(5, 11, 24, 0.92);
 }
 
 .navbar {
@@ -27,6 +31,12 @@
 .logo-container {
   display: inline-flex;
   align-items: center;
+  border-radius: var(--radius-sm);
+}
+
+.logo-container:focus-visible {
+  outline: 2px solid var(--hdr-cyan);
+  outline-offset: 4px;
 }
 
 .logo-img {
@@ -44,8 +54,9 @@
   padding: 0;
 }
 
-.nav-list a,
+.nav-list > li > a,
 .dropbtn {
+  position: relative;
   display: inline-flex;
   align-items: center;
   gap: var(--space-8);
@@ -64,13 +75,19 @@
   white-space: nowrap;
 }
 
-.nav-list a:hover,
+.nav-list > li > a:hover,
 .dropbtn:hover {
-  color: var(--dt-cyan);
+  color: var(--hdr-cyan);
   background: rgba(56, 189, 248, 0.08);
 }
 
-.nav-list a.active {
+.nav-list > li > a:focus-visible,
+.dropbtn:focus-visible {
+  outline: 2px solid var(--hdr-cyan);
+  outline-offset: 2px;
+}
+
+.nav-list > li > a.active {
   color: #fff;
   background: var(--dt-blue);
   border-color: transparent;
@@ -78,9 +95,30 @@
   box-shadow: 0 0 24px var(--dt-glow);
 }
 
-.dropdown.open .dropbtn {
-  color: var(--dt-cyan);
+/* Subrayado azul fino en el disparador activo/abierto (Referencia 2) */
+.dropbtn::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  bottom: 4px;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--hdr-underline), var(--hdr-cyan));
+  transform: scaleX(0);
+  transform-origin: center;
+  transition: transform 180ms ease-out;
+}
+
+.dropdown.open .dropbtn,
+.dropdown.is-route-active .dropbtn {
+  color: var(--hdr-cyan);
   background: rgba(56, 189, 248, 0.08);
+}
+
+.dropdown.open .dropbtn::after,
+.dropdown.is-route-active .dropbtn::after {
+  transform: scaleX(1);
 }
 
 .dropdown.open .dropbtn .ui-icon {
@@ -91,62 +129,35 @@
   transition: transform 200ms ease-out;
 }
 
+/* El mega-panel se posiciona relativo a .main-header para centrarse bajo todo el header */
+.dropdown {
+  position: static;
+}
+
 .nav-cta a.public-btn {
   color: #fff;
-  background: var(--dt-blue);
-  padding: 0.7rem 1.35rem;
+  background: transparent;
+  border: 1px solid rgba(56, 189, 248, 0.55);
+  padding: 0.65rem 1.3rem;
   border-radius: 999px;
   gap: var(--space-8);
+  box-shadow: 0 0 18px rgba(0, 122, 255, 0.16);
 }
 
 .nav-cta a.public-btn:hover,
 .nav-cta a.public-btn.active {
   color: #fff;
-  background: var(--dt-blue-strong);
+  background: var(--dt-blue);
+  border-color: var(--dt-blue);
   box-shadow: 0 0 24px var(--dt-glow);
-}
-
-.dropdown {
-  position: relative;
-}
-
-.dropdown-content {
-  display: none;
-  position: absolute;
-  top: calc(100% + 8px);
-  left: 0;
-  min-width: 16rem;
-  padding: var(--space-8);
-  background: var(--dt-panel);
-  border: 1px solid var(--dt-line);
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-md);
-  z-index: 5;
-}
-
-.dropdown.open .dropdown-content,
-.dropdown:hover .dropdown-content {
-  display: grid;
-  gap: 2px;
-}
-
-.dropdown-content a {
-  border-radius: var(--radius-sm);
-  padding: 0.65rem 0.85rem;
-  min-height: 44px;
-  font-weight: 500;
-}
-
-.dropdown-content a:hover {
-  background: var(--dt-panel-2);
-  color: var(--dt-cyan);
 }
 
 .lang {
   position: relative;
-  display: flex;
+  display: inline-flex;
+  align-items: center;
   gap: 2px;
-  padding: 3px;
+  padding: 3px 3px 3px 10px;
   margin-left: var(--space-16);
   border-radius: 999px;
   background: var(--dt-panel);
@@ -164,9 +175,16 @@
   background: var(--dt-line-strong);
 }
 
+.lang-globe {
+  color: var(--hdr-cyan);
+  font-size: 0.9rem;
+  margin-right: 4px;
+  opacity: 0.85;
+}
+
 .lang button {
-  min-width: 44px;
-  min-height: 44px;
+  min-width: 40px;
+  min-height: 40px;
   border: 0;
   border-radius: 999px;
   background: transparent;
@@ -174,10 +192,16 @@
   font-weight: 600;
   font-size: var(--text-14);
   cursor: pointer;
+  transition: color 180ms ease-out, background 180ms ease-out;
 }
 
 .lang button:hover {
-  color: var(--dt-cyan);
+  color: var(--hdr-cyan);
+}
+
+.lang button:focus-visible {
+  outline: 2px solid var(--hdr-cyan);
+  outline-offset: 2px;
 }
 
 .lang button.active {
@@ -199,11 +223,17 @@
   cursor: pointer;
 }
 
+.mobile-menu-toggle:focus-visible {
+  outline: 2px solid var(--hdr-cyan);
+  outline-offset: 2px;
+}
+
 .mobile-menu-toggle span {
   display: block;
   width: 18px;
   height: 1.5px;
   background: var(--dt-text);
+  transition: transform 180ms ease-out, opacity 180ms ease-out;
 }
 
 .mobile-menu-toggle.active span:nth-child(1) {
@@ -219,6 +249,10 @@
 }
 
 @include down(900px) {
+  .navbar {
+    width: calc(100% - 1.5rem);
+  }
+
   .mobile-menu-toggle {
     display: flex;
   }
@@ -229,11 +263,14 @@
     left: var(--space-12);
     right: var(--space-12);
     top: calc(100% + 8px);
-    background: var(--dt-panel);
+    max-height: calc(100dvh - 104px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: rgba(5, 11, 24, 0.985);
     border: 1px solid var(--dt-line);
-    border-radius: var(--radius-md);
+    border-radius: 20px;
     box-shadow: var(--shadow-md);
-    padding: var(--space-8);
+    padding: 12px 12px 24px;
   }
 
   .nav.mobile-open {
@@ -243,33 +280,40 @@
   .nav-list {
     flex-direction: column;
     align-items: stretch;
+    gap: 4px;
   }
 
-  .nav-list a,
+  .nav-list > li > a,
   .dropbtn {
     width: 100%;
-    justify-content: flex-start;
+    justify-content: space-between;
   }
 
-  .nav-cta a {
+  .dropbtn::after {
+    display: none;
+  }
+
+  .nav-cta a.public-btn {
     justify-content: center;
-  }
-
-  .dropdown-content {
-    position: static;
-    box-shadow: none;
-    border: 0;
-    background: var(--dt-panel-2);
-    margin-top: var(--space-4);
+    margin-top: 6px;
   }
 
   .lang {
     justify-content: center;
+    margin-left: 0;
+    margin-top: 6px;
+    padding: 4px 10px;
+  }
+
+  .lang::before {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .dropbtn .ui-icon {
+  .dropbtn .ui-icon,
+  .dropbtn::after,
+  .mobile-menu-toggle span {
     transition: none;
   }
 }

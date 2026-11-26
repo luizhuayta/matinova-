@@ -18,6 +18,26 @@
   --cyber-cut: 18px;
 }
 
+
+@mixin hud-panel {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(6, 19, 41, 0) 42%),
+    var(--cyber-surface);
+  border: 1px solid var(--cyber-border);
+  border-radius: var(--cyber-radius);
+  box-shadow: var(--cyber-glow), inset 0 1px 0 rgba(248, 250, 252, 0.04);
+  backdrop-filter: blur(14px);
+}
+
+@mixin hud-panel-hover {
+  border-color: var(--cyber-border-strong);
+  box-shadow: var(--cyber-glow-strong), inset 0 1px 0 rgba(248, 250, 252, 0.06);
+}
+
+.cyber-hud-panel {
+  @include hud-panel;
+}
+
 .cyber-dot-grid {
   background-image: radial-gradient(rgba(56, 189, 248, 0.16) 1px, transparent 1px);
   background-size: 18px 18px;
@@ -70,3 +90,4 @@
   max-width: 60ch;
   color: var(--cyber-muted);
 }
+

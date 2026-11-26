@@ -45,6 +45,15 @@ mkdir -p "$OUT/api/uploads" "$OUT/api/tmp/ratelimit"
 cp -a "$BROWSER"/. "$OUT/"
 cp -f "$FRONT/public/.htaccess" "$OUT/.htaccess"
 
+SAFETY_WORKER="$FRONT/node_modules/@angular/service-worker/safety-worker.js"
+if [[ ! -f "$SAFETY_WORKER" ]]; then
+  echo "No se encontró $SAFETY_WORKER." >&2
+  exit 1
+fi
+cp -f "$SAFETY_WORKER" "$OUT/safety-worker.js"
+cp -f "$SAFETY_WORKER" "$OUT/ngsw-worker.js"
+rm -f "$OUT/ngsw.json"
+
 # Frontal /api.php: el API también responde por /api.php/<ruta> sin depender
 # del .htaccess de la raíz, y el frontend de producción lo usa por defecto.
 cp -f "$ROOT/api.php" "$OUT/api.php"

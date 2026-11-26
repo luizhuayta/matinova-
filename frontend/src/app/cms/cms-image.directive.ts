@@ -1,5 +1,6 @@
-import { Directive, HostListener, effect, input } from '@angular/core';
+import { DestroyRef, Directive, HostListener, effect, inject, input } from '@angular/core';
 import { CmsEditableHost } from './cms-editable-host';
+import { LocaleService } from './locale.service';
 import { imageSizes, inferImageFit, publicPhotoSrc, rasterSrcset, srcsetFromVariants, uploadMediaId, webpSrcset } from './public-url';
 
 @Directive({
@@ -7,6 +8,8 @@ import { imageSizes, inferImageFit, publicPhotoSrc, rasterSrcset, srcsetFromVari
   standalone: true,
 })
 export class CmsImageDirective extends CmsEditableHost {
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly locales = inject(LocaleService);
   readonly cmsImage = input.required<string>();
   readonly cmsScope = input<'page' | 'site'>('page');
   protected override removeClasses = ['cms-editable-image', 'cms-selected'];
@@ -98,13 +101,25 @@ export class CmsImageDirective extends CmsEditableHost {
     event.preventDefault();
     event.stopPropagation();
     const file = event.dataTransfer?.files?.[0];
-    if (!file || !file.type.startsWith('image/')) {
+    if (!file || !file.type.startsWith('image/') || this.editor.uploading()) {
       return;
     }
+    const slug = this.cms.currentSlug();
+    const locale = this.locales.locale();
+    const path = this.cmsImage();
+    const scope = this.cmsScope();
+    this.cms.uploadNotice.set('');
     this.editor.uploading.set(true);
     try {
       const url = await this.cms.uploadImage(file);
-      this.cms.set(this.cmsImage(), url, this.cmsScope());
+      if (this.destroyRef.destroyed || !this.editor.editMode() || this.cms.currentSlug() !== slug ||
+          this.locales.locale() !== locale || this.cmsImage() !== path || this.cmsScope() !== scope) {
+        this.cms.uploadNotice.set('La imagen quedó en la biblioteca. Selecciónala en el campo de destino.');
+        return;
+      }
+      this.cms.set(path, url, scope);
+    } catch {
+      this.cms.uploadNotice.set('No se pudo subir la imagen.');
     } finally {
       this.editor.uploading.set(false);
     }

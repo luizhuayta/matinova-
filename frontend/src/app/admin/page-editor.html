@@ -7,13 +7,13 @@
         <label class="slug-edit">
           Ruta
           <input class="admin-control" [ngModel]="slugDraft()" (ngModelChange)="slugDraft.set($event)" maxlength="80">
-          <button type="button" class="admin-btn-ghost" (click)="saveSlug()">Cambiar URL</button>
+          <button type="button" class="admin-btn-ghost" (click)="saveSlug()" [disabled]="!documentsReady() || cms.saving() || auth.sessionExpired()">Cambiar URL</button>
         </label>
         <p class="slug-hint">Si cambias la ruta, la anterior redirige (301) a la nueva.</p>
       }
       <label class="locale-edit">
         Idioma
-        <select class="admin-control" [ngModel]="locales.locale()" (ngModelChange)="changeLocale($event)">
+        <select class="admin-control" [ngModel]="locales.locale()" (ngModelChange)="changeLocale($event)" [disabled]="loadingDocuments() || cms.saving() || editor.uploading() || auth.sessionExpired()">
           @for (item of localeOptions; track item.id) {
             <option [value]="item.id">{{ item.label }}</option>
           }
@@ -27,10 +27,10 @@
       </div>
       <p class="save-state" data-tour="status" [attr.data-state]="saveState()">{{ saveState() }}</p>
       <div class="icon-tools" role="group" aria-label="Herramientas">
-        <button type="button" class="admin-icon-btn" (click)="cms.undo()" [disabled]="!cms.canUndo()" aria-label="Deshacer">
+        <button type="button" class="admin-icon-btn" (click)="cms.undo()" [disabled]="!documentsReady() || !cms.canUndo()" aria-label="Deshacer">
           <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
         </button>
-        <button type="button" class="admin-icon-btn" (click)="cms.redo()" [disabled]="!cms.canRedo()" aria-label="Rehacer">
+        <button type="button" class="admin-icon-btn" (click)="cms.redo()" [disabled]="!documentsReady() || !cms.canRedo()" aria-label="Rehacer">
           <i class="bi bi-arrow-clockwise" aria-hidden="true"></i>
         </button>
         <button type="button" class="admin-icon-btn" (click)="previewPublic()" aria-label="Vista previa">
@@ -64,11 +64,11 @@
         </button>
       </div>
       <div class="publish-cluster" data-tour="publish">
-        <button type="button" class="admin-btn-ghost" (click)="save()" [disabled]="cms.saving() || !cms.dirty()">
+        <button type="button" class="admin-btn-ghost" (click)="save()" [disabled]="!documentsReady() || cms.saving() || !cms.dirty() || auth.sessionExpired()">
           {{ cms.saving() ? 'Guardando…' : 'Guardar' }}
         </button>
         @if (canPublish()) {
-          <button type="button" class="admin-btn-primary" (click)="publish()" [disabled]="cms.saving()">Publicar</button>
+          <button type="button" class="admin-btn-primary" (click)="publish()" [disabled]="!documentsReady() || cms.saving() || auth.sessionExpired()">Publicar</button>
         }
       </div>
     </div>
@@ -90,12 +90,24 @@
         <button type="button" class="admin-btn-ghost" (click)="cms.undoRemove()">Deshacer</button>
       }
       @if (n.action === 'reload') {
-        <button type="button" class="admin-btn-ghost" (click)="reload()">Recargar</button>
+        <button type="button" class="admin-btn-ghost" (click)="reload()" [disabled]="loadingDocuments() || cms.saving()">Recargar</button>
+      }
+      @if (n.action === 'login') {
+        <a class="admin-link" routerLink="/admin/login" [queryParams]="{ returnUrl: loginReturnUrl() }">Volver a iniciar sesión</a>
+      }
+      @if (n.action === 'site') {
+        <a class="admin-link" routerLink="/admin/paginas/sitio" [queryParams]="{ locale: locales.locale() }">Editar apariencia del sitio</a>
+      }
+      @if (n.action === 'dismiss-upload') {
+        <button type="button" class="admin-btn-ghost" (click)="cms.uploadNotice.set('')">Cerrar aviso</button>
       }
     </p>
   }
 
-  <div class="editor-body">
+  @if (loadingDocuments()) {
+    <p role="status">Cargando el documento…</p>
+  }
+  <div class="editor-body" [inert]="!documentsReady()">
     <div class="preview-pane">
       <div class="preview-wrap" #previewWrap data-tour="preview">
         <div
@@ -118,8 +130,8 @@
               }
               @if (isSitio()) {
                 <div class="sitio-hint">Así se ve el menú y el pie. Cambia logo, textos y WhatsApp en el panel.</div>
-              } @else if (preview(); as cmp) {
-                <ng-container [ngComponentOutlet]="cmp" [ngComponentOutletInputs]="{ slug: slug() }"></ng-container>
+              } @else if (documentsReady()) {
+                <app-cms-page-blocks [slug]="slug()" />
               }
               @if (!isLibro()) {
                 <app-footer></app-footer>

@@ -12,9 +12,17 @@ function cms_write_guard(bool $needAdminRole = false): void
     rate_limit('cms_write', 40, 60);
 }
 
+function cms_editor_read_guard(): void
+{
+    if (($_GET['editor'] ?? '') === '1') {
+        require_admin();
+    }
+}
+
 function handle_pages(string $path, string $method): void
 {
     if ($path === '/pages' && $method === 'GET') {
+        cms_editor_read_guard();
         cms_pages_list();
     }
 
@@ -65,6 +73,7 @@ function handle_pages(string $path, string $method): void
             handle_site($method);
         }
         if ($method === 'GET') {
+            cms_editor_read_guard();
             $payload = cms_doc_payload($slug);
             json_out_public($payload, $payload['updated_at'] ?? null);
         }
@@ -84,8 +93,15 @@ function handle_pages(string $path, string $method): void
 function cms_pages_list(): never
 {
     $locale = cms_request_locale();
-    $rows = db()->prepare('SELECT slug, locale, title, updated_at, version, path, show_in_menu, menu_order FROM pages WHERE locale = ? ORDER BY menu_order ASC, title');
-    $rows->execute([$locale]);
+    $rows = db()->prepare(
+        "SELECT p.slug, p.locale, p.title, p.updated_at, p.version, p.path, p.show_in_menu, p.menu_order
+         FROM pages p
+         WHERE p.locale = ? OR (p.locale = 'es' AND NOT EXISTS (
+             SELECT 1 FROM pages translation WHERE translation.slug = p.slug AND translation.locale = ?
+         ))
+         ORDER BY p.menu_order ASC, p.title, p.slug"
+    );
+    $rows->execute([$locale, $locale]);
     $pages = [];
     $menu = [];
     foreach ($rows->fetchAll() as $row) {
@@ -204,7 +220,7 @@ function cms_pages_delete(string $slug): never
     if ($slug === 'sitio' || in_array($slug, cms_protected_slugs(), true)) {
         json_out(['message' => 'Esta página no se puede eliminar.'], 403);
     }
-    $row = cms_doc_read($slug);
+    $row = cms_doc_read($slug, false);
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
@@ -218,7 +234,7 @@ function cms_pages_update_meta(string $slug): never
     if ($slug === 'sitio') {
         json_out(['message' => 'La apariencia del sitio no tiene esa opción.'], 400);
     }
-    $row = cms_doc_read($slug);
+    $row = cms_doc_read($slug, false);
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
@@ -322,6 +338,7 @@ function cms_pages_translate(string $slug): never
 function handle_site(string $method): never
 {
     if ($method === 'GET') {
+        cms_editor_read_guard();
         $payload = cms_doc_payload('sitio');
         json_out_public($payload, $payload['updated_at'] ?? null);
     }
