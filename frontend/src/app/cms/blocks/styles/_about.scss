@@ -16,30 +16,48 @@
 
 .team-grid { grid-template-columns: repeat(auto-fit, minmax(min(100%, 270px), 1fr)); }
 
+/* Equipo: cualquier foto subida (retrato, cuadrada o apaisada) se muestra
+   como avatar circular centrado con aro cyan y brillo azul. El editor sube
+   una foto normal; el círculo lo pone el diseño, no la imagen. */
 .acerca-container .team-photo {
   position: relative;
   margin: 0 0 0.75rem;
   aspect-ratio: 4 / 3;
+  display: grid;
+  place-items: center;
   border-radius: calc(var(--cyber-radius) - 4px);
   overflow: hidden;
-  background: var(--cyber-surface-solid);
+  background:
+    radial-gradient(circle at 50% 50%, rgba(0, 90, 200, 0.45) 0%, rgba(0, 90, 200, 0.12) 42%, transparent 68%),
+    var(--cyber-surface-solid);
   border: 1px solid var(--cyber-border);
 }
 
-.acerca-container .team-photo picture,
-.acerca-container .team-photo img {
-  position: absolute;
-  inset: 0;
+.acerca-container .team-photo picture {
   display: block;
-  width: 100%;
-  height: 100%;
+  height: 86%;
+  aspect-ratio: 1 / 1;
+  max-width: 86%;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 3px solid var(--cyber-cyan, #38bdf8);
+  box-shadow: 0 0 0 6px rgba(56, 189, 248, 0.08), 0 0 32px rgba(0, 122, 255, 0.35);
+  background: var(--cyber-surface-solid);
 }
 
 .acerca-container .team-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
-  object-position: 50% 20%;
+  object-position: 50% 22%;
   margin: 0;
   background: var(--cyber-surface-solid);
+}
+
+html[data-a11y-contrast="high"] .acerca-container .team-photo picture {
+  box-shadow: none;
+  border-color: currentColor;
 }
 
 .team-social {
