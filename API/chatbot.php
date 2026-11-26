@@ -138,7 +138,7 @@ function chatbot_classic_result(string $message): array
     }
 
     if (revisarPalabras(['quienes', 'nosotros', 'empresa', 'historia', 'anos', 'experiencia', 'fundacion', 'hitos', 'valores', 'mision', 'vision', 'filosofia', 'compromiso'], $input_norm)) {
-        $reply = "*30 años de trabajo en tecnología*\n\nMatt Innova Solution empezó cuando los mainframes dominaban. Pasamos del ensamblaje de PCs y cableado estructurado a nube, ERP y desarrollo a medida. Más de 4,000 clientes y 50 macroproyectos.\n\n" .
+        $reply = "*30+ años de trabajo en tecnología*\n\nMatt Innova Solution empezó cuando los mainframes dominaban. Pasamos del ensamblaje de PCs y cableado estructurado a nube, ERP y desarrollo a medida. 4,127 clientes atendidos y soporte 24/7.\n\n" .
              "*Hitos*\n" .
              "*1994-2000 (Fundación):* hardware y redes para pymes en Cañete.\n" .
              "*2001-2010 (Expansión):* primer sistema de facturación electrónica adaptado a la legislación peruana.\n" .
@@ -160,7 +160,7 @@ function chatbot_classic_result(string $message): array
     }
 
     if (revisarPalabras(['giovanni', 'risco', 'desarrollador', 'arquitecto', 'programador'], $input_norm)) {
-        $reply = "*Giovanni Risco — Lead web developer y arquitecto de software*\n\nArquitecturas de microservicios con NestJS y frontends con Angular. Sistemas pensados para ser escalables y seguros.\n\n_\"Un sistema no está completo hasta que es a prueba de fallos y de usuarios.\"_";
+        $reply = "*Giovanni Risco Collazos — Desarrollo web y arquitectura de software*\n\nArquitecturas de microservicios con NestJS y frontends con Angular. Sistemas pensados para ser escalables y seguros.\n\n_\"Un sistema no está completo hasta que es a prueba de fallos y de usuarios.\"_";
         return chatbot_pack($reply . $ayudaAdicional, [
             chatbot_link('Acerca de', '/acerca-de'),
             chatbot_link('Software a medida', '/servicios/software'),

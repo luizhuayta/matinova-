@@ -15,6 +15,17 @@ import {
 import { BlockTypeDef, PageTemplateDef } from './block-registry';
 import { LocaleService } from './locale.service';
 
+interface CreatePageResponse {
+  page: CmsPageSummary;
+  content: JsonMap;
+  version: number;
+  translations?: string[];
+}
+
+export interface CmsWriteResponse extends CmsDocResponse {
+  syncedImages?: number;
+}
+
 export interface AiChatConfig {
   enabled: boolean;
   provider: 'openrouter' | 'deepseek' | 'custom' | string;
@@ -34,6 +45,13 @@ export class CmsApiService {
     return { locale: this.locale?.locale() || 'es' };
   }
 
+  private readOptions(editor: boolean) {
+    const params = this.locParams();
+    return editor
+      ? { params: { ...params, editor: '1' }, headers: { 'Cache-Control': 'no-cache' }, cache: 'no-store' as const, transferCache: false }
+      : { params, cache: 'no-cache' as const };
+  }
+
   private requireDoc(res: CmsDocResponse): CmsDocResponse {
     if (!res || !res.content || typeof res.content !== 'object' || Array.isArray(res.content)) {
       throw new Error('La API no devolvió un documento CMS válido.');
@@ -41,13 +59,13 @@ export class CmsApiService {
     return res;
   }
 
-  getSite(preview = ''): Promise<CmsDocResponse> {
-    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`, { params: this.locParams() }).pipe(timeout(15000)))
+  getSite(preview = '', editor = false): Promise<CmsDocResponse> {
+    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/site${preview}`, this.readOptions(editor)).pipe(timeout(15000)))
       .then((res) => this.requireDoc(res));
   }
 
-  getPagesCatalog(): Promise<{ pages: CmsPageSummary[]; menu: CmsMenuItem[] }> {
-    return firstValueFrom(this.http.get<{ pages: CmsPageSummary[]; menu?: CmsMenuItem[] }>(`${API_URL}/pages`, { params: this.locParams() }).pipe(timeout(15000))).then(
+  getPagesCatalog(editor = false): Promise<{ pages: CmsPageSummary[]; menu: CmsMenuItem[] }> {
+    return firstValueFrom(this.http.get<{ pages: CmsPageSummary[]; menu?: CmsMenuItem[] }>(`${API_URL}/pages`, this.readOptions(editor)).pipe(timeout(15000))).then(
       (res) => {
         if (!res || !Array.isArray(res.pages)) {
           throw new Error('La API no devolvió un catálogo CMS válido.');
@@ -73,9 +91,9 @@ export class CmsApiService {
     template?: string;
     showInMenu?: boolean;
     path?: string;
-  }): Promise<{ page: CmsPageSummary; content: JsonMap; version: number }> {
+  }): Promise<CreatePageResponse> {
     return firstValueFrom(
-      this.http.post<{ page: CmsPageSummary; content: JsonMap; version: number }>(`${API_URL}/pages`, body, {
+      this.http.post<CreatePageResponse>(`${API_URL}/pages`, body, {
         params: this.locParams(),
       })
     );
@@ -92,19 +110,19 @@ export class CmsApiService {
     return firstValueFrom(this.http.patch<{ page: CmsPageSummary }>(`${API_URL}/pages/${slug}/meta`, body, { params: this.locParams() }));
   }
 
-  getPage(slug: string, preview = ''): Promise<CmsDocResponse> {
-    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/pages/${slug}${preview}`, { params: this.locParams() }).pipe(timeout(15000)))
+  getPage(slug: string, preview = '', editor = false): Promise<CmsDocResponse> {
+    return firstValueFrom(this.http.get<CmsDocResponse>(`${API_URL}/pages/${slug}${preview}`, this.readOptions(editor)).pipe(timeout(15000)))
       .then((res) => this.requireDoc(res));
   }
 
-  save(slug: string, content: JsonMap, version: number): Promise<CmsDocResponse> {
+  save(slug: string, content: JsonMap, version: number): Promise<CmsWriteResponse> {
     const url = slug === 'sitio' ? `${API_URL}/site` : `${API_URL}/pages/${slug}`;
-    return firstValueFrom(this.http.put<CmsDocResponse>(url, { content, version }, { params: this.locParams() }));
+    return firstValueFrom(this.http.put<CmsWriteResponse>(url, { content, version }, { params: this.locParams() }));
   }
 
-  publish(slug: string, version: number): Promise<CmsDocResponse> {
+  publish(slug: string, version: number): Promise<CmsWriteResponse> {
     const url = slug === 'sitio' ? `${API_URL}/site/publish` : `${API_URL}/pages/${slug}/publish`;
-    return firstValueFrom(this.http.post<CmsDocResponse>(url, { version }, { params: this.locParams() }));
+    return firstValueFrom(this.http.post<CmsWriteResponse>(url, { version }, { params: this.locParams() }));
   }
 
   listRevisions(slug: string): Promise<CmsRevision[]> {

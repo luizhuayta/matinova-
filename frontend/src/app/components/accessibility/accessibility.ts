@@ -1,8 +1,9 @@
-import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, ViewEncapsulation, inject } from '@angular/core';
+import { Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild, ViewEncapsulation, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient } from '@angular/common/http';
 import { API_URL } from '../../cms/cms.models';
+import { LocaleService } from '../../cms/locale.service';
 
 @Component({
   selector: 'app-accessibility',
@@ -14,6 +15,8 @@ import { API_URL } from '../../cms/cms.models';
 })
 export class AccessibilityComponent implements OnInit, OnDestroy {
   private http = inject(HttpClient);
+  private locales = inject(LocaleService);
+  isEn = computed(() => this.locales.locale() === 'en');
   @ViewChild('dialog') dialog?: ElementRef<HTMLElement>;
   isOpen = false;
   activeTab: 'tools' | 'report' = 'tools';
@@ -121,8 +124,9 @@ export class AccessibilityComponent implements OnInit, OnDestroy {
 
   submitReport(): void {
     this.error = '';
+    const en = this.isEn();
     if (!this.reportForm.name.trim() || !this.reportForm.email.trim() || !this.reportForm.description.trim()) {
-      this.error = 'Nombre, correo y descripción son obligatorios.';
+      this.error = en ? 'Name, email and description are required.' : 'Nombre, correo y descripción son obligatorios.';
       return;
     }
     this.sending = true;
@@ -134,7 +138,9 @@ export class AccessibilityComponent implements OnInit, OnDestroy {
       },
       error: () => {
         this.sending = false;
-        this.error = 'No se pudo enviar. Inténtalo de nuevo o escribe a contacto.';
+        this.error = en
+          ? 'Could not send report. Please try again or write via contact.'
+          : 'No se pudo enviar. Inténtalo de nuevo o escribe a contacto.';
       },
     });
   }
@@ -167,10 +173,12 @@ export class AccessibilityComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    if (typeof localStorage === 'undefined') {
+    let saved: string | null = null;
+    try {
+      saved = typeof window === 'undefined' ? null : window.localStorage.getItem('accessibilityTools');
+    } catch {
       return;
     }
-    const saved = localStorage.getItem('accessibilityTools');
     if (!saved) {
       return;
     }
@@ -178,11 +186,18 @@ export class AccessibilityComponent implements OnInit, OnDestroy {
       this.tools = { ...this.tools, ...JSON.parse(saved) };
       this.apply();
     } catch {
-      localStorage.removeItem('accessibilityTools');
+      try {
+        window.localStorage.removeItem('accessibilityTools');
+      } catch {
+        /* private */
+      }
     }
   }
 
   ngOnDestroy(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
     document.getElementById('a11y-reading-guide')?.remove();
     document.getElementById('a11y-window-mask')?.remove();
   }

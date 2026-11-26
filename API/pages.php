@@ -12,9 +12,17 @@ function cms_write_guard(bool $needAdminRole = false): void
     rate_limit('cms_write', 40, 60);
 }
 
+function cms_editor_read_guard(): void
+{
+    if (($_GET['editor'] ?? '') === '1') {
+        require_admin();
+    }
+}
+
 function handle_pages(string $path, string $method): void
 {
     if ($path === '/pages' && $method === 'GET') {
+        cms_editor_read_guard();
         cms_pages_list();
     }
 
@@ -65,6 +73,7 @@ function handle_pages(string $path, string $method): void
             handle_site($method);
         }
         if ($method === 'GET') {
+            cms_editor_read_guard();
             $payload = cms_doc_payload($slug);
             json_out_public($payload, $payload['updated_at'] ?? null);
         }
@@ -84,8 +93,15 @@ function handle_pages(string $path, string $method): void
 function cms_pages_list(): never
 {
     $locale = cms_request_locale();
-    $rows = db()->prepare('SELECT slug, locale, title, updated_at, version, path, show_in_menu, menu_order FROM pages WHERE locale = ? ORDER BY menu_order ASC, title');
-    $rows->execute([$locale]);
+    $rows = db()->prepare(
+        "SELECT p.slug, p.locale, p.title, p.updated_at, p.version, p.path, p.show_in_menu, p.menu_order
+         FROM pages p
+         WHERE p.locale = ? OR (p.locale = 'es' AND NOT EXISTS (
+             SELECT 1 FROM pages translation WHERE translation.slug = p.slug AND translation.locale = ?
+         ))
+         ORDER BY p.menu_order ASC, p.title, p.slug"
+    );
+    $rows->execute([$locale, $locale]);
     $pages = [];
     $menu = [];
     foreach ($rows->fetchAll() as $row) {
@@ -159,11 +175,6 @@ function cms_pages_create(): never
     if (in_array($slug, cms_reserved_slugs(), true) || $slug === 'sitio') {
         json_out(['field' => 'slug', 'message' => 'Ese nombre está reservado.'], 400);
     }
-    $exists = db()->prepare('SELECT slug FROM pages WHERE slug = ? AND locale = ?');
-    $exists->execute([$slug, cms_request_locale()]);
-    if ($exists->fetch()) {
-        json_out(['field' => 'slug', 'message' => 'Ya existe una página con esa ruta.'], 409);
-    }
     $template = (string) ($input['template'] ?? 'blank');
     $ids = array_column(cms_page_templates(), 'id');
     if (!in_array($template, $ids, true)) {
@@ -174,8 +185,17 @@ function cms_pages_create(): never
     $order = (int) ($input['menuOrder'] ?? cms_next_menu_order());
     $locale = cms_request_locale();
     $doc = cms_blank_page_document($title, $template);
-    $ins = db()->prepare('INSERT INTO pages (slug, locale, title, content, path, show_in_menu, menu_order, version) VALUES (?, ?, ?, ?, ?, ?, ?, 1)');
-    $ins->execute([$slug, $locale, $title, json_encode($doc, JSON_UNESCAPED_UNICODE), $path, $show ? 1 : 0, $order]);
+    $translations = cms_pages_create_locales($slug, $locale, [
+        'title' => $title,
+        'content' => json_encode($doc, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+        'draft' => null,
+        'path' => $path,
+        'show_in_menu' => $show ? 1 : 0,
+        'menu_order' => $order,
+    ]);
+    if ($translations === null) {
+        json_out(['field' => 'slug', 'message' => 'Ya existe una página con esa ruta.'], 409);
+    }
     json_out([
         'ok' => true,
         'page' => [
@@ -190,6 +210,7 @@ function cms_pages_create(): never
         ],
         'content' => $doc,
         'version' => 1,
+        'translations' => $translations,
     ], 201);
 }
 
@@ -204,7 +225,7 @@ function cms_pages_delete(string $slug): never
     if ($slug === 'sitio' || in_array($slug, cms_protected_slugs(), true)) {
         json_out(['message' => 'Esta página no se puede eliminar.'], 403);
     }
-    $row = cms_doc_read($slug);
+    $row = cms_doc_read($slug, false);
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
@@ -218,7 +239,7 @@ function cms_pages_update_meta(string $slug): never
     if ($slug === 'sitio') {
         json_out(['message' => 'La apariencia del sitio no tiene esa opción.'], 400);
     }
-    $row = cms_doc_read($slug);
+    $row = cms_doc_read($slug, false);
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
@@ -300,28 +321,16 @@ function cms_pages_translate(string $slug): never
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
-    $exists = db()->prepare('SELECT slug FROM pages WHERE slug = ? AND locale = ?');
-    $exists->execute([$slug, $target]);
-    if ($exists->fetch()) {
+    if (!cms_pages_insert_locale($slug, $target, $row)) {
         json_out(['ok' => true, 'slug' => $slug, 'locale' => $target, 'existed' => true]);
     }
-    $ins = db()->prepare('INSERT INTO pages (slug, locale, title, content, draft, path, show_in_menu, menu_order, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)');
-    $ins->execute([
-        $slug,
-        $target,
-        $row['title'],
-        $row['content'],
-        $row['draft'],
-        $row['path'],
-        $row['show_in_menu'],
-        $row['menu_order'],
-    ]);
     json_out(['ok' => true, 'slug' => $slug, 'locale' => $target], 201);
 }
 
 function handle_site(string $method): never
 {
     if ($method === 'GET') {
+        cms_editor_read_guard();
         $payload = cms_doc_payload('sitio');
         json_out_public($payload, $payload['updated_at'] ?? null);
     }

@@ -1,0 +1,36 @@
+<article class="service-panel" [class.service-panel--editing]="editor.editMode()" [class.service-panel--photo]="photo()">
+  @if (photo() || editor.editMode()) {
+    <picture class="service-panel-photo">
+      @if (webp(); as source) {
+        <source type="image/webp" [srcset]="source">
+      }
+      <img [src]="photo() || null" [cmsImage]="path('img')" [alt]="alt()"
+        width="640" height="400" loading="lazy" decoding="async">
+    </picture>
+  }
+  <div class="service-panel-copy">
+    <i class="service-icon service-panel-icon" [class]="icon()" aria-hidden="true"></i>
+    <h3 [cmsText]="path('title')"></h3>
+    <p [cmsText]="path('text')"></p>
+    @if (editor.editMode()) {
+      <a class="service-link service-panel-link" [href]="href()" [cmsLink]="path(linkField())">
+        @if (editableLabel()) {
+          <span [cmsText]="path('link')"></span>
+        } @else {
+          <span>{{ linkLabel() }}</span>
+        }
+        <svg class="ui-icon" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+      </a>
+    } @else {
+      <a class="service-link service-panel-link"
+        [routerLink]="internal() ? href() : null"
+        [href]="internal() ? null : href()"
+        [attr.target]="internal() ? null : '_blank'"
+        [attr.rel]="internal() ? null : 'noopener'"
+        [attr.aria-label]="linkLabel() + ' · ' + title()">
+        <span>{{ linkLabel() }}</span>
+        <svg class="ui-icon" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+      </a>
+    }
+  </div>
+</article>

@@ -19,33 +19,36 @@
             @if (subtitle()) {
               <p class="premium-hero-sub" [cmsText]="path('subtitle')"></p>
             } @else {
-              <p class="premium-hero-sub"><!-- i18n -->30 años integrando software, hardware y operación para empresas y entidades educativas en Perú. Migraciones, ERPs, redes y soporte 24/7.</p>
+              <p class="premium-hero-sub">{{ heroSubtitleFallback() }}</p>
             }
+            <ng-template #heroCtaText let-field>
+              @if (editor.editMode() || props()[field]) {
+                <span [cmsText]="path(field)"></span>
+              } @else {
+                <span>{{ heroCtaFallback(field) }}</span>
+              }
+            </ng-template>
             <div class="premium-hero-ctas">
               @if (isInternalHref(href())) {
-                <a publicBtn tone="accent" class="p-btn-premium" [routerLink]="href()" aria-label="Ver servicios de Matt Innova">
-                  <span [cmsText]="path('cta')"></span>
-                  <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                <a publicBtn buttonIcon="arrow" [routerLink]="href()">
+                  <ng-container [ngTemplateOutlet]="heroCtaText" [ngTemplateOutletContext]="{ $implicit: 'cta' }" />
                 </a>
               } @else {
-                <a publicBtn tone="accent" class="p-btn-premium" [href]="href()" target="_blank" rel="noopener" aria-label="Ver servicios de Matt Innova">
-                  <span [cmsText]="path('cta')"></span>
-                  <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
+                <a publicBtn buttonIcon="arrow" [href]="href()" target="_blank" rel="noopener">
+                  <ng-container [ngTemplateOutlet]="heroCtaText" [ngTemplateOutletContext]="{ $implicit: 'cta' }" />
                 </a>
               }
               @if (isInternalHref(secondaryHref())) {
-                <a class="p-btn-ghost-light" [routerLink]="secondaryHref()" aria-label="Ver presentación de Matt Innova">
-                  <svg class="ui-icon ui-icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                  <span [cmsText]="path('secondaryCta')"></span>
+                <a publicBtn tone="ghost" buttonIcon="play" [routerLink]="secondaryHref()">
+                  <ng-container [ngTemplateOutlet]="heroCtaText" [ngTemplateOutletContext]="{ $implicit: 'secondaryCta' }" />
                 </a>
               } @else {
-                <a class="p-btn-ghost-light" [href]="secondaryHref()" target="_blank" rel="noopener" aria-label="Ver presentación de Matt Innova">
-                  <svg class="ui-icon ui-icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
-                  <span [cmsText]="path('secondaryCta')"></span>
+                <a publicBtn tone="ghost" buttonIcon="play" [href]="secondaryHref()" target="_blank" rel="noopener">
+                  <ng-container [ngTemplateOutlet]="heroCtaText" [ngTemplateOutletContext]="{ $implicit: 'secondaryCta' }" />
                 </a>
               }
               @if (slides().length > 1 && animate()) {
-                <button type="button" class="hero-pause" (click)="toggleAuto()" [attr.aria-pressed]="autoPaused()" [attr.aria-label]="autoPaused() ? 'Reanudar banners' : 'Pausar banners'">
+                <button type="button" class="hero-pause" (click)="toggleAuto()" [attr.aria-pressed]="autoPaused()" [attr.aria-label]="autoPaused() ? (isEn() ? 'Resume banners' : 'Reanudar banners') : (isEn() ? 'Pause banners' : 'Pausar banners')">
                   @if (autoPaused()) {
                     <svg class="ui-icon ui-icon--sm" aria-hidden="true" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
                   } @else {
@@ -104,23 +107,36 @@
                   [cmsImage]="path('slides.' + currentSlide() + '.image')"
                   width="720"
                   height="560"
-                  alt="Gabinetes de servidores e infraestructura TI en proyección isométrica">
+                  [alt]="isEn() ? 'Server racks and IT infrastructure in isometric projection' : 'Gabinetes de servidores e infraestructura TI en proyección isométrica'">
               }
             </div>
           </div>
         </div>
-        <div class="container studio-grid premium-trustbar" appReveal [cmsList]="path('stats')">
+        <div class="container premium-trustbar hero-metrics" role="list" appReveal [cmsList]="path('stats')">
           @for (stat of heroStats(); track $index) {
-            <div class="trust-item span-3">
-              <span class="trust-icon" aria-hidden="true">
-                <svg class="ui-icon"><use [attr.href]="'assets/icons/ui.svg#' + heroStatIcon(stat['icon'], $index)"></use></svg>
+            @let icon = heroStatIcon(stat['icon'], $index);
+            <div class="hero-metric" role="listitem">
+              <span class="hero-metric-icon" aria-hidden="true">
+                <svg [attr.viewBox]="icon.viewBox" fill="currentColor" focusable="false">
+                  @for (shape of icon.paths; track shape) {
+                    <path [attr.d]="shape"/>
+                  }
+                </svg>
               </span>
               @if (stats().length) {
-                <strong [cmsText]="path('stats.' + $index + '.number')"></strong>
-                <span class="trust-label" [cmsText]="path('stats.' + $index + '.label')"></span>
+                @if (editor.editMode()) {
+                  <strong [cmsText]="path('stats.' + $index + '.number')"></strong>
+                } @else {
+                  <strong [appCountUp]="stat['number']" [countUpDelay]="$index * 120">{{ stat['number'] }}</strong>
+                }
+                <span class="hero-metric-label" [cmsText]="path('stats.' + $index + '.label')"></span>
               } @else {
-                <strong>{{ stat['number'] }}</strong>
-                <span class="trust-label">{{ stat['label'] }}</span>
+                @if (editor.editMode()) {
+                  <strong>{{ stat['number'] }}</strong>
+                } @else {
+                  <strong [appCountUp]="stat['number']" [countUpDelay]="$index * 120">{{ stat['number'] }}</strong>
+                }
+                <span class="hero-metric-label">{{ stat['label'] }}</span>
               }
             </div>
           }
@@ -143,7 +159,7 @@
                     height="500"
                     loading="lazy"
                     decoding="async"
-                    [alt]="props()['imageAlt'] || 'Operación TI entre sedes'"
+                    [alt]="props()['imageAlt'] || (isEn() ? 'IT operations across sites' : 'Operación TI entre sedes')"
                     [cmsImage]="path('image')">
                 </picture>
               } @else {
@@ -151,7 +167,7 @@
                   src="/assets/illustrations/why-us.svg"
                   width="640"
                   height="500"
-                  alt="Operación TI entre sedes, ilustración isométrica">
+                  [alt]="isEn() ? 'IT operations across sites, isometric illustration' : 'Operación TI entre sedes, ilustración isométrica'">
               }
             </div>
           </div>
@@ -173,14 +189,14 @@
               </div>
             }
             <div class="about-ctas">
-              <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="navy" cssClass="p-btn-premium p-btn-premium--navy" />
-              <a class="p-link-phone" [routerLink]="contactHref()" aria-label="Escribir a Matt Innova por el formulario de contacto">
+              <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="navy" />
+              <a class="p-link-phone" [routerLink]="contactHref()" [attr.aria-label]="isEn() ? 'Write to Matt Innova via the contact form' : 'Escribir a Matt Innova por el formulario de contacto'">
                 <span class="phone-icon" aria-hidden="true">
                   <svg class="ui-icon"><use href="assets/icons/ui.svg#phone"></use></svg>
                 </span>
                 <span>
-                  <small><!-- i18n -->Escríbenos hoy</small>
-                  <strong>(+51) 992 422 219</strong>
+                  <small>{{ isEn() ? 'Write to us today' : 'Escríbenos hoy' }}</small>
+                  <strong>{{ sitePhone() }}</strong>
                 </span>
               </a>
             </div>
@@ -230,39 +246,17 @@
             }
             <p class="premium-sub" [cmsText]="path('text')"></p>
           </div>
-          <div class="studio-grid services-grid premium-services-grid" [cmsList]="path('cards')">
+          <div class="premium-services-grid" [cmsList]="path('cards')">
             @for (card of serviceCards(); track $index) {
-              <article class="premium-service-card span-4" appReveal [delay]="($index * 70) + 'ms'">
-                <picture class="service-media">
-                  @if (webpOf(card['img']); as webp) {
-                    <source type="image/webp" [srcset]="webp">
-                  }
-                  <img
-                    [src]="rasterOf(card['img'])"
-                    [alt]="card['alt'] || card['title']"
-                    [cmsImage]="path('cards.' + $index + '.img')"
-                    loading="lazy"
-                    width="640"
-                    height="400">
-                </picture>
-                <span class="service-overlay" aria-hidden="true"></span>
-                <div class="service-bay-body">
-                  <span class="service-icon" aria-hidden="true"><i [class]="cardIcon(card, $index)"></i></span>
-                  <h3 [cmsText]="path('cards.' + $index + '.title')"></h3>
-                  <p [cmsText]="path('cards.' + $index + '.text')"></p>
-                  @if (isInternalHref(cardLink(card))) {
-                    <a class="service-link" [routerLink]="cardLink(card)">
-                      {{ cardLinkLabel() }}
-                      <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
-                    </a>
-                  } @else {
-                    <a class="service-link" [href]="cardLink(card)" target="_blank" rel="noopener">
-                      {{ cardLinkLabel() }}
-                      <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#arrow-right"></use></svg>
-                    </a>
-                  }
-                </div>
-              </article>
+              <app-service-photo-card class="premium-service-card" appReveal [delay]="($index * 70) + 'ms'"
+                [field]="path('cards.' + $index)"
+                [image]="card['img'] || ''"
+                [alt]="card['alt'] || ''"
+                [title]="card['title'] || ''"
+                [icon]="cardIcon(card, $index)"
+                [href]="cardLink(card)"
+                [linkLabel]="cardLinkLabel()"
+                linkField="link" />
             }
           </div>
         </div>
@@ -285,8 +279,8 @@
               }
             </ul>
             <div class="dark-ctas">
-              <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="soft" cssClass="p-btn-premium p-btn-premium--white" />
-              <a class="p-btn-ghost-light" [routerLink]="contactHref()" [attr.aria-label]="contactCtaLabel()">{{ contactCtaLabel() }}</a>
+              <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="soft" />
+              <a publicBtn tone="ghost" [routerLink]="contactHref()" [attr.aria-label]="contactCtaLabel()">{{ contactCtaLabel() }}</a>
             </div>
           </div>
           <div class="innovative-mosaic premium-bento" [cmsList]="path('items')">
@@ -333,7 +327,7 @@
             }
           </div>
           <div class="t-cta">
-            <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="navy" cssClass="p-btn-premium p-btn-premium--navy" />
+            <app-cms-cta [href]="href()" [textPath]="path('cta')" [linkPath]="path('ctaLink')" tone="navy" />
           </div>
         </div>
       </section>

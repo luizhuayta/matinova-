@@ -71,12 +71,15 @@
           <span cmsText="footer.email" cmsScope="site"></span>
         </li>
         <li>
-          <a [routerLink]="pathOf('/libro-reclamaciones')" class="libro-link" aria-label="Libro de reclamaciones — INDECOPI, Ley 29571">
+          <a
+            [routerLink]="pathOf('/libro-reclamaciones')"
+            class="libro-link"
+            [attr.aria-label]="locales.locale() === 'en' ? 'Claims book — INDECOPI, Law 29571' : 'Libro de reclamaciones — INDECOPI, Ley 29571'">
             <span class="libro-icon" aria-hidden="true">
               <svg class="ui-icon"><use href="assets/icons/ui.svg#book"></use></svg>
             </span>
             <img src="libro.jpg" [src]="footer()['libroImage'] || 'libro.jpg'" alt="" class="libro-image" cmsImage="footer.libroImage" cmsScope="site" width="48" height="48">
-            <span>Libro de reclamaciones</span>
+            <span>{{ locales.locale() === 'en' ? 'Claims book' : 'Libro de reclamaciones' }}</span>
           </a>
         </li>
       </ul>

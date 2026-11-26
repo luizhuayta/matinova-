@@ -1,57 +1,122 @@
 import { JsonMap } from './cms.models';
+import { CmsLocale, activeCmsLocale } from './locale.service';
 
 export const CLIENT_CATEGORY_ORDER = ['empresas', 'educativas', 'alianzas'] as const;
 
-export const CLIENT_CATEGORY_META: Record<string, { label: string; icon: string; art: string; countLabel: string }> = {
+export interface ClientCategoryMeta {
+  label: string;
+  labelEn: string;
+  icon: string;
+  art: string;
+  countLabel: string;
+  countSingular: string;
+  countLabelEn: string;
+  countSingularEn: string;
+}
+
+export const CLIENT_CATEGORY_META: Record<string, ClientCategoryMeta> = {
   empresas: {
     label: 'Empresas y comercio',
+    labelEn: 'Companies & retail',
     icon: 'building',
     art: 'assets/illustrations/clients-empresas.svg',
     countLabel: 'clientes',
+    countSingular: 'cliente',
+    countLabelEn: 'clients',
+    countSingularEn: 'client',
   },
   educativas: {
     label: 'Instituciones educativas',
+    labelEn: 'Educational institutions',
     icon: 'school',
     art: 'assets/illustrations/clients-educativas.svg',
     countLabel: 'instituciones',
+    countSingular: 'institución',
+    countLabelEn: 'institutions',
+    countSingularEn: 'institution',
   },
   alianzas: {
     label: 'Alianzas',
+    labelEn: 'Alliances',
     icon: 'handshake',
     art: 'assets/illustrations/clients-alianzas.svg',
     countLabel: 'alianzas',
+    countSingular: 'alianza',
+    countLabelEn: 'alliances',
+    countSingularEn: 'alliance',
   },
 };
 
 const CLIENT_SUB_ICONS: Record<string, string> = {
   'salud y farmacia': 'hospital',
+  'health & pharmacy': 'hospital',
   automotriz: 'car',
+  automotive: 'car',
   'tecnología y software': 'laptop',
   'tecnologia y software': 'laptop',
+  'technology & software': 'laptop',
   'retail y moda': 'shopping-bag',
+  'retail & fashion': 'shopping-bag',
   agropecuario: 'sprout',
+  agriculture: 'sprout',
   'servicios y reparación': 'wrench',
   'servicios y reparacion': 'wrench',
+  'services & repair': 'wrench',
   gastronomía: 'utensils',
   gastronomia: 'utensils',
+  gastronomy: 'utensils',
   'educación y consultoría': 'graduation-cap',
   'educacion y consultoria': 'graduation-cap',
+  'education & consulting': 'graduation-cap',
   'servicios profesionales': 'briefcase',
+  'professional services': 'briefcase',
   entretenimiento: 'clapperboard',
+  entertainment: 'clapperboard',
   ceba: 'school',
   eespp: 'school',
   iespp: 'school',
   iestp: 'school',
   iei: 'school',
   'i.e. primaria/secundaria': 'school',
+  'primary & secondary schools': 'school',
   'academias y formación': 'graduation-cap',
   'academias y formacion': 'graduation-cap',
+  'academies & training': 'graduation-cap',
   ugel: 'landmark',
   corporativas: 'building',
+  corporate: 'building',
   tecnológicas: 'laptop',
   tecnologicas: 'laptop',
+  technology: 'laptop',
   gubernamentales: 'landmark',
+  government: 'landmark',
   educativas: 'school',
+  educational: 'school',
+};
+
+const CLIENT_SUB_LABELS_EN: Record<string, string> = {
+  'salud y farmacia': 'Health & Pharmacy',
+  automotriz: 'Automotive',
+  'tecnología y software': 'Technology & Software',
+  'tecnologia y software': 'Technology & Software',
+  'retail y moda': 'Retail & Fashion',
+  agropecuario: 'Agriculture',
+  'servicios y reparación': 'Services & Repair',
+  'servicios y reparacion': 'Services & Repair',
+  gastronomía: 'Gastronomy',
+  gastronomia: 'Gastronomy',
+  'educación y consultoría': 'Education & Consulting',
+  'educacion y consultoria': 'Education & Consulting',
+  'servicios profesionales': 'Professional Services',
+  entretenimiento: 'Entertainment',
+  'i.e. primaria/secundaria': 'Primary & Secondary Schools',
+  'academias y formación': 'Academies & Training',
+  'academias y formacion': 'Academies & Training',
+  corporativas: 'Corporate',
+  tecnológicas: 'Technology',
+  tecnologicas: 'Technology',
+  gubernamentales: 'Government',
+  educativas: 'Educational',
 };
 
 export interface ClientSubPanel {
@@ -67,6 +132,24 @@ export interface ClientPanel {
   subs: ClientSubPanel[];
 }
 
+function resolveClientLocale(locale?: CmsLocale): CmsLocale {
+  if (locale) {
+    return locale;
+  }
+  const active = activeCmsLocale();
+  if (typeof window !== 'undefined' && typeof window.location?.pathname === 'string') {
+    const path = window.location.pathname;
+    if (path === '/admin' || path.startsWith('/admin/')) {
+      return active;
+    }
+    if (path === '/en' || path.startsWith('/en/')) {
+      return 'en';
+    }
+    return 'es';
+  }
+  return active;
+}
+
 function categoryKey(item: JsonMap): string {
   const raw = String(item['category'] ?? '').trim().toLowerCase();
   return raw || 'empresas';
@@ -77,8 +160,12 @@ function subcategoryName(item: JsonMap): string {
   return raw || 'General';
 }
 
-export function clientCategoryLabel(key: string): string {
-  return CLIENT_CATEGORY_META[key]?.label ?? key;
+export function clientCategoryLabel(key: string, locale?: CmsLocale): string {
+  const meta = CLIENT_CATEGORY_META[key];
+  if (!meta) {
+    return key;
+  }
+  return resolveClientLocale(locale) === 'en' ? meta.labelEn : meta.label;
 }
 
 export function clientCategoryIcon(key: string): string {
@@ -89,32 +176,39 @@ export function clientSectorArt(key: string): string {
   return CLIENT_CATEGORY_META[key]?.art ?? 'assets/illustrations/clients-empresas.svg';
 }
 
-export function clientCountLabel(key: string, count: number): string {
-  const word = CLIENT_CATEGORY_META[key]?.countLabel ?? 'nombres';
-  if (count === 1) {
-    if (word === 'instituciones') {
-      return '1 institución';
-    }
-    if (word === 'alianzas') {
-      return '1 alianza';
-    }
-    if (word === 'clientes') {
-      return '1 cliente';
-    }
-    return `1 ${word}`;
+export function clientCountLabel(key: string, count: number, locale?: CmsLocale): string {
+  const meta = CLIENT_CATEGORY_META[key];
+  if (resolveClientLocale(locale) === 'en') {
+    const singular = meta?.countSingularEn ?? 'entry';
+    const plural = meta?.countLabelEn ?? 'entries';
+    return `${count} ${count === 1 ? singular : plural}`;
   }
-  return `${count} ${word}`;
+  const singular = meta?.countSingular ?? 'nombre';
+  const plural = meta?.countLabel ?? 'nombres';
+  return `${count} ${count === 1 ? singular : plural}`;
 }
 
 export function clientSubIcon(name: string): string {
   return CLIENT_SUB_ICONS[name.trim().toLowerCase()] ?? 'building';
 }
 
+export function clientSubLabel(name: string, locale?: CmsLocale): string {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return '';
+  }
+  if (resolveClientLocale(locale) === 'en') {
+    return CLIENT_SUB_LABELS_EN[trimmed.toLowerCase()] ?? trimmed;
+  }
+  return trimmed;
+}
+
 export function panelItemCount(panel: ClientPanel): number {
   return panel.subs.reduce((sum, sub) => sum + sub.indices.length, 0);
 }
 
-export function groupClientItems(items: JsonMap[]): ClientPanel[] {
+export function groupClientItems(items: JsonMap[], locale?: CmsLocale): ClientPanel[] {
+  const resolvedLocale = resolveClientLocale(locale);
   const map = new Map<string, Map<string, ClientSubPanel>>();
   items.forEach((item, index) => {
     const key = categoryKey(item);
@@ -144,7 +238,7 @@ export function groupClientItems(items: JsonMap[]): ClientPanel[] {
 
   return keys.map((key) => ({
     key,
-    label: clientCategoryLabel(key),
+    label: clientCategoryLabel(key, resolvedLocale),
     icon: clientCategoryIcon(key),
     subs: [...(map.get(key)?.values() ?? [])],
   }));

@@ -17,6 +17,7 @@ import {
   clientCountLabel,
   clientSectorArt,
   clientSubIcon,
+  clientSubLabel,
   groupClientItems,
   panelItemCount,
 } from '../client-panels';
@@ -62,7 +63,7 @@ export class ExtraStyleBlock implements OnDestroy {
   props = computed(() => this.block().props);
   items = computed(() => asList(this.props()['items'] ?? this.props()['stages']));
   layout = computed(() => String(this.props()['layout'] || 'logos-grid'));
-  panels = computed<ClientPanel[]>(() => groupClientItems(this.items()));
+  panels = computed<ClientPanel[]>(() => groupClientItems(this.items(), this.locales.locale()));
   animate = computed(() => this.cms.site()['animateCarousels'] !== false && !this.editor.editMode() && motionAllowed());
   activePanel = computed(() => {
     const key = this.activeSector();
@@ -143,11 +144,19 @@ export class ExtraStyleBlock implements OnDestroy {
   }
 
   sectorCount(panel: ClientPanel): string {
-    return clientCountLabel(panel.key, panelItemCount(panel));
+    return clientCountLabel(panel.key, panelItemCount(panel), this.locales.locale());
   }
 
   subIcon(name: string): string {
     return clientSubIcon(name);
+  }
+
+  subLabel(name: string): string {
+    return clientSubLabel(name, this.locales.locale());
+  }
+
+  isEn(): boolean {
+    return this.locales.locale() === 'en';
   }
 
   hideBrokenLogo(event: Event): void {

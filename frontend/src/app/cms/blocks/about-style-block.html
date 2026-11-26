@@ -22,7 +22,11 @@
         <div class="container studio-grid stats-grid" [cmsList]="path('items')">
           @for (stat of items(); track $index) {
             <app-cyber-card class="span-3 stat-bay" [icon]="statIcon(stat['icon'], $index)" appReveal [delay]="($index * 70) + 'ms'">
-              <div class="stat-number" [cmsText]="path('items.' + $index + '.number')"></div>
+              @if (editor.editMode()) {
+                <div class="stat-number" [cmsText]="path('items.' + $index + '.number')"></div>
+              } @else {
+                <div class="stat-number" [appCountUp]="stat['number']" [countUpDelay]="$index * 120">{{ stat['number'] }}</div>
+              }
               <div class="stat-label" [cmsText]="path('items.' + $index + '.label')"></div>
             </app-cyber-card>
           }
@@ -59,12 +63,12 @@
                 <p class="team-role" [cmsText]="path('items.' + $index + '.role')"></p>
                 <div class="team-social">
                   @if (hasLink(member['linkedin'])) {
-                    <a [href]="member['linkedin']" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'LinkedIn de ' + member['name']" [cmsLink]="path('items.' + $index + '.linkedin')">
+                    <a [href]="member['linkedin']" target="_blank" rel="noopener noreferrer" [attr.aria-label]="isEn() ? member['name'] + ' on LinkedIn' : 'LinkedIn de ' + member['name']" [cmsLink]="path('items.' + $index + '.linkedin')">
                       <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#linkedin"></use></svg>
                     </a>
                   }
                   @if (hasLink(member['github'])) {
-                    <a [href]="member['github']" target="_blank" rel="noopener noreferrer" [attr.aria-label]="'GitHub de ' + member['name']" [cmsLink]="path('items.' + $index + '.github')">
+                    <a [href]="member['github']" target="_blank" rel="noopener noreferrer" [attr.aria-label]="isEn() ? member['name'] + ' on GitHub' : 'GitHub de ' + member['name']" [cmsLink]="path('items.' + $index + '.github')">
                       <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#github"></use></svg>
                     </a>
                   }
@@ -91,7 +95,7 @@
                       [src]="rasterOf(aboutPhoto()) || aboutPhoto()"
                       width="640"
                       height="500"
-                      [alt]="props()['imageAlt'] || 'Operación TI entre sedes'"
+                      [alt]="props()['imageAlt'] || (isEn() ? 'IT operations across sites' : 'Operación TI entre sedes')"
                       [cmsImage]="path('image')">
                   </picture>
                 } @else {
@@ -99,7 +103,7 @@
                     src="/assets/illustrations/why-us.svg"
                     width="640"
                     height="500"
-                    alt="Operación TI entre sedes, ilustración isométrica">
+                    [alt]="isEn() ? 'IT operations across sites, isometric illustration' : 'Operación TI entre sedes, ilustración isométrica'">
                 }
               </div>
             </div>
@@ -165,7 +169,7 @@
                   @if (isPlayed($index)) {
                     <iframe [src]="embed(video['embed'])" [title]="video['title'] || 'Video'" allowfullscreen loading="lazy"></iframe>
                   } @else {
-                    <button type="button" class="video-thumb" (click)="playVideo($index)" [attr.aria-label]="'Reproducir ' + (video['title'] || 'video')">
+                    <button type="button" class="video-thumb" (click)="playVideo($index)" [attr.aria-label]="(isEn() ? 'Play ' : 'Reproducir ') + (video['title'] || 'video')">
                       @if (videoThumb(video['embed']); as thumb) {
                         <img [src]="thumb" alt="" loading="lazy" decoding="async">
                       }

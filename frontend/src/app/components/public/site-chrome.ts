@@ -1,4 +1,5 @@
-import { Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { Component, computed, effect, inject, signal, OnInit, OnDestroy, PLATFORM_ID, ViewChild, ElementRef } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { CmsContentService } from '../../cms/cms-content.service';
 import { CmsEditorService } from '../../cms/cms-editor.service';
@@ -20,6 +21,8 @@ import { DEFAULT_SPLASH_IMAGES } from '../../cms/cms-schema';
   host: { style: 'display: contents' },
 })
 export class SiteChrome implements OnInit, OnDestroy {
+  private platformId = inject(PLATFORM_ID);
+  private isBrowser = isPlatformBrowser(this.platformId);
   private cms = inject(CmsContentService);
   private locales = inject(LocaleService);
   editor = inject(CmsEditorService);
@@ -28,8 +31,28 @@ export class SiteChrome implements OnInit, OnDestroy {
   showLoading = signal(true);
   private splashTimer?: ReturnType<typeof setTimeout>;
   private ctaTimer?: ReturnType<typeof setTimeout>;
+  private cookieResizeObserver?: ResizeObserver;
+  private cookieResizeListener?: () => void;
+
+  @ViewChild('cookieContent') set cookieContent(element: ElementRef<HTMLElement> | undefined) {
+    this.observeCookieContent(element);
+  }
+
+  constructor() {
+    effect(() => {
+      if (!this.isBrowser) {
+        return;
+      }
+      const showCookies = this.showCookies();
+      document.body.classList.toggle('has-cookie-banner', showCookies);
+      if (!showCookies) {
+        document.body.style.removeProperty('--cookie-banner-h');
+      }
+    });
+  }
 
   site = computed(() => this.cms.site());
+  isEn = computed(() => this.locales.locale() === 'en');
   showSplash = computed(() => this.site()['showSplash'] !== false && this.showLoading() && !this.editor.editMode());
   showCta = computed(() => this.site()['showCtaBanner'] !== false && this.showCtaBanner());
   showCookies = computed(() => this.showCookieBanner() && !this.editor.editMode());
@@ -59,11 +82,14 @@ export class SiteChrome implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    const cookiesAccepted = typeof localStorage === 'undefined' ? null : localStorage.getItem('cookiesAccepted');
+    if (!this.isBrowser) {
+      return;
+    }
+    const cookiesAccepted = this.readStorage('cookiesAccepted');
     if (cookiesAccepted === 'true' || cookiesAccepted === 'false') {
       this.showCookieBanner.set(false);
     }
-    if (typeof localStorage !== 'undefined' && localStorage.getItem('ctaBannerClosed') === 'true') {
+    if (this.readStorage('ctaBannerClosed') === 'true') {
       this.showCtaBanner.set(false);
     }
     const splashSeen = this.splashAlreadySeen();
@@ -73,8 +99,7 @@ export class SiteChrome implements OnInit, OnDestroy {
       const splashMs = Number(this.site()['splashSeconds'] ?? 3) * 1000;
       this.splashTimer = setTimeout(() => this.dismissSplash(), Number.isFinite(splashMs) ? splashMs : 3000);
     }
-    this.syncCookiePad();
-    
+
     // Auto-cerrar el banner CTA después de 8 segundos
     if (this.showCtaBanner()) {
       this.ctaTimer = setTimeout(() => this.closeCtaBanner(), 8000);
@@ -82,9 +107,11 @@ export class SiteChrome implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    if (typeof document !== 'undefined') {
+    if (this.isBrowser) {
       document.body.classList.remove('has-cookie-banner');
+      document.body.style.removeProperty('--cookie-banner-h');
     }
+    this.stopCookieMeasurement();
     if (this.splashTimer) {
       clearTimeout(this.splashTimer);
     }
@@ -99,47 +126,87 @@ export class SiteChrome implements OnInit, OnDestroy {
       this.splashTimer = undefined;
     }
     this.showLoading.set(false);
+    this.writeStorage('splashSeen', 'true');
+    this.writeStorage('splashSeen', 'true', 'session');
+  }
+
+  closeCtaBanner(): void {
+    this.showCtaBanner.set(false);
+    this.writeStorage('ctaBannerClosed', 'true');
+  }
+
+  acceptCookies(): void {
+    this.showCookieBanner.set(false);
+    this.writeStorage('cookiesAccepted', 'true');
+  }
+
+  rejectCookies(): void {
+    this.showCookieBanner.set(false);
+    this.writeStorage('cookiesAccepted', 'false');
+  }
+
+  private observeCookieContent(element: ElementRef<HTMLElement> | undefined): void {
+    if (!this.isBrowser) {
+      return;
+    }
+    this.stopCookieMeasurement();
+    if (!element) {
+      document.body.style.removeProperty('--cookie-banner-h');
+      return;
+    }
+    const content = element.nativeElement;
+    const update = () => {
+      const height = Math.ceil(content.getBoundingClientRect().height);
+      if (height > 0) {
+        document.body.style.setProperty('--cookie-banner-h', `${height}px`);
+      }
+    };
+    update();
+    if (typeof ResizeObserver !== 'undefined') {
+      this.cookieResizeObserver = new ResizeObserver(update);
+      this.cookieResizeObserver.observe(content);
+    } else {
+      this.cookieResizeListener = update;
+      window.addEventListener('resize', update);
+    }
+  }
+
+  private stopCookieMeasurement(): void {
+    this.cookieResizeObserver?.disconnect();
+    this.cookieResizeObserver = undefined;
+    if (this.cookieResizeListener) {
+      window.removeEventListener('resize', this.cookieResizeListener);
+      this.cookieResizeListener = undefined;
+    }
+  }
+
+  private splashAlreadySeen(): boolean {
+    return this.readStorage('splashSeen') === 'true' || this.readStorage('splashSeen', 'session') === 'true';
+  }
+
+  private readStorage(key: string, storage: 'local' | 'session' = 'local'): string | null {
+    if (!this.isBrowser) {
+      return null;
+    }
     try {
-      localStorage.setItem('splashSeen', 'true');
-      sessionStorage.setItem('splashSeen', 'true');
+      return (storage === 'local' ? window.localStorage : window.sessionStorage).getItem(key);
+    } catch {
+      return null;
+    }
+  }
+
+  private writeStorage(key: string, value: string, storage: 'local' | 'session' = 'local'): void {
+    if (!this.isBrowser) {
+      return;
+    }
+    try {
+      (storage === 'local' ? window.localStorage : window.sessionStorage).setItem(key, value);
     } catch {
       /* private mode */
     }
   }
 
-  closeCtaBanner(): void {
-    this.showCtaBanner.set(false);
-    localStorage.setItem('ctaBannerClosed', 'true');
-  }
-
-  acceptCookies(): void {
-    this.showCookieBanner.set(false);
-    localStorage.setItem('cookiesAccepted', 'true');
-    this.syncCookiePad();
-  }
-
-  rejectCookies(): void {
-    this.showCookieBanner.set(false);
-    localStorage.setItem('cookiesAccepted', 'false');
-    this.syncCookiePad();
-  }
-
-  private syncCookiePad(): void {
-    if (typeof document === 'undefined') {
-      return;
-    }
-    document.body.classList.toggle('has-cookie-banner', this.showCookies());
-  }
-
-  private splashAlreadySeen(): boolean {
-    try {
-      return localStorage.getItem('splashSeen') === 'true' || sessionStorage.getItem('splashSeen') === 'true';
-    } catch {
-      return false;
-    }
-  }
-
   private reducedMotion(): boolean {
-    return typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    return this.isBrowser && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   }
 }

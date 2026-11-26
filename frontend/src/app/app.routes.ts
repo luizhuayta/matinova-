@@ -29,12 +29,24 @@ export const routes: Routes = [
       }
     ]
   },
-  { path: 'en', loadComponent: publicPage, data: { locale: 'en', slug: 'inicio' } },
-  { path: 'en/servicios/:suffix', loadComponent: publicPage, data: { locale: 'en' } },
-  { path: 'en/:slug', loadComponent: publicPage, data: { locale: 'en' } },
-  { path: 'es', loadComponent: publicPage, data: { locale: 'es', slug: 'inicio' } },
-  { path: 'es/servicios/:suffix', loadComponent: publicPage, data: { locale: 'es' } },
-  { path: 'es/:slug', loadComponent: publicPage, data: { locale: 'es' } },
+  {
+    path: 'en',
+    data: { locale: 'en' },
+    children: [
+      { path: '', loadComponent: publicPage, data: { locale: 'en', slug: 'inicio' } },
+      { path: 'servicios/:suffix', loadComponent: publicPage, data: { locale: 'en' } },
+      { path: '**', loadComponent: publicPage, data: { locale: 'en' } },
+    ],
+  },
+  {
+    path: 'es',
+    data: { locale: 'es' },
+    children: [
+      { path: '', loadComponent: publicPage, data: { locale: 'es', slug: 'inicio' } },
+      { path: 'servicios/:suffix', loadComponent: publicPage, data: { locale: 'es' } },
+      { path: '**', loadComponent: publicPage, data: { locale: 'es' } },
+    ],
+  },
   { path: '', loadComponent: publicPage, data: { slug: 'inicio', locale: 'es' } },
   { path: 'servicios/:suffix', loadComponent: publicPage, data: { locale: 'es' } },
   { path: '**', loadComponent: publicPage, data: { locale: 'es' } },

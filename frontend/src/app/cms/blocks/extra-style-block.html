@@ -34,9 +34,9 @@
             </div>
 
             @if (activePanel(); as panel) {
-              <div class="client-filters" role="group" aria-label="Filtrar por rubro">
+              <div class="client-filters" role="group" [attr.aria-label]="isEn() ? 'Filter by sector' : 'Filtrar por rubro'">
                 <button type="button" class="client-chip" [class.is-active]="!activeSub()" [attr.aria-pressed]="!activeSub()" (click)="selectSub('')">
-                  Todos
+                  {{ isEn() ? 'All' : 'Todos' }}
                 </button>
                 @for (sub of panel.subs; track sub.name) {
                   <button
@@ -46,32 +46,32 @@
                     [attr.aria-pressed]="activeSub() === sub.name"
                     (click)="selectSub(sub.name)">
                     <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use [attr.href]="'assets/icons/ui.svg#' + subIcon(sub.name)"></use></svg>
-                    {{ sub.name }}
+                    {{ subLabel(sub.name) }}
                     <span>{{ sub.indices.length }}</span>
                   </button>
                 }
               </div>
 
               @if (!visibleIndices().length) {
-                <p class="clients-empty">Aún no cargamos logos de este rubro.</p>
+                <p class="clients-empty">{{ isEn() ? 'No logos uploaded for this sector yet.' : 'Aún no cargamos logos de este rubro.' }}</p>
               } @else {
-                <div class="studio-grid clients-cards" [cmsList]="path(listPath())">
+                <div class="clients-cards" [cmsList]="path(listPath())">
                   @for (i of visibleIndices(); track i) {
                     @let item = items()[i];
                     @if (hasUrl(item['url']) && internal(item['url'])) {
-                      <app-cyber-card class="span-3 client-tile">
+                      <app-cyber-card class="client-tile">
                         <a class="client-tile-link" [routerLink]="clientHref(item['url'])">
                           <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
                         </a>
                       </app-cyber-card>
                     } @else if (hasUrl(item['url'])) {
-                      <app-cyber-card class="span-3 client-tile">
+                      <app-cyber-card class="client-tile">
                         <a class="client-tile-link" [href]="item['url']" target="_blank" rel="noopener noreferrer">
                           <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
                         </a>
                       </app-cyber-card>
                     } @else {
-                      <app-cyber-card class="span-3 client-tile">
+                      <app-cyber-card class="client-tile">
                         <div class="client-tile-link">
                           <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
                         </div>
@@ -93,7 +93,7 @@
             <div class="client-tile-copy">
               <strong [cmsText]="path(listPath() + '.' + i + '.name')"></strong>
               @if (itemSub(item)) {
-                <span>{{ itemSub(item) }}</span>
+                <span>{{ subLabel(itemSub(item)) }}</span>
               }
             </div>
           </ng-template>
@@ -120,9 +120,9 @@
                   <h3 [cmsText]="path(listPath() + '.' + $index + '.name')"></h3>
                   <p [cmsText]="path(listPath() + '.' + $index + '.text')"></p>
                   @if (hasUrl(item['url']) && internal(item['url'])) {
-                    <a [routerLink]="clientHref(item['url'])" [cmsLink]="path(listPath() + '.' + $index + '.url')">Ver más</a>
+                    <a [routerLink]="clientHref(item['url'])" [cmsLink]="path(listPath() + '.' + $index + '.url')">{{ isEn() ? 'View more' : 'Ver más' }}</a>
                   } @else if (hasUrl(item['url'])) {
-                    <a [href]="item['url']" target="_blank" rel="noopener" [cmsLink]="path(listPath() + '.' + $index + '.url')">Ver más</a>
+                    <a [href]="item['url']" target="_blank" rel="noopener" [cmsLink]="path(listPath() + '.' + $index + '.url')">{{ isEn() ? 'View more' : 'Ver más' }}</a>
                   }
                 </div>
               </article>
@@ -201,7 +201,7 @@
         @if (props()['embed']) {
           <div class="map-frame">
             @if (!mapLoaded()) {
-              <button type="button" class="map-facade" (click)="loadMap()" [attr.aria-label]="'Cargar mapa interactivo: ' + (props()['title'] || 'Dónde estamos')">
+              <button type="button" class="map-facade" (click)="loadMap()" [attr.aria-label]="(isEn() ? 'Load interactive map: ' : 'Cargar mapa interactivo: ') + (props()['title'] || (isEn() ? 'Where we are' : 'Dónde estamos'))">
                 <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s-7-5.5-7-11a7 7 0 0 1 14 0c0 5.5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>
                 @if (props()['title']) {
                   <span class="map-facade-title" [cmsText]="path('title')"></span>
@@ -209,10 +209,10 @@
                 @if (props()['text']) {
                   <span class="map-facade-address" [cmsText]="path('text')"></span>
                 }
-                <span class="map-facade-cta">Cargar mapa</span>
+                <span class="map-facade-cta">{{ isEn() ? 'Load map' : 'Cargar mapa' }}</span>
               </button>
             } @else {
-              <iframe [src]="embed(mapUrl())" title="Mapa de Matt Innova Solution en San Vicente de Cañete" aria-label="Mapa de Matt Innova Solution en San Vicente de Cañete" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="800" height="450" allowfullscreen></iframe>
+              <iframe [src]="embed(mapUrl())" [title]="isEn() ? 'Map of Matt Innova Solution in San Vicente de Cañete' : 'Mapa de Matt Innova Solution en San Vicente de Cañete'" [attr.aria-label]="isEn() ? 'Map of Matt Innova Solution in San Vicente de Cañete' : 'Mapa de Matt Innova Solution en San Vicente de Cañete'" loading="lazy" referrerpolicy="no-referrer-when-downgrade" width="800" height="450" allowfullscreen></iframe>
             }
           </div>
         }

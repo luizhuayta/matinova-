@@ -6,6 +6,13 @@ import { API_URL } from './cms.models';
 
 export type AdminRole = 'admin' | 'editor' | '';
 
+export function adminReturnUrl(url: string | null): string {
+  const path = url?.split(/[?#]/)[0];
+  return url && path && /^\/admin(?:\/[a-z0-9-]+)*\/?$/.test(path) && !/^\/admin\/login(?:\/|$)/.test(path)
+    ? url
+    : '/admin';
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
@@ -14,6 +21,7 @@ export class AuthService {
   readonly role = signal<AdminRole>('');
   readonly csrfToken = signal('');
   readonly ready = signal(false);
+  readonly sessionExpired = signal(false);
 
   isAdmin(): boolean {
     return this.role() === 'admin';
@@ -23,13 +31,16 @@ export class AuthService {
     try {
       const res = await firstValueFrom(
         this.http.get<{ authenticated: boolean; username?: string; role?: string; csrfToken?: string }>(
-          `${API_URL}/auth/me`
+          `${API_URL}/auth/me`, { cache: 'no-store', transferCache: false }
         )
       );
       this.username.set(res.authenticated ? (res.username ?? 'admin') : null);
       this.role.set(res.authenticated ? ((res.role as AdminRole) || 'admin') : '');
       this.csrfToken.set(res.csrfToken ?? '');
       this.ready.set(true);
+      if (res.authenticated) {
+        this.sessionExpired.set(false);
+      }
       return res.authenticated;
     } catch {
       this.username.set(null);
@@ -51,6 +62,7 @@ export class AuthService {
       this.username.set(res.username);
       this.role.set((res.role as AdminRole) || 'admin');
       this.csrfToken.set(res.csrfToken ?? '');
+      this.sessionExpired.set(false);
       return null;
     } catch (err: unknown) {
       const message = (err as { error?: { message?: string } })?.error?.message;
@@ -67,6 +79,7 @@ export class AuthService {
     this.username.set(null);
     this.role.set('');
     this.csrfToken.set('');
+    this.sessionExpired.set(false);
     await this.router.navigateByUrl('/admin/login');
   }
 }

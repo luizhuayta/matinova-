@@ -1,6 +1,5 @@
-import { NgComponentOutlet } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
-import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, Type, ViewChild, computed, effect, inject, signal } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { AuthService } from '../cms/auth.service';
@@ -9,6 +8,7 @@ import { CmsEditorService, PreviewDevice } from '../cms/cms-editor.service';
 import { CmsSelectionService } from '../cms/cms-selection.service';
 import { LocaleService, CMS_LOCALES } from '../cms/locale.service';
 import { CmsApiService } from '../cms/cms-api.service';
+import { CmsPageBlocks } from '../cms/blocks/cms-page-blocks';
 import { labelForPath } from '../cms/cms-schema';
 import { CmsRevision, PAGE_LABELS, changedPaths, pathForSlug } from '../cms/cms.models';
 import { CmsInspector } from './cms-inspector';
@@ -27,7 +27,7 @@ const BEZEL = 24;
 @Component({
   selector: 'app-page-editor',
   standalone: true,
-  imports: [NgComponentOutlet, RouterLink, Header, Footer, CmsInspector, AdminTour, FormsModule],
+  imports: [CmsPageBlocks, RouterLink, Header, Footer, CmsInspector, AdminTour, FormsModule],
   templateUrl: './page-editor.html',
   styleUrl: './page-editor.scss',
 })
@@ -48,7 +48,8 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   status = signal('');
   scale = signal(1);
   frameHeight = signal(640);
-  preview = signal<Type<unknown> | null>(null);
+  loadingDocuments = signal(true);
+  documentsReady = computed(() => !this.loadingDocuments() && this.cms.versions()[this.slug()] !== undefined);
   revisions = signal<CmsRevision[]>([]);
   showRevisions = signal(false);
   isSitio = computed(() => this.slug() === 'sitio');
@@ -82,12 +83,18 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     if (this.cms.saving() || this.editor.uploading()) {
       return 'Guardando…';
     }
-    if (this.cms.dirty() || this.cms.hasDraft()[this.slug()]) {
+    if (this.cms.dirty()) {
+      return 'Cambios pendientes de guardar';
+    }
+    if (this.cms.hasDraft()[this.slug()]) {
       return 'Cambios sin publicar';
     }
     return 'Guardado';
   });
   notice = computed(() => {
+    if (this.auth.sessionExpired()) {
+      return { kind: 'error' as const, text: 'Sesión expirada, vuelve a iniciar sesión.', action: 'login' as const, path: '' };
+    }
     const err = this.error() || this.cms.conflict();
     if (err) {
       return { kind: 'error' as const, text: err, action: 'reload' as const, path: '' };
@@ -96,12 +103,22 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     if (fieldErr) {
       return { kind: 'error' as const, text: fieldErr.message, action: 'goto' as const, path: fieldErr.path };
     }
+    if (!this.isSitio() && this.cms.siteDraftError()) {
+      return { kind: 'error' as const, text: this.cms.siteDraftError(), action: 'site' as const, path: '' };
+    }
+    if (this.cms.draftStorageError()) {
+      return { kind: 'error' as const, text: 'El navegador no pudo almacenar el borrador. Guarda los cambios antes de cerrar o recargar la pestaña.', action: '' as const, path: '' };
+    }
     const toast = this.cms.removeToast();
     if (toast) {
       return { kind: 'info' as const, text: toast, action: 'undo' as const, path: '' };
     }
     if (this.editor.uploading()) {
       return { kind: 'info' as const, text: 'La foto se está ajustando…', action: '' as const, path: '' };
+    }
+    const uploadNotice = this.cms.uploadNotice();
+    if (uploadNotice) {
+      return { kind: 'info' as const, text: uploadNotice, action: 'dismiss-upload' as const, path: '' };
     }
     const status = this.status();
     if (status) {
@@ -125,18 +142,27 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const locale = this.route.snapshot.queryParamMap.get('locale');
+    if (locale === 'es' || locale === 'en') {
+      this.locales.locale.set(locale);
+    }
     this.editor.enable();
     this.cms.startEditingSession();
     this.route.paramMap.subscribe((params) => {
       const slug = params.get('slug') || 'inicio';
       this.slug.set(slug);
       this.slugDraft.set(slug);
+      this.error.set('');
+      this.status.set('');
       this.cms.useSlug(slug);
       this.selection.slug = slug;
       this.selection.selectedPath.set('');
-      void this.loadPreview(slug);
+      if (!this.loadingDocuments() && this.cms.versions()[slug] === undefined) {
+        void this.loadDocuments();
+      }
       this.scheduleScale();
     });
+    void this.loadDocuments();
   }
 
   ngAfterViewInit(): void {
@@ -227,7 +253,9 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     this.status.set('');
     try {
       await this.cms.publish();
-      this.status.set('Publicado. La web ya muestra esta versión.');
+      this.status.set(this.cms.dirty()
+        ? 'Publicado. Los cambios que hiciste durante la publicación siguen pendientes de guardar.'
+        : 'Publicado. La web ya muestra esta versión.');
     } catch (err) {
       if (err instanceof HttpErrorResponse && err.status === 409) {
         this.error.set(this.cms.conflict() || 'Alguien publicó antes. Recarga para no pisar cambios.');
@@ -238,9 +266,26 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
   }
 
   async reload(): Promise<void> {
-    await this.cms.reloadSlug(this.slug());
-    this.error.set('');
-    this.status.set('Se recargó el documento actual.');
+    if (this.cms.dirty() && !confirm('¿Descartar los cambios pendientes de guardar y cargar la versión del servidor?')) {
+      return;
+    }
+    try {
+      if (!this.documentsReady()) {
+        await this.loadDocuments();
+        return;
+      }
+      await this.cms.reloadSlug(this.slug(), true);
+      this.error.set('');
+      this.status.set('Se recargó el documento actual.');
+    } catch {
+      this.error.set('No se pudo recargar el documento.');
+    }
+  }
+
+  loginReturnUrl(): string {
+    return this.router.serializeUrl(this.router.createUrlTree(['/admin/paginas', this.slug()], {
+      queryParams: { locale: this.locales.locale() },
+    }));
   }
 
   async previewPublic(): Promise<void> {
@@ -279,7 +324,10 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     if (!this.canRestore()) {
       return;
     }
-    if (!confirm('¿Restaurar esta revisión al borrador?')) {
+    const message = this.cms.dirty()
+      ? '¿Reemplazar los cambios pendientes de guardar por esta revisión?'
+      : '¿Restaurar esta revisión al borrador?';
+    if (!confirm(message)) {
       return;
     }
     try {
@@ -303,41 +351,66 @@ export class PageEditor implements OnInit, AfterViewInit, OnDestroy {
     if (!next || next === this.slug()) {
       return;
     }
+    if (this.cms.dirty() || this.cms.saving() || this.editor.uploading()) {
+      this.error.set('Guarda los cambios pendientes antes de cambiar la URL.');
+      return;
+    }
     if (!confirm('Al cambiar la ruta, la URL anterior redirigirá a la nueva. ¿Continuar?')) {
       return;
     }
+    this.loadingDocuments.set(true);
     try {
       const page = await this.cms.updatePageMeta(this.slug(), { slug: next });
       this.slugWarn.set('');
       this.redirects.set(await this.api.listRedirects().catch(() => []));
-      await this.router.navigate(['/admin/paginas', page.slug]);
+      await this.router.navigate(['/admin/paginas', page.slug], { queryParamsHandling: 'preserve' });
       this.status.set('Ruta actualizada. La URL anterior redirige aquí.');
     } catch {
       this.error.set('No se pudo cambiar la ruta.');
+    } finally {
+      this.loadingDocuments.set(false);
     }
   }
 
   async changeLocale(next: string): Promise<void> {
     const locale = next === 'en' ? 'en' : 'es';
-    this.locales.locale.set(locale);
+    const previous = this.locales.locale();
+    if (locale === previous || this.cms.saving() || this.editor.uploading() || this.loadingDocuments()) {
+      return;
+    }
+    this.error.set('');
+    this.loadingDocuments.set(true);
     try {
       if (locale !== 'es') {
         await this.api.translatePage(this.slug(), locale);
       }
+      this.locales.locale.set(locale);
       await this.cms.loadAll();
-      this.cms.useSlug(this.slug());
-    } catch {
+      await this.router.navigate([], { relativeTo: this.route, queryParams: { locale }, queryParamsHandling: 'merge', replaceUrl: true });
+    } catch (err) {
+      this.locales.locale.set(previous);
+      if (err instanceof HttpErrorResponse && err.status === 401) {
+        this.auth.sessionExpired.set(true);
+      }
       this.error.set('No se pudo cargar el idioma.');
+    } finally {
+      this.loadingDocuments.set(false);
     }
   }
 
-  private async loadPreview(slug: string): Promise<void> {
-    if (slug === 'sitio') {
-      this.preview.set(null);
-      return;
+  private async loadDocuments(): Promise<void> {
+    this.loadingDocuments.set(true);
+    this.error.set('');
+    try {
+      await this.cms.loadAll();
+      if (this.cms.versions()[this.slug()] === undefined) {
+        this.error.set('No hay un documento para esta página en el idioma seleccionado.');
+      }
+    } catch {
+      this.error.set('No se pudieron cargar los documentos.');
+    } finally {
+      this.loadingDocuments.set(false);
     }
-    const mod = await import('../pages/dynamic-page/dynamic-page');
-    this.preview.set(mod.DynamicPage);
   }
 
   private scheduleScale(): void {

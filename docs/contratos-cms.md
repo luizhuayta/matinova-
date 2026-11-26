@@ -16,6 +16,10 @@ Claves de respuesta: `content`, `version`, `updated_at`, `schemaVersion`. En adm
 
 Optimistic locking: `PUT` / `publish` envían `version`. Conflicto = **409** con `version` y `content`.
 
+La respuesta de `POST /pages` incluye `translations` con los locales que se crearon junto con la página. Una creación en ES copia sus datos e IDs de bloque a EN en la misma transacción, si EN todavía no existe.
+
+Las respuestas exitosas de `PUT /pages/{slug}`, `PUT /site` y sus rutas `publish` incluyen `syncedImages`, el número de campos de imagen copiados de ES a EN. El guardado actualiza el borrador EN y la publicación actualiza el contenido publicado EN. La copia conserva los textos y las imágenes personalizadas, incrementa la versión EN si hubo cambios y devuelve `0` si no hay cambios aplicables.
+
 ## Documento de sitio (`GET /site`)
 
 Campos planos que el shell público lee:
@@ -71,9 +75,9 @@ Opcionales; no cambian las claves existentes. El contenido viejo sigue funcionan
 
 ## Versiones de schema
 
-- `APP_SCHEMA_VERSION` (migrate.php / `app_secrets.schema_version`): DDL de la app.
+- `APP_SCHEMA_VERSION` (migrate.php / `app_secrets.schema_version`): DDL y migraciones de datos de la app.
 - `CMS_SCHEMA_VERSION` (cms-schema.php / `document.schemaVersion`): forma JSON de cada documento.
-- `cms_studio_sitewide_migrate()` solo pisa contenido editorial si `APP_MIGRATE_CONTENT=1` o al subir a schema 10 por primera vez.
+- En bases que ya estaban en v14, las migraciones de datos anteriores se marcan como aplicadas. La v15 corrige datos de contacto de relleno y textos concretos en contenido publicado y borradores. Cada corrección tiene su propia marca de ejecución.
 
 ## Qué no tocar en este refactor
 

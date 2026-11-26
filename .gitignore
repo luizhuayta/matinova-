@@ -21,6 +21,7 @@ docs/*
 !docs/contratos-cms.md
 !docs/CPANEL-RECUPERACION.md
 !docs/LEVANTAR-EN-OTRO-EQUIPO.md
+!docs/historial/
 
 # Herramientas de IA / temporales
 .atl/
@@ -44,9 +45,16 @@ Thumbs.db
 .env
 .env.local
 
-# Grabaciones y demos Playwright
+# Grabaciones, reportes y resultados de Playwright
 videos_tour/
+test-results/
+playwright-report/
+blob-report/
 
 # Capturas locales de QA
 prueba/
 capturas/
+
+# Builds
+frontend/dist/
+frontend/.angular/

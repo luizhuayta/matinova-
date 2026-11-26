@@ -17,11 +17,12 @@ import { PageHeader } from '../../components/ui/page-header';
 import { CyberCard } from '../../components/ui/cyber-card';
 import { HudDivider } from '../../components/ui/hud-divider';
 import { GlowButton } from '../../components/ui/glow-button';
+import { CountUpDirective } from '../count-up.directive';
 
 @Component({
   selector: 'app-about-style-block',
   standalone: true,
-  imports: [CommonModule, RouterModule, CmsTextDirective, CmsImageDirective, CmsLinkDirective, CmsListDirective, PublicReveal, PageHeader, CyberCard, HudDivider, GlowButton],
+  imports: [CommonModule, RouterModule, CmsTextDirective, CmsImageDirective, CmsLinkDirective, CmsListDirective, PublicReveal, PageHeader, CyberCard, HudDivider, GlowButton, CountUpDirective],
   templateUrl: './about-style-block.html',
 })
 export class AboutStyleBlock {
@@ -71,6 +72,10 @@ export class AboutStyleBlock {
 
   ctaLabel(): string {
     return String(this.props()['cta'] ?? '');
+  }
+
+  isEn(): boolean {
+    return this.locales.locale() === 'en';
   }
 
   iconOf(icon: unknown, fallback: string): string {

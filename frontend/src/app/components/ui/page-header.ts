@@ -52,7 +52,7 @@ import { Component, input } from '@angular/core';
     .cyber-page-header__inner {
       position: relative;
       z-index: 1;
-      width: min(1120px, calc(100% - 2.5rem));
+      width: min(var(--layout-max, 1120px), calc(100% - 2 * var(--layout-gutter, 1.25rem)));
       margin-inline: auto;
     }
     .cyber-page-header--center .cyber-page-header__inner { text-align: center; }
@@ -65,7 +65,7 @@ import { Component, input } from '@angular/core';
     }
     .cyber-page-header__text {
       margin: 0;
-      max-width: 60ch;
+      max-width: var(--layout-measure, 68ch);
       color: var(--cyber-muted);
     }
     .cyber-page-header--center .cyber-page-header__text { margin-inline: auto; }

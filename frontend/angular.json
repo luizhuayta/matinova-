@@ -27,6 +27,11 @@
               {
                 "glob": "**/*",
                 "input": "public"
+              },
+              {
+                "glob": "safety-worker.js",
+                "input": "node_modules/@angular/service-worker",
+                "output": "/"
               }
             ],
             "styles": [
@@ -51,7 +56,7 @@
                 }
               ],
               "outputHashing": "all",
-              "serviceWorker": "ngsw-config.json"
+              "serviceWorker": false
             },
             "development": {
               "optimization": false,

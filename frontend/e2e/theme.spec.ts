@@ -8,17 +8,32 @@ async function expectDarkSection(page: Page, selector: string) {
     const own = getComputedStyle(el).backgroundColor;
     const block = el.closest('.cms-block');
     const veil = block ? getComputedStyle(block).backgroundImage : '';
-    return { own, veil };
+    const theme = document.querySelector('.public-theme');
+    return {
+      own,
+      veil,
+      bodyBg: getComputedStyle(document.body).backgroundColor,
+      frame: theme ? getComputedStyle(theme, '::after').position : '',
+    };
   });
-  const isDark = bg.own === 'rgb(3, 11, 26)' || bg.veil.includes('rgba(3, 11, 26');
+  const usesGlobalFrame = bg.own === 'rgba(0, 0, 0, 0)' && bg.veil === 'none' && bg.bodyBg === 'rgb(3, 11, 26)' && bg.frame === 'fixed';
+  const isDark = bg.own === 'rgb(3, 11, 26)' || bg.veil.includes('rgba(3, 11, 26') || usesGlobalFrame;
   expect(isDark).toBe(true);
 }
 
 test('el shell público usa el tema oscuro', async ({ page }) => {
   await page.goto('/');
   await expect(page.locator('.public-theme')).toBeVisible();
-  const bg = await page.locator('.public-theme').evaluate((el) => getComputedStyle(el).backgroundColor);
-  expect(bg).toBe('rgb(5, 11, 24)');
+  const shell = await page.locator('.public-theme').evaluate((el) => ({
+    bg: getComputedStyle(el).backgroundColor,
+    frame: getComputedStyle(el, '::after').position,
+    bodyBg: getComputedStyle(document.body).backgroundColor,
+    htmlBg: getComputedStyle(document.documentElement).backgroundColor,
+  }));
+  expect(shell.bg).toBe('rgba(0, 0, 0, 0)');
+  expect(shell.frame).toBe('fixed');
+  expect(shell.bodyBg).toBe('rgb(3, 11, 26)');
+  expect(shell.htmlBg).toBe('rgb(3, 11, 26)');
 });
 
 test('el admin conserva sus tokens claros', async ({ page }) => {
@@ -45,7 +60,7 @@ test('el hero muestra cifras y acento', async ({ page }) => {
 
 test('los servicios muestran icono y enlace', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.premium-service-card')).toHaveCount(6);
+  await expect(page.locator('.premium-service-card')).toHaveCount(5);
   await expect(page.locator('.premium-service-card .service-icon').first()).toBeVisible();
   await expect(page.locator('.premium-service-card .service-link').first()).toContainText(/Saber más|Learn more/);
 });

@@ -2,6 +2,7 @@
 @use './styles/tokens';
 @use './styles/cyber';
 @use './app/cms/blocks/public-blocks.scss';
+@use './styles/shared';
 @use './app/admin/admin-theme.scss';
 
 *,
@@ -110,13 +111,13 @@ a:hover {
 }
 
 .container {
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(var(--layout-max, 1120px), calc(100% - 2 * var(--layout-gutter, 1.25rem)));
   margin-inline: auto;
 }
 
 /* Densidad desktop: equivale a ver el sitio al 80% sin tocar
    proporciones, CMS ni elementos fijos (chat, whatsapp, cookies). */
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (max-width: 1439.98px) {
   app-header,
   main.public-main,
   app-footer {
@@ -396,22 +397,7 @@ html[data-a11y-cursor="large"] {
   cursor: default;
 }
 
-body.has-cookie-banner {
-  padding-bottom: 7rem;
-}
-
-@media (max-width: 768px) {
-  body.has-cookie-banner {
-    padding-bottom: 8.5rem;
-  }
-}
-
 body.chatbot-open {
   overflow: hidden;
 }
 
-@include down(768px) {
-  .container {
-    width: min(1120px, calc(100% - 1.5rem));
-  }
-}

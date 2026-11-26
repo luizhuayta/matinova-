@@ -26,3 +26,23 @@ function cms_content_overwrite_enabled(): bool
         return true;
     }
 }
+
+/** Registra el cambio en la misma transacción que sus escrituras de datos. */
+function cms_run_migration_once(string $name, ?callable $migration): void
+{
+    $pdo = db();
+    $pdo->beginTransaction();
+    try {
+        $stmt = $pdo->prepare("INSERT INTO app_secrets (k, v) VALUES (?, '1') ON DUPLICATE KEY UPDATE k = VALUES(k)");
+        $stmt->execute(['migration_done:' . $name]);
+        if ($stmt->rowCount() === 1 && $migration !== null) {
+            $migration();
+        }
+        $pdo->commit();
+    } catch (Throwable $err) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        throw $err;
+    }
+}

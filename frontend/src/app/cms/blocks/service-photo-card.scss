@@ -1,0 +1,161 @@
+:host {
+  display: block;
+  min-width: 0;
+}
+
+.service-panel {
+  box-sizing: border-box;
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  min-height: 16rem;
+  height: 100%;
+  border: 1px solid var(--cyber-border-strong);
+  border-radius: var(--cyber-radius);
+  background: color-mix(in srgb, var(--cyber-bg) 90%, var(--cyber-blue));
+  box-shadow: var(--cyber-glow);
+  backdrop-filter: blur(12px);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.service-panel:hover,
+.service-panel:focus-within {
+  border-color: var(--cyber-cyan);
+  box-shadow: var(--cyber-glow-strong);
+}
+
+.service-panel-photo {
+  position: absolute;
+  z-index: -1;
+  inset: 0 0 0 auto;
+  width: 64%;
+  border-radius: inherit;
+  overflow: hidden;
+  opacity: 0.68;
+  /* Mantiene el velo por debajo del texto y revela la foto a la derecha. */
+  mask-image: linear-gradient(90deg, transparent, rgb(0 0 0 / 0.16) 53%, #000 74%);
+}
+
+.service-panel-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+  filter: brightness(1.2);
+}
+
+.service-panel-copy {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  width: 100%;
+  padding: clamp(1.1rem, 2.4vw, 1.65rem);
+}
+
+.service-panel--photo .service-panel-copy {
+  width: 70%;
+  padding-inline-end: 0;
+}
+
+.service-panel-icon {
+  color: var(--cyber-cyan);
+  font-size: 1.9rem;
+  line-height: 1;
+  margin-block-end: 0.75rem;
+}
+
+.service-panel-copy h3 {
+  margin: 0 0 0.45rem;
+  color: var(--cyber-text);
+  font-size: clamp(1.05rem, 1.6vw, 1.35rem);
+  overflow-wrap: anywhere;
+}
+
+.service-panel-copy p {
+  margin: 0 0 0.75rem;
+  max-width: var(--layout-measure, 68ch);
+  color: var(--cyber-text);
+  font-size: 0.94rem;
+  line-height: 1.55;
+  overflow-wrap: anywhere;
+}
+
+.service-panel-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 44px;
+  margin-block-start: auto;
+  color: var(--cyber-cyan);
+  font-weight: 700;
+  text-underline-offset: 0.25em;
+}
+
+.service-panel-link:hover { color: var(--cyber-text); }
+.service-panel-link:focus-visible { outline: 2px solid var(--cyber-cyan); outline-offset: 4px; }
+.service-panel-link svg { inline-size: 1rem; block-size: 1rem; flex: none; }
+
+.service-panel:not(.service-panel--editing) .service-panel-link::after {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  content: '';
+}
+
+@media (max-width: 480px) {
+  .service-panel { min-height: 14rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .service-panel { transition: none; }
+}
+
+@media (forced-colors: active) {
+  .service-panel { border-color: CanvasText; }
+  .service-panel-photo { display: none; }
+  .service-panel--photo .service-panel-copy { width: 100%; }
+  .service-panel-link:focus-visible { outline-color: Highlight; }
+}
+
+/* Conserva los selectores de las tarjetas existentes sin duplicar su superficie. */
+:host(.premium-service-card) {
+  display: block;
+  min-height: 0;
+  overflow: visible;
+  border: 0;
+  background: none;
+}
+
+:host(.premium-service-card:hover) {
+  transform: none;
+  box-shadow: none;
+}
+
+.service-panel .service-panel-icon {
+  display: inline-block;
+  width: auto;
+  height: auto;
+  border: 0;
+  background: none;
+  box-shadow: none;
+}
+
+.service-panel .service-panel-copy p {
+  display: block;
+  overflow: visible;
+  margin: 0 0 0.75rem;
+  color: var(--cyber-muted);
+}
+
+:host-context(html[data-a11y-contrast="high"]) {
+  .service-panel { background: var(--dt-panel); border-color: var(--dt-line); box-shadow: none; }
+  .service-panel-photo { display: none; }
+  .service-panel--photo .service-panel-copy { width: 100%; }
+  .service-panel-icon,
+  .service-panel-copy h3,
+  .service-panel .service-panel-copy p,
+  .service-panel-link { color: var(--dt-text); }
+  .service-panel-link:focus-visible { outline-color: var(--focus); }
+}

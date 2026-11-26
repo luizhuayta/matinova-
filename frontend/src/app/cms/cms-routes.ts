@@ -78,10 +78,32 @@ export const CHATBOT_PATH_LABELS: Record<string, string> = {
   '/servicios/consultoria': 'Consultoría TI',
 };
 
+export const CHATBOT_PATH_LABELS_EN: Record<string, string> = {
+  '/': 'Home',
+  '/servicios': 'Services',
+  '/servicios/software': 'Software & web',
+  '/servicios/saas': 'SaaS',
+  '/servicios/consultoria': 'IT consulting',
+  '/servicios/soluciones-ti': 'IT solutions',
+  '/servicios/hardware': 'Hardware',
+  '/acerca-de': 'About',
+  '/contacto': 'Contact',
+  '/libro-reclamaciones': 'Claims book',
+  '/clientes': 'Clients',
+  '/privacidad': 'Privacy',
+  '/terminos': 'Terms',
+};
+
 export const CHATBOT_WELCOME_LINKS = [
   { label: 'Servicios', path: '/servicios' },
   { label: 'Clientes', path: '/clientes' },
   { label: 'Contacto', path: '/contacto' },
+] as const;
+
+export const CHATBOT_WELCOME_LINKS_EN = [
+  { label: 'Services', path: '/servicios' },
+  { label: 'Clients', path: '/clientes' },
+  { label: 'Contact', path: '/contacto' },
 ] as const;
 
 export const KNOWN_NAV_PATHS = new Set(
@@ -90,6 +112,9 @@ export const KNOWN_NAV_PATHS = new Set(
     .map(([, path]) => path)
 );
 
-export function publicPathLabel(path: string): string {
+export function publicPathLabel(path: string, locale: 'es' | 'en' = 'es'): string {
+  if (locale === 'en') {
+    return CHATBOT_PATH_LABELS_EN[path] ?? path;
+  }
   return CHATBOT_PATH_LABELS[path] ?? PATH_LABELS[path] ?? path;
 }

@@ -1,7 +1,7 @@
 import { NgClass } from '@angular/common';
 import { Component, computed, input } from '@angular/core';
 import { RouterModule } from '@angular/router';
-import { PublicButton } from '../components/public/public-button';
+import { PublicButton, PublicButtonTone } from '../components/public/public-button';
 import { CmsLinkDirective } from './cms-link.directive';
 import { CmsTextDirective } from './cms-text.directive';
 import { isInternalLink } from './block-registry';
@@ -16,22 +16,24 @@ import { isLiveHref } from './public-url';
       <a
         publicBtn
         [tone]="tone()"
+        [buttonIcon]="tone() === 'ghost' ? 'none' : 'arrow'"
         [ngClass]="cssClass()"
         [routerLink]="href()"
-        [cmsText]="textPath()"
         [cmsLink]="linkPath()"
         [attr.aria-label]="ariaLabel()">
+        <span [cmsText]="textPath()"></span>
         <ng-content />
       </a>
     } @else if (visible() && href() && live()) {
       <a
         publicBtn
         [tone]="tone()"
+        [buttonIcon]="tone() === 'ghost' ? 'none' : 'arrow'"
         [ngClass]="cssClass()"
         [href]="href()"
-        [cmsText]="textPath()"
         [cmsLink]="linkPath()"
         [attr.aria-label]="ariaLabel()">
+        <span [cmsText]="textPath()"></span>
         <ng-content />
       </a>
     }
@@ -41,9 +43,9 @@ export class CmsCtaButton {
   readonly href = input('');
   readonly textPath = input('');
   readonly linkPath = input('');
-  readonly tone = input<'primary' | 'navy' | 'accent' | 'ghost' | 'soft'>('primary');
+  readonly tone = input<PublicButtonTone>('primary');
   readonly cssClass = input('');
-  readonly ariaLabel = input('Hablar con un experto de Matt Innova');
+  readonly ariaLabel = input<string | null>(null);
   readonly show = input(true);
   readonly visible = computed(() => this.show() && !!this.href());
   readonly internal = computed(() => isInternalLink(this.href()));

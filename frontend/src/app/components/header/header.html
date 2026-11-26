@@ -1,56 +1,135 @@
 <header class="main-header" [class.scrolled]="isScrolled">
   <div class="navbar">
-    <a [routerLink]="homeLink()" class="logo-container">
+    <a [routerLink]="homeLink()" class="logo-container" (click)="closeMobileMenu()">
       <img src="logo.svg" [src]="site()['logo'] || 'logo.svg'" [alt]="site()['logoAlt'] || 'Matt Innova Solution'" class="logo-img" cmsImage="logo" cmsScope="site">
     </a>
-    <button class="mobile-menu-toggle" type="button" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" [attr.aria-expanded]="isMobileMenuOpen" aria-controls="site-nav" [attr.aria-label]="isMobileMenuOpen ? 'Cerrar menú' : 'Abrir menú'">
+    <button class="mobile-menu-toggle" type="button" (click)="toggleMobileMenu()" [class.active]="isMobileMenuOpen" [attr.aria-expanded]="isMobileMenuOpen" aria-controls="site-nav" [attr.aria-label]="isMobileMenuOpen ? (isEnglish() ? 'Close menu' : 'Cerrar menú') : (isEnglish() ? 'Open menu' : 'Abrir menú')">
       <span></span><span></span><span></span>
     </button>
     <nav id="site-nav" class="nav" [class.mobile-open]="isMobileMenuOpen">
       <ul class="nav-list">
-        <li><a [routerLink]="homeLink()" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="navigateTo(homeLink())" cmsText="nav.inicio" cmsScope="site"></a></li>
-        <li><a [routerLink]="aboutLink()" routerLinkActive="active" (click)="navigateTo(aboutLink())" cmsText="nav.acerca" cmsScope="site"></a></li>
-        <li class="dropdown" [class.open]="openMenu === 'servicios'">
-          <button class="dropbtn" type="button" (click)="toggleMenu('servicios', $event)" [attr.aria-expanded]="openMenu === 'servicios'" aria-haspopup="true" aria-controls="menu-servicios">
+        <li><a [routerLink]="homeLink()" routerLinkActive="active" [routerLinkActiveOptions]="{exact: true}" (click)="closeMobileMenu()" cmsText="nav.inicio" cmsScope="site"></a></li>
+        <li><a [routerLink]="aboutLink()" routerLinkActive="active" (click)="closeMobileMenu()" cmsText="nav.acerca" cmsScope="site"></a></li>
+        <li
+          class="dropdown"
+          [class.open]="openMenu() === 'servicios'"
+          [class.is-route-active]="isServicesActive()"
+          (pointerenter)="onDropdownEnter('servicios', $event)"
+          (pointerleave)="onDropdownLeave($event)"
+        >
+          <button
+            class="dropbtn"
+            type="button"
+            data-mega-trigger="servicios"
+            (click)="toggleMenu('servicios', $event)"
+            (keydown)="onTriggerKeydown('servicios', 'menu-servicios', $event)"
+            [attr.aria-expanded]="openMenu() === 'servicios'"
+            aria-haspopup="true"
+            aria-controls="menu-servicios"
+          >
             <span cmsText="nav.servicios" cmsScope="site"></span>
             <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#chevron"></use></svg>
           </button>
-          <div class="dropdown-content" id="menu-servicios">
-            <a *ngFor="let item of navServices(); let i = index" [routerLink]="menuPath(item['path'])" (click)="navigateTo(menuPath(item['path']))" [cmsText]="'navServices.' + i + '.label'" cmsScope="site"></a>
-          </div>
+          <app-header-mega-menu
+            panelId="menu-servicios"
+            [open]="openMenu() === 'servicios'"
+            [sectionLabel]="servicesSectionLabel()"
+            sectionBiIcon="bi-layers"
+            [allLink]="servicesLink()"
+            [allLabel]="allServicesLabel()"
+            [items]="serviceMegaItems()"
+            (itemSelect)="closeMobileMenu()"
+            (panelEnter)="onPanelEnter($event)"
+            (panelLeave)="onPanelLeave($event)"
+          />
         </li>
         <li>
-          <a [href]="nav()['academyUrl'] || 'https://misacademyonline.com/'" target="_blank" rel="noopener noreferrer" cmsText="nav.academy" cmsScope="site" aria-label="MIS Academy, abre en una pestaña nueva"></a>
+          <a [href]="nav()['academyUrl'] || 'https://misacademyonline.com/'" target="_blank" rel="noopener noreferrer" cmsText="nav.academy" cmsScope="site" [attr.aria-label]="isEnglish() ? 'MIS Academy, opens in a new tab' : 'MIS Academy, abre en una pestaña nueva'"></a>
         </li>
-        @for (item of extraMenu(); track item.slug) {
-          <li>
-            <a [routerLink]="menuPath(item.path)" routerLinkActive="active" (click)="navigateTo(menuPath(item.path))">{{ item.title }}</a>
-          </li>
+        @for (entry of extraEntries(); track entry.slug) {
+          @if (entry.kind === 'group' && entry.children?.length) {
+            <li
+              class="dropdown"
+              [class.open]="openMenu() === 'extra-' + entry.slug"
+              [class.is-route-active]="isDynamicGroupActive(entry.path)"
+              (pointerenter)="onDropdownEnter('extra-' + entry.slug, $event)"
+              (pointerleave)="onDropdownLeave($event)"
+            >
+              <button
+                class="dropbtn"
+                type="button"
+                [attr.data-mega-trigger]="'extra-' + entry.slug"
+                (click)="toggleMenu('extra-' + entry.slug, $event)"
+                (keydown)="onTriggerKeydown('extra-' + entry.slug, 'menu-' + entry.slug, $event)"
+                [attr.aria-expanded]="openMenu() === 'extra-' + entry.slug"
+                aria-haspopup="true"
+                [attr.aria-controls]="'menu-' + entry.slug"
+              >
+                <span>{{ entry.label }}</span>
+                <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#chevron"></use></svg>
+              </button>
+              <app-header-mega-menu
+                [panelId]="'menu-' + entry.slug"
+                [open]="openMenu() === 'extra-' + entry.slug"
+                [sectionLabel]="entry.label"
+                sectionBiIcon="bi-grid"
+                [allLink]="menuPath(entry.path)"
+                [allLabel]="isEnglish() ? 'View all' : 'Ver todo'"
+                [items]="dynamicGroupItems(entry.children)"
+                (itemSelect)="closeMobileMenu()"
+                (panelEnter)="onPanelEnter($event)"
+                (panelLeave)="onPanelLeave($event)"
+              />
+            </li>
+          } @else {
+            <li>
+              <a [routerLink]="menuPath(entry.path)" routerLinkActive="active" (click)="closeMobileMenu()">{{ entry.label }}</a>
+            </li>
+          }
         }
         @if (showClients()) {
-          <li class="dropdown" [class.open]="openMenu === 'clientes'">
-            <button class="dropbtn" type="button" (click)="toggleMenu('clientes', $event)" [attr.aria-expanded]="openMenu === 'clientes'" aria-haspopup="true" aria-controls="menu-clientes">
+          <li
+            class="dropdown"
+            [class.open]="openMenu() === 'clientes'"
+            [class.is-route-active]="isClientsActive()"
+            (pointerenter)="onDropdownEnter('clientes', $event)"
+            (pointerleave)="onDropdownLeave($event)"
+          >
+            <button
+              class="dropbtn"
+              type="button"
+              data-mega-trigger="clientes"
+              (click)="toggleMenu('clientes', $event)"
+              (keydown)="onTriggerKeydown('clientes', 'menu-clientes', $event)"
+              [attr.aria-expanded]="openMenu() === 'clientes'"
+              aria-haspopup="true"
+              aria-controls="menu-clientes"
+            >
               <span cmsText="clientsLabel" cmsScope="site"></span>
               <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#chevron"></use></svg>
             </button>
-            <div class="dropdown-content" id="menu-clientes">
-              <a [routerLink]="clientsLink()" (click)="navigateTo(clientsLink())">Ver todos los clientes</a>
-              @for (item of clientCategories; track item.key) {
-                <a [routerLink]="clientsLink()" [queryParams]="{ category: item.key }" (click)="goClients(item.key)">{{ item.label }}</a>
-              }
-            </div>
+            <app-header-mega-menu
+              panelId="menu-clientes"
+              [open]="openMenu() === 'clientes'"
+              [sectionLabel]="clientsSectionLabel()"
+              sectionBiIcon="bi-building"
+              [allLink]="clientsLink()"
+              [allLabel]="allClientsLabel()"
+              [items]="clientMegaItems()"
+              (itemSelect)="closeMobileMenu()"
+              (panelEnter)="onPanelEnter($event)"
+              (panelLeave)="onPanelLeave($event)"
+            />
           </li>
         }
-        <li>
-          <a [routerLink]="contactLink()" routerLinkActive="active" (click)="navigateTo(contactLink())" cmsText="nav.contacto" cmsScope="site"></a>
-        </li>
         <li class="lang">
+          <i class="bi bi-globe lang-globe" aria-hidden="true"></i>
           @for (item of localeOptions; track item.id) {
-            <button type="button" [class.active]="locales.locale() === item.id" (click)="switchLocale(item.id)" [attr.aria-label]="'Idioma ' + item.id">{{ item.id.toUpperCase() }}</button>
+            <button type="button" [class.active]="locales.locale() === item.id" [attr.aria-pressed]="locales.locale() === item.id" (click)="switchLocale(item.id)" [attr.aria-label]="(isEnglish() ? 'Language ' : 'Idioma ') + item.label">{{ item.id.toUpperCase() }}</button>
           }
         </li>
         <li class="nav-cta">
-          <a publicBtn [routerLink]="contactLink()" routerLinkActive="active" (click)="navigateTo(contactLink())" aria-label="Hablar con un experto de Matt Innova">
+          <a publicBtn [routerLink]="contactLink()" routerLinkActive="active" (click)="closeMobileMenu()">
             <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#mail"></use></svg>
             <span cmsText="nav.contacto" cmsScope="site"></span>
           </a>
