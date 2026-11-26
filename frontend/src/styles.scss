@@ -111,13 +111,13 @@ a:hover {
 }
 
 .container {
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(var(--layout-max, 1120px), calc(100% - 2 * var(--layout-gutter, 1.25rem)));
   margin-inline: auto;
 }
 
 /* Densidad desktop: equivale a ver el sitio al 80% sin tocar
    proporciones, CMS ni elementos fijos (chat, whatsapp, cookies). */
-@media (min-width: 1024px) {
+@media (min-width: 1024px) and (max-width: 1439.98px) {
   app-header,
   main.public-main,
   app-footer {
@@ -401,8 +401,3 @@ body.chatbot-open {
   overflow: hidden;
 }
 
-@include down(768px) {
-  .container {
-    width: min(1120px, calc(100% - 1.5rem));
-  }
-}

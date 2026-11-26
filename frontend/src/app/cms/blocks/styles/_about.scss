@@ -176,6 +176,7 @@
 }
 
 .about-copy .lead {
+  max-width: var(--layout-measure, 68ch);
   font-size: 1.1rem;
   line-height: 1.7;
   color: var(--dt-muted);

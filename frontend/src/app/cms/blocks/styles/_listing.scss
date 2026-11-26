@@ -70,7 +70,7 @@
 .listing-hero p,
 .cta-bay p {
   color: var(--dt-muted);
-  max-width: 48ch;
+  max-width: var(--layout-measure, 68ch);
   font-size: var(--text-16);
   line-height: 1.55;
 }
@@ -390,7 +390,7 @@
 
 .service-page .reason-bay .cyber-card__body {
   display: grid;
-  grid-template-columns: minmax(0, 300px) 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
   gap: 0;
   padding: 0;
 }
@@ -420,6 +420,7 @@
 }
 
 .service-page .reason-bay p {
+  max-width: var(--layout-measure, 68ch);
   margin: 0;
   color: var(--cyber-muted);
   line-height: 1.65;
@@ -453,7 +454,7 @@
 }
 
 .cyber-cta p {
-  max-width: 56ch;
+  max-width: var(--layout-measure, 68ch);
   margin: 0.75rem auto 0;
   color: var(--cyber-muted);
 }
@@ -493,9 +494,6 @@ html[data-a11y-contrast='high'] .service-page .cyber-glow-button {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .service-page .reason-bay .cyber-card__body {
-    grid-template-columns: minmax(0, 240px) 1fr;
-  }
 }
 
 @include down(680px) {

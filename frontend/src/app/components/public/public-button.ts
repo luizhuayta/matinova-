@@ -92,7 +92,7 @@ export type PublicButtonIcon = 'arrow' | 'play' | 'none';
       --action-outline: #fff;
       --action-focus-shadow: 0 0 0 7px #000;
     }
-    @media (min-width: 1024px) {
+    @media (1024px <= width < 1440px) {
       /* Compensa el zoom de escritorio del shell público. */
       :host(.public-btn) { min-block-size: 52px; }
     }

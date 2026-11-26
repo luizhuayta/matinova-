@@ -238,9 +238,9 @@
             }
             <p class="premium-sub" [cmsText]="path('text')"></p>
           </div>
-          <div class="studio-grid services-grid premium-services-grid" [cmsList]="path('cards')">
+          <div class="premium-services-grid" [cmsList]="path('cards')">
             @for (card of serviceCards(); track $index) {
-              <app-service-photo-card class="premium-service-card span-4" appReveal [delay]="($index * 70) + 'ms'"
+              <app-service-photo-card class="premium-service-card" appReveal [delay]="($index * 70) + 'ms'"
                 [field]="path('cards.' + $index)"
                 [image]="card['img'] || ''"
                 [alt]="card['alt'] || ''"

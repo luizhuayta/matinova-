@@ -57,12 +57,16 @@ html:has(.public-theme) {
     ),
     radial-gradient(ellipse 46% 38% at 6% 18%, rgba(0, 122, 255, 0.16), rgba(0, 122, 255, 0) 70%),
     radial-gradient(ellipse 46% 38% at 94% 18%, rgba(0, 122, 255, 0.16), rgba(0, 122, 255, 0) 70%);
-  background-size: clamp(7.5rem, 10vw, 13rem) 100%, clamp(7.5rem, 10vw, 13rem) 100%, 100% 100%, 100% 100%;
+  --frame-side: min(
+    clamp(5.5rem, 7vw, 10rem),
+    calc((100% - min(var(--layout-max), calc(100% - 2 * var(--layout-gutter)))) / 2 + 2rem)
+  );
+  background-size: var(--frame-side) 100%, var(--frame-side) 100%, 100% 100%, 100% 100%;
   background-position: left top, right top, center, center;
   background-repeat: no-repeat;
   opacity: 1;
-  mask-image: linear-gradient(90deg, #000 0%, transparent clamp(7.5rem, 10vw, 13rem), transparent calc(100% - clamp(7.5rem, 10vw, 13rem)), #000 100%);
-  -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent clamp(7.5rem, 10vw, 13rem), transparent calc(100% - clamp(7.5rem, 10vw, 13rem)), #000 100%);
+  mask-image: linear-gradient(90deg, #000 0%, transparent var(--frame-side), transparent calc(100% - var(--frame-side)), #000 100%);
+  -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent var(--frame-side), transparent calc(100% - var(--frame-side)), #000 100%);
 }
 
 .public-theme .cms-block.has-bg-image[style*='url("/images/redesign/section-bg.webp")'] {
@@ -72,6 +76,10 @@ html:has(.public-theme) {
 
 .public-theme .cms-block {
   background-color: transparent;
+}
+
+:where(.public-theme .cms-block) p {
+  max-width: var(--layout-measure, 68ch);
 }
 
 .public-theme .cms-block :is(
@@ -154,10 +162,14 @@ body .public-theme .cms-block .service-panel:focus-within {
       ),
       radial-gradient(ellipse 46% 38% at 6% 18%, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0) 70%),
       radial-gradient(ellipse 46% 38% at 94% 18%, rgba(0, 122, 255, 0.1), rgba(0, 122, 255, 0) 70%);
-    background-size: 22vw 100%, 22vw 100%, 100% 100%, 100% 100%;
+    --frame-side: min(
+      clamp(3rem, 14vw, 4.5rem),
+      calc((100% - min(var(--layout-max), calc(100% - 2 * var(--layout-gutter)))) / 2 + 2rem)
+    );
+    background-size: var(--frame-side) 100%, var(--frame-side) 100%, 100% 100%, 100% 100%;
     opacity: 0.92;
-    mask-image: linear-gradient(90deg, #000 0%, transparent 22vw, transparent calc(100% - 22vw), #000 100%);
-    -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent 22vw, transparent calc(100% - 22vw), #000 100%);
+    mask-image: linear-gradient(90deg, #000 0%, transparent var(--frame-side), transparent calc(100% - var(--frame-side)), #000 100%);
+    -webkit-mask-image: linear-gradient(90deg, #000 0%, transparent var(--frame-side), transparent calc(100% - var(--frame-side)), #000 100%);
   }
 }
 

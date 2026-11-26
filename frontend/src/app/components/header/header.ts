@@ -340,7 +340,7 @@ export class Header implements AfterViewInit, OnDestroy {
   }
 
   private isMobileViewport(): boolean {
-    return typeof window !== 'undefined' && window.innerWidth <= 900;
+    return typeof window !== 'undefined' && window.innerWidth <= 1023;
   }
 
   private scheduleHoverClose(): void {

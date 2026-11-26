@@ -55,23 +55,23 @@
               @if (!visibleIndices().length) {
                 <p class="clients-empty">Aún no cargamos logos de este rubro.</p>
               } @else {
-                <div class="studio-grid clients-cards" [cmsList]="path(listPath())">
+                <div class="clients-cards" [cmsList]="path(listPath())">
                   @for (i of visibleIndices(); track i) {
                     @let item = items()[i];
                     @if (hasUrl(item['url']) && internal(item['url'])) {
-                      <app-cyber-card class="span-3 client-tile">
+                      <app-cyber-card class="client-tile">
                         <a class="client-tile-link" [routerLink]="clientHref(item['url'])">
                           <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
                         </a>
                       </app-cyber-card>
                     } @else if (hasUrl(item['url'])) {
-                      <app-cyber-card class="span-3 client-tile">
+                      <app-cyber-card class="client-tile">
                         <a class="client-tile-link" [href]="item['url']" target="_blank" rel="noopener noreferrer">
                           <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
                         </a>
                       </app-cyber-card>
                     } @else {
-                      <app-cyber-card class="span-3 client-tile">
+                      <app-cyber-card class="client-tile">
                         <div class="client-tile-link">
                           <ng-container *ngTemplateOutlet="cardInner; context: { item: item, i: i }"></ng-container>
                         </div>

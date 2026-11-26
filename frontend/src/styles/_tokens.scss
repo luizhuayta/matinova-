@@ -98,6 +98,10 @@
 }
 
 .public-theme {
+  --layout-max: 1360px;
+  --layout-gutter: clamp(1.25rem, 4vw, 4rem);
+  --layout-measure: 68ch;
+
   color-scheme: dark;
   background: var(--dt-bg);
   color: var(--dt-text);

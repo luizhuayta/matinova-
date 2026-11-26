@@ -2,11 +2,6 @@
 
 @use '../../../../styles/bp' as *;
 
-.extra-block .extra-inner {
-  width: min(1120px, calc(100% - 2.5rem));
-  margin-inline: auto;
-}
-
 .extra-clients {
   padding: var(--space-48) 0 var(--space-64);
 }
@@ -20,7 +15,7 @@
 }
 
 .extra-clients .extra-head p {
-  max-width: 48ch;
+  max-width: var(--layout-measure, 68ch);
   color: var(--ink-700);
 }
 
@@ -129,9 +124,8 @@
 
 .extra-block .clients-cards {
   display: grid;
-  grid-template-columns: repeat(12, minmax(0, 1fr));
-  column-gap: var(--gutter);
-  row-gap: var(--gutter);
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--gutter);
 }
 
 .client-tile {
@@ -261,11 +255,6 @@
   background: var(--surface-50);
 }
 
-.extra-faq .extra-inner {
-  width: min(1120px, calc(100% - 2.5rem));
-  margin-inline: auto;
-}
-
 .extra-faq .extra-head {
   margin-bottom: var(--space-32);
 }
@@ -351,14 +340,19 @@
 }
 
 @include down(900px) {
-  .extra-block .extra-inner,
-  .extra-faq .extra-inner {
-    width: min(1120px, calc(100% - 1.5rem));
+  .extra-block .clients-cards {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .client-sector {
     grid-template-columns: 1fr;
     min-height: 0;
+  }
+}
+
+@include down(680px) {
+  .extra-block .clients-cards {
+    grid-template-columns: 1fr;
   }
 }
 

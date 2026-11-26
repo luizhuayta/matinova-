@@ -56,7 +56,6 @@
 
 .service-panel--photo .service-panel-copy {
   width: 70%;
-  max-width: 30rem;
   padding-inline-end: 0;
 }
 
@@ -76,6 +75,7 @@
 
 .service-panel-copy p {
   margin: 0 0 0.75rem;
+  max-width: var(--layout-measure, 68ch);
   color: var(--cyber-text);
   font-size: 0.94rem;
   line-height: 1.55;

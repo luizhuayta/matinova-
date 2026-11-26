@@ -2,6 +2,19 @@
 
 @use '../../../../styles/bp' as *;
 
+.cms-block .container,
+.cms-block app-page-header .cyber-page-header__inner,
+.extra-block .extra-inner,
+.form-shell,
+.legal-shell {
+  width: min(var(--layout-max, 1360px), calc(100% - 2 * var(--layout-gutter, clamp(1.25rem, 4vw, 4rem))));
+  margin-inline: auto;
+}
+
+.cms-block .cyber-page-header__text {
+  max-width: var(--layout-measure, 68ch);
+}
+
 .cms-blocks {
   display: grid;
 }
@@ -157,8 +170,8 @@
 .innovative-grid,
 .testimonials-grid {
   display: grid;
-  grid-template-columns: 0.9fr 1.1fr;
-  gap: 2rem;
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: var(--layout-gutter, clamp(1.25rem, 4vw, 4rem));
   align-items: center;
 }
 
@@ -174,7 +187,8 @@
 }
 
 .legal-shell .content-section {
-  max-width: var(--measure);
+  max-width: var(--layout-measure, 68ch);
+  margin-inline: auto;
   color: var(--ink-900);
   overflow-wrap: anywhere;
 }
@@ -207,6 +221,7 @@
 
 .map-frame {
   background: var(--surface-100);
+  inline-size: 100%;
   min-height: 320px;
   border-radius: var(--radius-md);
 }
@@ -237,7 +252,7 @@
 
 .map-facade-address {
   color: var(--text-on-dark);
-  max-width: 52ch;
+  max-width: min(100%, var(--layout-measure, 68ch));
   line-height: 1.55;
 }
 
@@ -337,7 +352,7 @@
   margin: 0;
   padding: 0 var(--space-24) var(--space-24);
   color: var(--ink-700);
-  max-width: 68ch;
+  max-width: var(--layout-measure, 68ch);
 }
 
 @include down(900px) {
@@ -359,7 +374,7 @@
 .clients-cards,
 .clients-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
   gap: 0.8rem;
 }
 
@@ -550,7 +565,7 @@
   font-size: var(--text-18);
   line-height: 1.5;
   margin: 1rem 0 0;
-  max-width: 52ch;
+  max-width: var(--layout-measure, 68ch);
 }
 
 .dark-points {
@@ -763,12 +778,6 @@
   .premium-home .t-card:hover,
   .premium-home .public-btn:hover {
     transform: none;
-  }
-}
-
-@include down(768px) {
-  .premium-home .container {
-    width: min(1120px, calc(100% - 1.5rem));
   }
 }
 

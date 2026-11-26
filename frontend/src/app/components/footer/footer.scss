@@ -22,7 +22,7 @@
 .footer-grid {
   position: relative;
   z-index: 1;
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(var(--layout-max, 1120px), calc(100% - 2 * var(--layout-gutter, 1.25rem)));
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(12, minmax(0, 1fr));
@@ -191,7 +191,7 @@
 .footer-bottom {
   position: relative;
   z-index: 1;
-  width: min(1120px, calc(100% - 2.5rem));
+  width: min(var(--layout-max, 1120px), calc(100% - 2 * var(--layout-gutter, 1.25rem)));
   margin: var(--space-48) auto var(--space-24);
   padding: var(--space-16) 0 0;
   border-top: 1px solid var(--border-onDark);
