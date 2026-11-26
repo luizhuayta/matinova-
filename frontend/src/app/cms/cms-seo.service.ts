@@ -37,7 +37,11 @@ export class CmsSeoService {
     const title = String(
       seo['title'] || page['title'] || siteSeo['title'] || site['logoAlt'] || 'Matt Innova Solution'
     );
-    const description = String(seo['description'] || siteSeo['description'] || footer['desc'] || '');
+    const defaultDesc =
+      locale === 'en'
+        ? '30 years implementing software, hardware and IT operations for companies and schools in Peru.'
+        : '30 años implementando software, hardware y operación TI para empresas y entidades educativas en Perú.';
+    const description = String(seo['description'] || siteSeo['description'] || footer['desc'] || defaultDesc);
     const image = String(seo['image'] || siteSeo['image'] || site['logo'] || 'logo.svg');
     const path = this.locales.prefix(pathForSlug(slug), locale);
     const origin = typeof location !== 'undefined' ? location.origin : '';

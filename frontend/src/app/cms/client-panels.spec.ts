@@ -3,6 +3,7 @@ import {
   clientCategoryLabel,
   clientCountLabel,
   clientSubIcon,
+  clientSubLabel,
   groupClientItems,
 } from './client-panels';
 import { activeCmsLocale } from './locale.service';
@@ -91,5 +92,16 @@ describe('groupClientItems', () => {
     activeCmsLocale.set('en');
     expect(clientCategoryLabel('alianzas')).toBe('Alliances');
     expect(clientCountLabel('alianzas', 3)).toBe('3 alliances');
+  });
+
+  it('traduce subcategorías de clientes en EN y mantiene íconos en ambos idiomas', () => {
+    expect(clientSubLabel('Salud y Farmacia', 'es')).toBe('Salud y Farmacia');
+    expect(clientSubLabel('Salud y Farmacia', 'en')).toBe('Health & Pharmacy');
+    expect(clientSubLabel('Tecnología y Software', 'en')).toBe('Technology & Software');
+    expect(clientSubLabel('Corporativas', 'en')).toBe('Corporate');
+    expect(clientSubLabel('CEBA', 'en')).toBe('CEBA');
+    expect(clientSubIcon('Health & Pharmacy')).toBe('hospital');
+    expect(clientSubIcon('Technology & Software')).toBe('laptop');
+    expect(clientSubIcon('Corporate')).toBe('building');
   });
 });

@@ -1,19 +1,31 @@
 import { CommonModule } from '@angular/common';
-import { Component, ChangeDetectorRef, ViewChild, ElementRef, OnDestroy, computed, inject } from '@angular/core';
+import { Component, ChangeDetectorRef, ViewChild, ElementRef, OnDestroy, computed, effect, inject } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChatLink, ChatService, ChatbotMode } from '../../services/chat';
 import { ChatDataService, ChatMessage } from '../../services/chat-data.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { CmsContentService } from '../../cms/cms-content.service';
-import { LocaleService } from '../../cms/locale.service';
-import { CHATBOT_WELCOME_LINKS, publicPathLabel } from '../../cms/cms-routes';
+import { CmsLocale, LocaleService } from '../../cms/locale.service';
+import { CHATBOT_WELCOME_LINKS, CHATBOT_WELCOME_LINKS_EN, publicPathLabel } from '../../cms/cms-routes';
 
-const WELCOME: ChatMessage = {
-  text: 'Hola. Soy el asistente de *Matt Innova Solution*. Puedo orientarte sobre servicios, clientes, contacto y el libro de reclamaciones.',
-  type: 'bot',
-  links: [...CHATBOT_WELCOME_LINKS],
-};
+function welcomeMessage(locale: CmsLocale): ChatMessage {
+  if (locale === 'en') {
+    return {
+      text: 'Hello. I am the *Matt Innova Solution* assistant. I can guide you to our services, clients, contact form and claims book.',
+      type: 'bot',
+      links: [...CHATBOT_WELCOME_LINKS_EN],
+    };
+  }
+  return {
+    text: 'Hola. Soy el asistente de *Matt Innova Solution*. Puedo orientarte sobre servicios, clientes, contacto y el libro de reclamaciones.',
+    type: 'bot',
+    links: [...CHATBOT_WELCOME_LINKS],
+  };
+}
+
+const WELCOME_ES_TEXT = welcomeMessage('es').text;
+const WELCOME_EN_TEXT = welcomeMessage('en').text;
 
 const LOGO_FALLBACK = 'logo.svg';
 
@@ -43,8 +55,13 @@ export class ChatbotComponent implements OnDestroy {
   userInput = '';
   isTyping = false;
   hasInteracted = false;
+  isEn = computed(() => this.locales.locale() === 'en');
 
-  suggestions = ['¿Qué servicios ofrecen?', 'Nuestros clientes', 'ERP y precios', 'Contacto'];
+  suggestions = computed(() =>
+    this.isEn()
+      ? ['What services do you offer?', 'Our clients', 'ERP and pricing', 'Contact']
+      : ['¿Qué servicios ofrecen?', 'Nuestros clientes', 'ERP y precios', 'Contacto']
+  );
 
   get hasUserMessage(): boolean {
     return this.messages.some((msg) => msg.type === 'user');
@@ -54,7 +71,7 @@ export class ChatbotComponent implements OnDestroy {
     return this.userInput.trim().length > 0 && !this.isTyping;
   }
 
-  messages: ChatMessage[] = [{ ...WELCOME, links: [...(WELCOME.links ?? [])] }];
+  messages: ChatMessage[] = [welcomeMessage(this.locales.locale())];
 
   mode = computed<ChatbotMode>(() => (this.cms.site()['chatbotMode'] === 'ia' ? 'ia' : 'clasico'));
 
@@ -70,6 +87,17 @@ export class ChatbotComponent implements OnDestroy {
     } else {
       this.chatData.addMessage(this.messages[0]);
     }
+    effect(() => {
+      const locale = this.locales.locale();
+      if (this.messages.length === 1 && this.messages[0].type === 'bot') {
+        const currentText = this.messages[0].text;
+        if (currentText === WELCOME_ES_TEXT || currentText === WELCOME_EN_TEXT) {
+          this.messages = [welcomeMessage(locale)];
+          this.chatData.clearMessages();
+          this.chatData.addMessage(this.messages[0]);
+        }
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -159,7 +187,7 @@ export class ChatbotComponent implements OnDestroy {
   }
 
   private friendlyPath(path: string): string {
-    return publicPathLabel(path);
+    return publicPathLabel(path, this.locales.locale());
   }
 
   /** Delegación de clics en enlaces internos renderizados dentro del mensaje. */
@@ -196,7 +224,7 @@ export class ChatbotComponent implements OnDestroy {
 
   clearChat(): void {
     this.chatData.clearMessages();
-    this.messages = [{ ...WELCOME, links: [...(WELCOME.links ?? [])] }];
+    this.messages = [welcomeMessage(this.locales.locale())];
     this.chatData.addMessage(this.messages[0]);
     this.scrollToBottom();
   }
@@ -232,12 +260,15 @@ export class ChatbotComponent implements OnDestroy {
       },
       error: () => {
         this.isTyping = false;
+        const en = this.isEn();
         this.push({
-          text: 'No pude responder ahora. Puedes ver nuestros servicios o escribirnos desde contacto.',
+          text: en
+            ? 'I could not respond right now. You can browse our services or write to us via contact.'
+            : 'No pude responder ahora. Puedes ver nuestros servicios o escribirnos desde contacto.',
           type: 'bot',
           links: [
-            { label: 'Servicios', path: '/servicios' },
-            { label: 'Contacto', path: '/contacto' }
+            { label: en ? 'Services' : 'Servicios', path: '/servicios' },
+            { label: en ? 'Contact' : 'Contacto', path: '/contacto' }
           ]
         });
         this.cdr.detectChanges();

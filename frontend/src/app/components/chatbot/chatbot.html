@@ -5,14 +5,14 @@
   #chatFab
   (click)="toggleChat()"
   *ngIf="!isOpen"
-  aria-label="Abrir asistente MIS-Bot"
+  [attr.aria-label]="isEn() ? 'Open MIS-Bot assistant' : 'Abrir asistente MIS-Bot'"
 >
   <img [src]="siteLogo()" alt="" (error)="onImgError($event)" width="28" height="28" />
   <span class="fab-dot" *ngIf="!hasInteracted" aria-hidden="true">1</span>
 </button>
 
 <!-- Ventana de chat -->
-<div class="chat-window" [class.open]="isOpen" role="dialog" aria-modal="true" aria-label="Asistente MIS-Bot" [attr.aria-hidden]="!isOpen" (keydown.escape)="closeFromKeyboard()">
+<div class="chat-window" [class.open]="isOpen" role="dialog" aria-modal="true" [attr.aria-label]="isEn() ? 'MIS-Bot assistant' : 'Asistente MIS-Bot'" [attr.aria-hidden]="!isOpen" (keydown.escape)="closeFromKeyboard()">
   <!-- Cabecera -->
   <div class="chat-header">
     <div class="bot-identity">
@@ -22,14 +22,14 @@
       </div>
       <div class="bot-meta">
         <strong>MIS-Bot</strong>
-        <span class="bot-status">En línea · responde al instante</span>
+        <span class="bot-status">{{ isEn() ? 'Online · instant replies' : 'En línea · responde al instante' }}</span>
       </div>
     </div>
     <div class="header-actions">
-      <button type="button" class="icon-btn" (click)="clearChat()" title="Limpiar conversación" aria-label="Limpiar conversación">
+      <button type="button" class="icon-btn" (click)="clearChat()" [title]="isEn() ? 'Clear conversation' : 'Limpiar conversación'" [attr.aria-label]="isEn() ? 'Clear conversation' : 'Limpiar conversación'">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg>
       </button>
-      <button type="button" class="icon-btn close" (click)="toggleChat()" title="Cerrar" aria-label="Cerrar chat">
+      <button type="button" class="icon-btn close" (click)="toggleChat()" [title]="isEn() ? 'Close' : 'Cerrar'" [attr.aria-label]="isEn() ? 'Close chat' : 'Cerrar chat'">
         <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
@@ -62,11 +62,11 @@
           </button>
         </div>
         <div class="feedback" *ngIf="msg.type === 'bot' && msg.showFeedback && !msg.feedback">
-          <span>¿Te sirvió?</span>
-          <button type="button" class="feedback-btn" (click)="rateMessage(i, 'up')" aria-label="Respuesta útil"><i class="bi bi-hand-thumbs-up"></i></button>
-          <button type="button" class="feedback-btn" (click)="rateMessage(i, 'down')" aria-label="Respuesta poco útil"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span>{{ isEn() ? 'Was this helpful?' : '¿Te sirvió?' }}</span>
+          <button type="button" class="feedback-btn" (click)="rateMessage(i, 'up')" [attr.aria-label]="isEn() ? 'Helpful response' : 'Respuesta útil'"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="feedback-btn" (click)="rateMessage(i, 'down')" [attr.aria-label]="isEn() ? 'Not helpful response' : 'Respuesta poco útil'"><i class="bi bi-hand-thumbs-down"></i></button>
         </div>
-        <p class="feedback-done" *ngIf="msg.feedback">Gracias por el comentario</p>
+        <p class="feedback-done" *ngIf="msg.feedback">{{ isEn() ? 'Thanks for the feedback' : 'Gracias por el comentario' }}</p>
       </div>
     </div>
 
@@ -85,12 +85,12 @@
 
   <!-- Sugerencias (fuera del scroll, no empuja mensajes) -->
   <div class="suggestions" *ngIf="!hasUserMessage && !isTyping">
-    <span class="suggestions-label">Prueba con:</span>
+    <span class="suggestions-label">{{ isEn() ? 'Try asking:' : 'Prueba con:' }}</span>
     <div class="suggestions-row">
       <button
         type="button"
         class="suggestion-chip"
-        *ngFor="let suggestion of suggestions"
+        *ngFor="let suggestion of suggestions()"
         (click)="selectSuggestion(suggestion)"
       >
         {{ suggestion }}
@@ -104,13 +104,13 @@
       #chatInput
       [(ngModel)]="userInput"
       name="userInput"
-      placeholder="Escribe tu duda técnica..."
+      [placeholder]="isEn() ? 'Write your technical question...' : 'Escribe tu duda técnica...'"
       type="text"
       autocomplete="off"
       maxlength="500"
-      aria-label="Escribe tu mensaje"
+      [attr.aria-label]="isEn() ? 'Write your message' : 'Escribe tu mensaje'"
     />
-    <button type="submit" [disabled]="!canSend" aria-label="Enviar mensaje" title="Enviar">
+    <button type="submit" [disabled]="!canSend" [attr.aria-label]="isEn() ? 'Send message' : 'Enviar mensaje'" [title]="isEn() ? 'Send' : 'Enviar'">
       <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4 20-7z"/></svg>
     </button>
   </form>

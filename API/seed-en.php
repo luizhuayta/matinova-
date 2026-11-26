@@ -6,6 +6,7 @@ function site_seed_en(): array
     $site = site_seed();
     $site['splashTagline'] = 'IT SOLUTIONS THAT TRANSFORM';
     $site['splashLabel'] = 'LOADING…';
+    $site['founderRole'] = 'CEO and founder';
     $site['ctaText'] = 'Need a system installed, not a slide deck?';
     $site['ctaButton'] = 'Talk to an expert';
     $site['whatsappMessage'] = 'Hello Matt Innova Solution, I would like more information.';
@@ -141,9 +142,9 @@ HTML;
                     ],
                 ],
                 'contactCards' => [
-                    ['title' => 'Legal address', 'text' => 'Urb. Libertad Mz. I Lt. 5, Calle Las Moras, San Vicente de Cañete, Lima, Peru'],
-                    ['title' => 'Email', 'text' => 'contacto@mattinnovasolution.com'],
-                    ['title' => 'WhatsApp', 'text' => '+51 992 422 219'],
+                    ['title' => 'Legal address', 'text' => 'Urb. Libertad Mz. I Lt. 5, Calle Las Moras, San Vicente de Cañete, Lima, Peru', 'icon' => 'bi-geo-alt'],
+                    ['title' => 'Email', 'text' => 'contacto@mattinnovasolution.com', 'icon' => 'bi-envelope'],
+                    ['title' => 'WhatsApp', 'text' => '+51 992 422 219', 'icon' => 'bi-whatsapp'],
                 ],
                 'services' => [
                     'tag' => '',
@@ -156,7 +157,7 @@ HTML;
                         ['img' => 'imat.jpg', 'alt' => 'Management consulting', 'title' => 'Management consulting', 'text' => 'We align processes, indicators and systems so leadership sees the operation without shadow spreadsheets.', 'icon' => 'bi-graph-up', 'link' => '/servicios/consultoria'],
                         ['img' => 'saas.jpg', 'alt' => 'SaaS solutions', 'title' => 'SaaS solutions', 'text' => 'ERP, mail and cloud tools, with go-live, training and support afterwards.', 'icon' => 'bi-cloud', 'link' => '/servicios/saas'],
                         ['img' => 'hardware2026.webp', 'alt' => 'Hardware and infrastructure', 'title' => 'Hardware and infrastructure', 'text' => 'Servers, PCs and cabling sized for each site, installed and left running.', 'icon' => 'bi-pc-display', 'link' => '/servicios/hardware'],
-                        ['img' => 'software.webp', 'alt' => 'Custom software', 'title' => 'Custom software development', 'text' => 'Angular systems and APIs for processes a generic product does not cover in Peru.', 'icon' => 'bi-code-slash', 'link' => '/servicios/software'],
+                        ['img' => 'software.webp', 'alt' => 'Custom software development', 'title' => 'Custom software development', 'text' => 'Angular systems and APIs for processes a generic product does not cover in Peru.', 'icon' => 'bi-code-slash', 'link' => '/servicios/software'],
                     ],
                 ],
                 'innovative' => [
@@ -223,9 +224,9 @@ HTML;
                     ['name' => 'Pedro Alex Taya Yactayo', 'role' => 'CEO and founder', 'image' => 'taya.jpg', 'linkedin' => '', 'github' => ''],
                 ],
                 'contactCards' => [
-                    ['title' => 'Legal address', 'text' => "Urb. Libertad Mz.I Lt.5 Calle Las Moras S/N\nSan Vicente - Cañete - Lima - Peru"],
-                    ['title' => 'Email', 'text' => 'contacto@mattinnovasolution.com'],
-                    ['title' => 'WhatsApp', 'text' => '(+51) 992 422 219'],
+                    ['title' => 'Head office', 'text' => "Urb. Libertad Mz.I Lt.5 Calle Las Moras S/N\nSan Vicente - Cañete - Lima - Peru", 'icon' => 'bi-geo-alt'],
+                    ['title' => 'Email', 'text' => 'contacto@mattinnovasolution.com', 'icon' => 'bi-envelope'],
+                    ['title' => 'WhatsApp', 'text' => '+51 992 422 219', 'icon' => 'bi-whatsapp'],
                 ],
                 'videosTag' => '',
                 'videosTitle' => 'Latest on YouTube',
@@ -247,6 +248,7 @@ HTML;
                 'cards' => [
                     ['path' => '/servicios/consultoria', 'img' => 'imac.jpg', 'title' => 'IT consulting', 'text' => 'Diagnosis, architecture and an implementation plan with owners, dates and follow-through.', 'link' => 'View consulting'],
                     ['path' => '/contacto', 'img' => 'imat.jpg', 'title' => 'Management consulting', 'text' => 'We align processes, indicators and systems so leadership sees the operation without shadow spreadsheets.', 'link' => 'Ask about it'],
+                    ['path' => '/servicios/soluciones-ti', 'img' => 'imas.jpg', 'title' => 'Information technology', 'text' => 'Networks, servers, backups and monitoring so Lima and the provinces keep running.', 'link' => 'View IT solutions'],
                     ['path' => '/servicios/saas', 'img' => 'saas.jpg', 'title' => 'SaaS solutions', 'text' => 'ERP, mail and cloud tools, with go-live, training and support afterwards.', 'link' => 'View SaaS'],
                     ['path' => '/servicios/hardware', 'img' => 'hardware2026.webp', 'title' => 'Hardware and infrastructure', 'text' => 'Servers, PCs and cabling sized for each site, installed and left running.', 'link' => 'View hardware'],
                     ['path' => '/servicios/software', 'img' => 'software.webp', 'title' => 'Custom software development', 'text' => 'Angular systems and APIs for processes a generic product does not cover in Peru.', 'link' => 'View software'],
@@ -273,7 +275,8 @@ HTML;
                     ['img' => 'ecommerce.jpeg', 'title' => 'Ecommerce site', 'text' => 'Online store with hosting, domain, payment gateways, and an admin panel.'],
                     ['img' => '/windows.jpg', 'title' => 'Windows Server 2022', 'text' => 'Secure-core servers for critical workloads, managed with Windows Admin Center and Azure Arc.'],
                     ['img' => '/windows-server-azure-arc.jpg', 'title' => 'Windows Server and Azure Arc', 'text' => 'Extend the datacenter to Azure and manage servers from one control plane.'],
-                ]
+                ],
+                'en'
             ),
         ],
         'servicios-saas' => [
@@ -293,7 +296,8 @@ HTML;
                     ['img' => '/infreaestructura.jpg', 'title' => 'Technology infrastructure', 'text' => 'Code on Bitbucket and GitHub, cloud on DigitalOcean, security with Cloudflare.'],
                     ['img' => '/erp.jpg', 'title' => 'ERP software', 'text' => 'Commercial ERP for multiple companies, users, and branches.'],
                     ['img' => '/modulos.jpg', 'title' => 'General modules', 'text' => 'Sales, purchasing, cash, products, warehouse, and reports.'],
-                ]
+                ],
+                'en'
             ),
         ],
         'servicios-hardware' => [
@@ -309,7 +313,8 @@ HTML;
                 [
                     ['img' => '/ServidoresHPE.jpg', 'title' => 'HPE ProLiant servers', 'text' => 'Compute for hybrid environments, including AI workloads.'],
                     ['img' => '/INFRAESTRUCTURAIT.jpg', 'title' => 'Lenovo IT infrastructure', 'text' => 'Lenovo ThinkSystem servers for reliable uptime.'],
-                ]
+                ],
+                'en'
             ),
         ],
         'servicios-consultoria' => [
@@ -326,7 +331,8 @@ HTML;
                     ['img' => '/expertos.jpg', 'title' => 'IT specialists', 'text' => 'More than 30 years installing networks, systems and processes in Peru.'],
                     ['img' => '/personalizado.jpg', 'title' => 'Scope per site', 'text' => 'Owners, dates and follow-through; consulting does not end with the report.'],
                     ['img' => '/resultados.jpg', 'title' => 'Go-live', 'text' => 'The plan closes when the change is in operation, not in a slide deck.'],
-                ]
+                ],
+                'en'
             ),
         ],
         'servicios-soluciones-ti' => [
@@ -343,7 +349,8 @@ HTML;
                     ['img' => '/integridad.jpg', 'title' => 'Coverage', 'text' => 'Networks, mail and backups in one implementation plan.'],
                     ['img' => '/adaptabilidad.jpg', 'title' => 'Room to grow', 'text' => 'Infrastructure scales with branches, not with emergency recabling.'],
                     ['img' => '/transformacion_digital.jpg', 'title' => 'Digital operations', 'text' => 'Microsoft 365 or Workspace on the network you already have.'],
-                ]
+                ],
+                'en'
             ),
         ],
         'contacto' => [

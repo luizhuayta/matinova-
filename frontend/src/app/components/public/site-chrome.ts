@@ -52,6 +52,7 @@ export class SiteChrome implements OnInit, OnDestroy {
   }
 
   site = computed(() => this.cms.site());
+  isEn = computed(() => this.locales.locale() === 'en');
   showSplash = computed(() => this.site()['showSplash'] !== false && this.showLoading() && !this.editor.editMode());
   showCta = computed(() => this.site()['showCtaBanner'] !== false && this.showCtaBanner());
   showCookies = computed(() => this.showCookieBanner() && !this.editor.editMode());

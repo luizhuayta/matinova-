@@ -7,6 +7,7 @@ import { CmsTextDirective } from '../../cms/cms-text.directive';
 import { CmsImageDirective } from '../../cms/cms-image.directive';
 import { API_URL, JsonMap } from '../../cms/cms.models';
 import { pageBlocks, propsPath } from '../../cms/block-registry';
+import { LocaleService } from '../../cms/locale.service';
 import { AnalyticsService } from '../../services/analytics.service';
 import { PageHeader } from '../ui/page-header';
 import { CyberCard } from '../ui/cyber-card';
@@ -24,7 +25,9 @@ export class LibroReclamacionesComponent {
   private http = inject(HttpClient);
   private cms = inject(CmsContentService);
   private analytics = inject(AnalyticsService);
+  private locales = inject(LocaleService);
   readonly prefix = input('');
+  isEn = computed(() => this.locales.locale() === 'en');
   page = computed(() => this.cms.pages()['libro-reclamaciones'] ?? {});
   props = computed(() => {
     const given = this.prefix();
@@ -40,7 +43,10 @@ export class LibroReclamacionesComponent {
   submitAttempted = false;
 
   submitLabel(): string {
-    return this.isLoading ? 'Enviando...' : String(this.props()['submitLabel'] || 'Enviar Reclamación Virtual');
+    if (this.isLoading) {
+      return this.isEn() ? 'Sending...' : 'Enviando...';
+    }
+    return String(this.props()['submitLabel'] || (this.isEn() ? 'Send virtual claim' : 'Enviar Reclamación Virtual'));
   }
   @ViewChild('reclamacionesForm') private libroForm?: NgForm;
   @ViewChild('errorSummary') private errorSummary?: ElementRef<HTMLElement>;
@@ -84,6 +90,7 @@ export class LibroReclamacionesComponent {
       return;
     }
     this.isLoading = true;
+    const en = this.isEn();
     const { default: Swal } = await import('sweetalert2');
     this.http.post<{ ticket?: string; mailSent?: boolean; message?: string }>(`${API_URL}/reclamaciones`, this.reclamo).subscribe({
       next: (response) => {
@@ -91,14 +98,16 @@ export class LibroReclamacionesComponent {
         this.analytics.trackLibroReclamacionesSubmit();
         const ticket = response.ticket ? ` Ticket ${response.ticket}.` : '';
         const mail = response.mailSent
-          ? ' Se envió una copia a su correo.'
-          : ' El registro quedó en el panel; el correo no se pudo enviar.';
+          ? (en ? ' A copy was sent to your email.' : ' Se envió una copia a su correo.')
+          : (en
+              ? ' The record was saved in the panel; the email could not be sent.'
+              : ' El registro quedó en el panel; el correo no se pudo enviar.');
         Swal.fire({
-          title: '¡Reclamación Registrada!',
-          text: `Su caso ha sido guardado.${ticket}${mail}`,
+          title: en ? 'Claim registered!' : '¡Reclamación Registrada!',
+          text: `${en ? 'Your case has been saved.' : 'Su caso ha sido guardado.'}${ticket}${mail}`,
           icon: 'success',
           confirmButtonColor: '#0066ff',
-          confirmButtonText: 'Aceptar',
+          confirmButtonText: en ? 'OK' : 'Aceptar',
         });
         this.limpiarFormulario();
       },
@@ -106,10 +115,12 @@ export class LibroReclamacionesComponent {
         this.isLoading = false;
         Swal.fire({
           title: 'Error',
-          text: 'No se pudo registrar la reclamación en el servidor. Intente más tarde.',
+          text: en
+            ? 'Could not register the claim on the server. Please try again later.'
+            : 'No se pudo registrar la reclamación en el servidor. Intente más tarde.',
           icon: 'error',
           confirmButtonColor: '#dc2626',
-          confirmButtonText: 'Cerrar',
+          confirmButtonText: en ? 'Close' : 'Cerrar',
         });
       },
     });

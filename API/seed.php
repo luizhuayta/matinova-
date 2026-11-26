@@ -158,7 +158,7 @@ HTML;
                     ],
                 ],
                 'contactCards' => [
-                    ['title' => 'Domicilio legal', 'text' => 'Urb. Libertad Mz. I Lt. 5, Calle Las Moras, San Vicente de Cañete, Lima, Perú', 'icon' => 'bi-geo-alt'],
+                    ['title' => 'Domicilio legal', 'text' => 'Urb. Libertad Mz.I Lt.5 Calle Las Moras S/N San Vicente - Cañete - Lima - Perú', 'icon' => 'bi-geo-alt'],
                     ['title' => 'Correo', 'text' => 'contacto@mattinnovasolution.com', 'icon' => 'bi-envelope'],
                     ['title' => 'WhatsApp', 'text' => '+51 992 422 219', 'icon' => 'bi-whatsapp'],
                 ],
@@ -285,7 +285,7 @@ HTML;
             'title' => 'Software',
             'content' => service_page_seed(
                 '/software-banner.webp',
-                'Software Banner',
+                'Banner de Software',
                 '/software.webp',
                 'Persona programando',
                 'Servicio',
@@ -295,7 +295,7 @@ HTML;
                     ['img' => '/microsoft3651.webp', 'title' => 'Microsoft 365', 'text' => 'Nuestros profesionales son expertos en Microsoft 365 y cuentan con experiencia en proyectos de implementación de ecosistemas colaborativos digitales.'],
                     ['img' => '/dspace.jpg', 'title' => 'Repositorio de Investigación', 'text' => 'Ofrecemos instalación de DSpace en VPS, cumpliendo normativas RENATI y CONCYTEC, con personalización, búsquedas avanzadas SOLR, y estadísticas AWStat.'],
                     ['img' => '/erp.jpg', 'title' => 'Software ERP', 'text' => 'Ofrecemos software de ERP de gestión comercial, multiempresa, multiusuario y multisucursales. Todo lo que necesitas para comenzar a vender y crecer de inmediato.'],
-                    ['img' => 'ecommerce.jpeg', 'title' => 'Pagina Ecommerce para tu negocio', 'text' => 'Diseñamos y desarrollamos tu tienda virtual a medida. Incluye hosting, dominio, pasarelas de pago seguras y un panel autoadministrable para que gestiones tus productos y vendas en línea sin complicaciones.'],
+                    ['img' => 'ecommerce.jpeg', 'title' => 'Página Ecommerce para tu negocio', 'text' => 'Diseñamos y desarrollamos tu tienda virtual a medida. Incluye hosting, dominio, pasarelas de pago seguras y un panel autoadministrable para que gestiones tus productos y vendas en línea sin complicaciones.'],
                     ['img' => '/windows.jpg', 'title' => 'Windows Server 2022', 'text' => 'Protegemos contra amenazas con un servidor de núcleo seguro y gestionamos cargas críticas con 48 TB de memoria y 2048 núcleos. Administra con Windows Admin Center y Azure Arc.'],
                     ['img' => '/windows-server-azure-arc.jpg', 'title' => 'Windows Server y Azure Arc', 'text' => 'Extendemos tu centro de datos a Azure para mejorar la eficiencia. Administramos servidores y modernizamos aplicaciones con Azure Kubernetes Service en Azure Stack HCI.'],
                 ]
@@ -305,7 +305,7 @@ HTML;
             'title' => 'SaaS',
             'content' => service_page_seed(
                 '/saas2026.webp',
-                'Saas Banner',
+                'Banner de SaaS',
                 '/saas.jpg',
                 'SAAS',
                 'Servicio',
@@ -316,7 +316,7 @@ HTML;
                     ['img' => '/dspace.jpg', 'title' => 'Repositorio de Investigación', 'text' => 'Ofrecemos instalación de DSpace en VPS, cumpliendo normativas RENATI y CONCYTEC, con personalización, búsquedas avanzadas SOLR, y estadísticas AWStat.'],
                     ['img' => '/creacion.jpg', 'title' => 'Creación de página web', 'text' => 'Ofrecemos planes para crear tu página web, con dominio incluido y funciones como subdominios y correos corporativos ilimitados, adaptados a tus necesidades.'],
                     ['img' => '/infreaestructura.jpg', 'title' => 'Infraestructura tecnológica', 'text' => 'Se apoya en plataformas líderes como Bitbucket y GitHub para la gestión de código, DigitalOcean para soluciones en la nube, y Cloudflare para optimizar la seguridad.'],
-                    ['img' => '/erp.jpg', 'title' => 'Software ERP', 'text' => 'Ofrecemos software de ERP de gestión comercial, multiempresa, multiusuario y multi sucursales. Todo lo que necesitas para comenzar a vender y crecer de inmediato.'],
+                    ['img' => '/erp.jpg', 'title' => 'Software ERP', 'text' => 'Ofrecemos software de ERP de gestión comercial, multiempresa, multiusuario y multisucursales. Todo lo que necesitas para comenzar a vender y crecer de inmediato.'],
                     ['img' => '/modulos.jpg', 'title' => 'Módulos Generales', 'text' => 'Brindamos módulos completos para Ventas, Compras, Caja, Productos, Almacén y Reportes. Administra eficientemente cada área y personaliza según tus necesidades.'],
                 ]
             ),
@@ -325,7 +325,7 @@ HTML;
             'title' => 'Hardware',
             'content' => service_page_seed(
                 '/hardware2026.webp',
-                'Hardware Banner',
+                'Banner de Hardware',
                 '/hardware2026.webp',
                 'Hardware',
                 'Servicio',
@@ -341,7 +341,7 @@ HTML;
             'title' => 'Consultoría',
             'content' => service_page_seed(
                 '/consultoria.webp',
-                'consultoria Banner',
+                'Banner de Consultoría',
                 '/consultoria.jpg',
                 'Consultoría TI',
                 'Servicio',
@@ -358,7 +358,7 @@ HTML;
             'title' => 'Soluciones TI',
             'content' => service_page_seed(
                 '/soluciones.webp',
-                'soluciones Banner',
+                'Banner de Soluciones TI',
                 '/sol_ti.jpg',
                 'Soluciones TI',
                 'Servicio',
@@ -444,14 +444,15 @@ HTML;
     ];
 }
 
-function service_page_seed(string $hero, string $heroAlt, string $image, string $imageAlt, string $label, string $title, string $text, array $reasons): array
+function service_page_seed(string $hero, string $heroAlt, string $image, string $imageAlt, string $label, string $title, string $text, array $reasons, string $locale = 'es'): array
 {
+    $isEn = $locale === 'en';
     foreach ($reasons as $i => $reason) {
         if (!is_array($reason)) {
             continue;
         }
         if (!isset($reason['alt']) || trim((string) $reason['alt']) === '') {
-            $reasons[$i]['alt'] = (string) ($reason['title'] ?? 'Motivo');
+            $reasons[$i]['alt'] = (string) ($reason['title'] ?? ($isEn ? 'Reason' : 'Motivo'));
         }
     }
     return [
@@ -462,19 +463,15 @@ function service_page_seed(string $hero, string $heroAlt, string $image, string 
         'label' => $label,
         'title' => $title,
         'text' => $text,
-        'cta' => 'Hablar con un experto',
+        'cta' => $isEn ? 'Talk to an expert' : 'Hablar con un experto',
         'reasonsSubtitle' => '',
-        'reasonsTitle' => 'Qué queda instalado',
+        'reasonsTitle' => $isEn ? 'What gets installed' : 'Qué queda instalado',
         'reasons' => $reasons,
     ];
 }
 
 function seed_database(): void
 {
-    db_init();
-    if (function_exists('db_migrate')) {
-        db_migrate();
-    }
     $pdo = db();
 
     $user = cfg('ADMIN_USER', 'admin');

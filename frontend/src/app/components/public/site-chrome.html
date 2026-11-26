@@ -1,5 +1,5 @@
 @if (showSplash()) {
-  <div class="loading-screen" role="dialog" aria-label="Cargando Matt Innova Solution" tabindex="0" (click)="dismissSplash()" (keydown.escape)="dismissSplash()">
+  <div class="loading-screen" role="dialog" [attr.aria-label]="isEn() ? 'Loading Matt Innova Solution' : 'Cargando Matt Innova Solution'" tabindex="0" (click)="dismissSplash()" (keydown.escape)="dismissSplash()">
     <div class="splash-atmosphere" aria-hidden="true">
       <div class="splash-core"></div>
       <div class="splash-flare"></div>
@@ -72,8 +72,8 @@
             decoding="async">
         }
       </div>
-      <p class="loading-tagline" cmsText="splashTagline" cmsScope="site">SOLUCIONES TI QUE TRANSFORMAN</p>
-      <p class="loading-label" cmsText="splashLabel" cmsScope="site">CARGANDO…</p>
+      <p class="loading-tagline" cmsText="splashTagline" cmsScope="site">{{ isEn() ? 'IT SOLUTIONS THAT TRANSFORM' : 'SOLUCIONES TI QUE TRANSFORMAN' }}</p>
+      <p class="loading-label" cmsText="splashLabel" cmsScope="site">{{ isEn() ? 'LOADING…' : 'CARGANDO…' }}</p>
       <span class="loading-bar" aria-hidden="true"><span></span></span>
     </div>
   </div>
@@ -84,12 +84,12 @@
     <div class="container cta-content">
       <p class="cta-text" cmsText="ctaText" cmsScope="site"></p>
       <div class="cta-actions">
-        <a [href]="'mailto:' + (site()['ctaEmail'] || '')" class="cta-email" [attr.aria-label]="'Escribir a ' + (site()['ctaEmail'] || 'Matt Innova')">
+        <a [href]="'mailto:' + (site()['ctaEmail'] || '')" class="cta-email" [attr.aria-label]="(isEn() ? 'Email ' : 'Escribir a ') + (site()['ctaEmail'] || 'Matt Innova')">
           <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#mail"></use></svg>
           <span cmsText="ctaEmail" cmsScope="site"></span>
         </a>
-        <a publicBtn class="cta-button" [routerLink]="contactPath()" [localeLink]="'/contacto'" cmsText="ctaButton" cmsScope="site" aria-label="Hablar con un experto de Matt Innova"></a>
-        <button class="cta-close" type="button" (click)="closeCtaBanner()" aria-label="Cerrar aviso">
+        <a publicBtn class="cta-button" [routerLink]="contactPath()" [localeLink]="'/contacto'" cmsText="ctaButton" cmsScope="site" [attr.aria-label]="isEn() ? 'Talk to a Matt Innova expert' : 'Hablar con un experto de Matt Innova'"></a>
+        <button class="cta-close" type="button" (click)="closeCtaBanner()" [attr.aria-label]="isEn() ? 'Close notice' : 'Cerrar aviso'">
           <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#x"></use></svg>
         </button>
       </div>
@@ -98,7 +98,7 @@
 }
 
 @if (showCookies()) {
-  <div class="cookie-banner" role="dialog" aria-modal="false" aria-label="Aviso de cookies" aria-describedby="cookie-description" (keydown.escape)="rejectCookies()">
+  <div class="cookie-banner" role="dialog" aria-modal="false" [attr.aria-label]="isEn() ? 'Cookie notice' : 'Aviso de cookies'" aria-describedby="cookie-description" (keydown.escape)="rejectCookies()">
     <div #cookieContent class="container cookie-content studio-dark">
       <p id="cookie-description" class="cookie-text" cmsText="cookieText" cmsScope="site"></p>
       <div class="cookie-actions">

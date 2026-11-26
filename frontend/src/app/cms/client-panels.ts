@@ -49,33 +49,74 @@ export const CLIENT_CATEGORY_META: Record<string, ClientCategoryMeta> = {
 
 const CLIENT_SUB_ICONS: Record<string, string> = {
   'salud y farmacia': 'hospital',
+  'health & pharmacy': 'hospital',
   automotriz: 'car',
+  automotive: 'car',
   'tecnología y software': 'laptop',
   'tecnologia y software': 'laptop',
+  'technology & software': 'laptop',
   'retail y moda': 'shopping-bag',
+  'retail & fashion': 'shopping-bag',
   agropecuario: 'sprout',
+  agriculture: 'sprout',
   'servicios y reparación': 'wrench',
   'servicios y reparacion': 'wrench',
+  'services & repair': 'wrench',
   gastronomía: 'utensils',
   gastronomia: 'utensils',
+  gastronomy: 'utensils',
   'educación y consultoría': 'graduation-cap',
   'educacion y consultoria': 'graduation-cap',
+  'education & consulting': 'graduation-cap',
   'servicios profesionales': 'briefcase',
+  'professional services': 'briefcase',
   entretenimiento: 'clapperboard',
+  entertainment: 'clapperboard',
   ceba: 'school',
   eespp: 'school',
   iespp: 'school',
   iestp: 'school',
   iei: 'school',
   'i.e. primaria/secundaria': 'school',
+  'primary & secondary schools': 'school',
   'academias y formación': 'graduation-cap',
   'academias y formacion': 'graduation-cap',
+  'academies & training': 'graduation-cap',
   ugel: 'landmark',
   corporativas: 'building',
+  corporate: 'building',
   tecnológicas: 'laptop',
   tecnologicas: 'laptop',
+  technology: 'laptop',
   gubernamentales: 'landmark',
+  government: 'landmark',
   educativas: 'school',
+  educational: 'school',
+};
+
+const CLIENT_SUB_LABELS_EN: Record<string, string> = {
+  'salud y farmacia': 'Health & Pharmacy',
+  automotriz: 'Automotive',
+  'tecnología y software': 'Technology & Software',
+  'tecnologia y software': 'Technology & Software',
+  'retail y moda': 'Retail & Fashion',
+  agropecuario: 'Agriculture',
+  'servicios y reparación': 'Services & Repair',
+  'servicios y reparacion': 'Services & Repair',
+  gastronomía: 'Gastronomy',
+  gastronomia: 'Gastronomy',
+  'educación y consultoría': 'Education & Consulting',
+  'educacion y consultoria': 'Education & Consulting',
+  'servicios profesionales': 'Professional Services',
+  entretenimiento: 'Entertainment',
+  'i.e. primaria/secundaria': 'Primary & Secondary Schools',
+  'academias y formación': 'Academies & Training',
+  'academias y formacion': 'Academies & Training',
+  corporativas: 'Corporate',
+  tecnológicas: 'Technology',
+  tecnologicas: 'Technology',
+  gubernamentales: 'Government',
+  educativas: 'Educational',
 };
 
 export interface ClientSubPanel {
@@ -149,6 +190,17 @@ export function clientCountLabel(key: string, count: number, locale?: CmsLocale)
 
 export function clientSubIcon(name: string): string {
   return CLIENT_SUB_ICONS[name.trim().toLowerCase()] ?? 'building';
+}
+
+export function clientSubLabel(name: string, locale?: CmsLocale): string {
+  const trimmed = name.trim();
+  if (!trimmed) {
+    return '';
+  }
+  if (resolveClientLocale(locale) === 'en') {
+    return CLIENT_SUB_LABELS_EN[trimmed.toLowerCase()] ?? trimmed;
+  }
+  return trimmed;
 }
 
 export function panelItemCount(panel: ClientPanel): number {

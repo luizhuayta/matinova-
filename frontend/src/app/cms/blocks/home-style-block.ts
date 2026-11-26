@@ -199,6 +199,21 @@ export class HomeStyleBlock implements OnDestroy {
     return this.locales.locale() === 'en' ? 'Talk to an expert' : 'Hablar con un experto';
   }
 
+  isEn(): boolean {
+    return this.locales.locale() === 'en';
+  }
+
+  heroSubtitleFallback(): string {
+    return this.isEn()
+      ? '30 years integrating software, hardware and operations for companies and schools in Peru. Migrations, ERPs, networks and 24/7 support.'
+      : '30 años integrando software, hardware y operación para empresas y entidades educativas en Perú. Migraciones, ERPs, redes y soporte 24/7.';
+  }
+
+  sitePhone(): string {
+    const footer = this.cms.site()['footer'] as Record<string, string> | undefined;
+    return String(footer?.['phone'] || '(+51) 992 422 219');
+  }
+
   innovativePoints(): string[] {
     return this.locales.locale() === 'en'
       ? ['Implementation included, not just the license', 'Support after go-live', 'Remote work across Latin America']

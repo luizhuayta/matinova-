@@ -42,6 +42,10 @@ export default defineConfig({
   retries: 0,
   use: {
     baseURL,
+    // El sitio redirige la primera visita a /en si el navegador está en inglés
+    // (default de Playwright). Las pruebas están escritas para ES; las de idioma
+    // fijan su propio locale con browser.newContext({ locale }).
+    locale: 'es-ES',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     launchOptions: {

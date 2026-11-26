@@ -57,13 +57,6 @@ foreach ($pages as $page) {
     $changed = 0;
     foreach ($content['blocks'] as &$block) {
         $type = (string) ($block['type'] ?? '');
-        if ($type === 'contactCards' && $page['slug'] === 'inicio') {
-            $items = $block['props']['items'] ?? [];
-            if (preg_match('/San Isidro|mattinnova\.pe|987 654 321/i', json_encode($items, JSON_UNESCAPED_UNICODE) ?: '')) {
-                $block['props']['items'] = $seedPages[$page['locale']]['inicio']['content']['contactCards'] ?? $items;
-                $changed++;
-            }
-        }
         if ($type === 'pageHero' && in_array($page['slug'], ['acerca-de', 'contacto'], true) && empty($block['props']['titleAccent'])) {
             $accent = $seedPages[$page['locale']][$page['slug']]['content']['heroTitleAccent'] ?? '';
             if ($accent !== '') {

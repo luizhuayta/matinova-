@@ -728,26 +728,30 @@ function cms_contacto_support_blocks(string $locale = 'es'): array
     ];
 }
 
-function cms_blocks_from_contacto(array $content): array
+function cms_blocks_from_contacto(array $content, string $locale = 'es'): array
 {
+    $isEn = $locale === 'en';
+    $defaultHeroText = $isEn
+        ? 'Head office in San Vicente de Cañete. WhatsApp and email answered the same business day.'
+        : 'Casa matriz en San Vicente de Cañete. WhatsApp y correo con respuesta el mismo día hábil.';
     return array_merge([
         cms_make_block('pageHero', [
             'badge' => $content['badge'] ?? '',
             'title' => $content['title'] ?? '',
             'titleAccent' => $content['heroTitleAccent'] ?? '',
-            'text' => $content['text'] ?? $content['heroText'] ?? 'Casa matriz en San Vicente de Cañete. WhatsApp y correo con respuesta el mismo día hábil.',
+            'text' => $content['text'] ?? $content['heroText'] ?? $defaultHeroText,
             'cta' => '',
             'ctaLink' => '',
             'image' => $content['heroImage'] ?? 'expertos.webp',
         ]),
         cms_make_block('contactCards', ['items' => $content['cards'] ?? []]),
         cms_make_block('contactForm', [
-            'submitLabel' => $content['submitLabel'] ?? 'Enviar mensaje',
+            'submitLabel' => $content['submitLabel'] ?? ($isEn ? 'Send message' : 'Enviar mensaje'),
             'destinationEmail' => $content['destinationEmail'] ?? '',
             'fields' => $content['fields'] ?? [],
             'placeholders' => $content['placeholders'] ?? [],
         ]),
-    ], cms_contacto_support_blocks());
+    ], cms_contacto_support_blocks($locale));
 }
 
 function cms_blocks_from_legal(array $content): array

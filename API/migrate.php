@@ -1,16 +1,11 @@
 <?php
 declare(strict_types=1);
 
-const APP_SCHEMA_VERSION = 14;
+const APP_SCHEMA_VERSION = 15;
+const APP_V15_COPY_MIGRATION = 'fix_en_untranslated_v15';
 
-function db_migrate(): void
+function db_migrate_schema(): void
 {
-    if (!function_exists('cms_content_overwrite_enabled')) {
-        require_once __DIR__ . '/Domain/CmsContentMigrate.php';
-    }
-    if (!function_exists('cms_rewrite_stored_public_images')) {
-        require_once __DIR__ . '/Domain/CmsImagePaths.php';
-    }
     $pdo = db();
     $statements = [
         "ALTER TABLE pages ADD COLUMN version INT UNSIGNED NOT NULL DEFAULT 1",
@@ -129,19 +124,36 @@ function db_migrate(): void
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4"
     );
     cms_migrate_composite_keys();
-    cms_backfill_page_meta();
-    cms_migrate_stored_documents();
-    cms_backfill_site_chatbot();
-    cms_migrate_splash_defaults();
-    cms_backfill_clients_page();
-    cms_public_redesign_migrate();
-    cms_home_editorial_copy_migrate();
-    cms_studio_polish_migrate();
-    cms_social_proof_hide_migrate();
-    if (cms_content_overwrite_enabled()) {
-        cms_studio_sitewide_migrate();
+}
+
+function db_migrate_content(int $previousVersion, bool $fresh): void
+{
+    require_once __DIR__ . '/Domain/CmsContentMigrate.php';
+    require_once __DIR__ . '/Domain/CmsImagePaths.php';
+    require_once __DIR__ . '/Domain/CmsPlaceholderContact.php';
+    $legacy = [
+        'page_meta' => 'cms_backfill_page_meta',
+        'stored_documents' => 'cms_migrate_stored_documents',
+        'site_chatbot' => 'cms_backfill_site_chatbot',
+        'splash_defaults' => 'cms_migrate_splash_defaults',
+        'clients_page' => 'cms_backfill_clients_page',
+        'public_redesign' => 'cms_public_redesign_migrate',
+        'home_editorial_copy' => 'cms_home_editorial_copy_migrate',
+        'studio_polish' => 'cms_studio_polish_migrate',
+        'social_proof_hide' => 'cms_social_proof_hide_migrate',
+        'studio_sitewide' => static function (): void {
+            if (cms_content_overwrite_enabled()) {
+                cms_studio_sitewide_migrate();
+            }
+        },
+        'stored_public_images' => 'cms_rewrite_stored_public_images',
+    ];
+    foreach ($legacy as $name => $migration) {
+        // Las instalaciones de v14 ya tienen sus propias ediciones. Una base
+        // nueva parte de los seeds actuales y tampoco necesita las copias antiguas.
+        cms_run_migration_once($name, $previousVersion >= 14 || $fresh ? null : $migration);
     }
-    cms_rewrite_stored_public_images();
+    cms_run_migration_once('fix_placeholder_contact', 'cms_fix_placeholder_contact');
 }
 
 function cms_migrate_composite_keys(): void
@@ -545,6 +557,15 @@ function cms_studio_polish_migrate(): void
     $pdo = db();
     $upd = $pdo->prepare('UPDATE pages SET content = ? WHERE slug = ? AND locale = ?');
     $rows = $pdo->query("SELECT slug, locale, content FROM pages WHERE slug IN ('inicio','contacto')")->fetchAll();
+    $spanishContacts = [];
+    foreach ($rows as $row) {
+        if ($row['locale'] === 'es') {
+            $doc = json_decode((string) $row['content']);
+            $spanishContacts[$row['slug']] = $doc instanceof stdClass
+                ? cms_document_contact_items($doc, (string) $row['slug'])
+                : [];
+        }
+    }
     foreach ($rows as $row) {
         $slug = (string) $row['slug'];
         $locale = cms_normalize_locale((string) ($row['locale'] ?? 'es'));
@@ -593,24 +614,9 @@ function cms_studio_polish_migrate(): void
                         : 'Operación TI entre sedes, ilustración isométrica';
                 }
             }
-            if ($type === 'contactCards') {
-                $items = $props['items'] ?? [];
-                if (is_array($items) && isset($items[0]) && is_array($items[0])) {
-                    $items[0]['title'] = $locale === 'en' ? 'Legal address' : 'Domicilio legal';
-                    $items[0]['text'] = 'Av. República de Panamá 3591, Of. 802 — San Isidro, Lima';
-                    $items[0]['icon'] = $items[0]['icon'] ?? 'bi-geo-alt';
-                }
-                if (is_array($items) && isset($items[1]) && is_array($items[1])) {
-                    $items[1]['title'] = $locale === 'en' ? 'Email' : 'Correo';
-                    $items[1]['text'] = 'contacto@mattinnova.pe';
-                    $items[1]['icon'] = $items[1]['icon'] ?? 'bi-envelope';
-                }
-                if (is_array($items) && isset($items[2]) && is_array($items[2])) {
-                    $items[2]['title'] = 'WhatsApp';
-                    $items[2]['text'] = '+51 987 654 321';
-                    $items[2]['icon'] = $items[2]['icon'] ?? 'bi-whatsapp';
-                }
-                $props['items'] = $items;
+            if ($type === 'contactCards' && $locale === 'en') {
+                $items = is_array($props['items'] ?? null) ? $props['items'] : [];
+                $props['items'] = cms_fill_english_contact_items($items, $spanishContacts[$slug] ?? []);
             }
             if ($type === 'services' && $slug === 'inicio') {
                 $cards = [
@@ -782,63 +788,96 @@ function cms_studio_sitewide_migrate(): void
     }
 }
 
+function app_db_version(string $key): int
+{
+    return app_db_versions($key)[$key] ?? 0;
+}
+
+function app_db_versions(string ...$keys): array
+{
+    try {
+        $placeholders = implode(', ', array_fill(0, count($keys), '?'));
+        $stmt = db()->prepare("SELECT k, v FROM app_secrets WHERE k IN ($placeholders)");
+        $stmt->execute($keys);
+        return array_map('intval', $stmt->fetchAll(PDO::FETCH_KEY_PAIR));
+    } catch (PDOException $err) {
+        if ($err->getCode() !== '42S02') {
+            throw $err;
+        }
+        return [];
+    }
+}
+
 function app_schema_is_current(): bool
 {
     try {
-        $stmt = db()->prepare("SELECT v FROM app_secrets WHERE k = 'schema_version'");
-        $stmt->execute();
-        $value = $stmt->fetchColumn();
-        return $value !== false && (int) $value >= APP_SCHEMA_VERSION;
+        return app_db_version('schema_version') >= APP_SCHEMA_VERSION;
     } catch (Throwable) {
         return false;
     }
 }
 
-function app_set_schema_version(int $version): void
-{
-    $stmt = db()->prepare('INSERT INTO app_secrets (k, v) VALUES (?, ?) ON DUPLICATE KEY UPDATE v = VALUES(v)');
-    $stmt->execute(['schema_version', (string) $version]);
-}
-
 function app_bootstrap_db(): void
 {
     $force = cfg('APP_SETUP', '0') === '1';
-    $dir = __DIR__ . '/tmp';
-    if (!is_dir($dir)) {
-        @mkdir($dir, 0775, true);
-    }
-    // One-shot: APP_SETUP=1 solo corre una vez por versión de esquema; el resto de
-    // requests lo ignoran (antes re-sembraba y re-migraba en CADA request).
-    $donePath = $dir . '/setup.done';
-    if ($force && @is_file($donePath) && trim((string) @file_get_contents($donePath)) === (string) APP_SCHEMA_VERSION && app_schema_is_current()) {
-        error_log('APP_SETUP=1 ignorado: setup ya aplicado para schema ' . APP_SCHEMA_VERSION . ' (ponlo a 0).');
+    $copyMarker = 'migration_done:' . APP_V15_COPY_MIGRATION;
+    $versions = app_db_versions('schema_version', 'setup_done_version', $copyMarker);
+    $version = $versions['schema_version'] ?? 0;
+    $copyPending = $version === 15 && empty($versions[$copyMarker]);
+    if ($version >= APP_SCHEMA_VERSION && !$copyPending
+        && (!$force || ($versions['setup_done_version'] ?? 0) >= APP_SCHEMA_VERSION)) {
         return;
     }
-    if (!$force && app_schema_is_current()) {
-        return;
-    }
-    $lockPath = $dir . '/setup.lock';
-    $lock = @fopen($lockPath, 'c');
-    if (!$lock) {
-        throw new RuntimeException('No se puede crear el bloqueo de migración en api/tmp. Revisa permisos.');
-    }
-    if (!flock($lock, LOCK_EX | LOCK_NB)) {
-        fclose($lock);
+
+    // El bloqueo vive en MariaDB y lo comparten el arranque web y el comando CLI.
+    $pdo = db();
+    $lockName = 'matt-cms-setup:' . sha1((string) $pdo->query('SELECT DATABASE()')->fetchColumn());
+    $lock = $pdo->prepare('SELECT GET_LOCK(?, 0)');
+    $lock->execute([$lockName]);
+    if ((int) $lock->fetchColumn() !== 1) {
+        if (PHP_SAPI === 'cli') {
+            throw new RuntimeException('Hay otra migración en curso.');
+        }
         json_out(['message' => 'Preparando la base de datos. Reintenta en unos segundos.'], 503, ['Retry-After' => '5']);
     }
     try {
-        if (!$force && app_schema_is_current()) {
-            return;
+        $previousVersion = app_db_version('schema_version');
+        if ($previousVersion < APP_SCHEMA_VERSION) {
+            // v15 solo cambia datos. Las bases en v14 ya tienen todo el DDL.
+            if ($previousVersion < 14) {
+                db_init();
+                db_migrate_schema();
+            }
+
+            // Seed solo al inicializar. El marcador permite reintentar la
+            // instalación sin volver a insertar datos tras un fallo posterior.
+            $fresh = false;
+            if ($previousVersion === 0) {
+                require_once __DIR__ . '/Domain/CmsContentMigrate.php';
+                cms_run_migration_once('initial_seed', static function () use ($pdo): void {
+                    $empty = !(int) $pdo->query('SELECT EXISTS (SELECT 1 FROM pages)')->fetchColumn()
+                        && !(int) $pdo->query('SELECT EXISTS (SELECT 1 FROM site_settings)')->fetchColumn();
+                    seed_database();
+                    if ($empty) {
+                        $pdo->exec("INSERT INTO app_secrets (k, v) VALUES ('initial_seed_fresh', '1')");
+                    }
+                });
+                $fresh = app_db_version('initial_seed_fresh') !== 0;
+            }
+            db_migrate_content($previousVersion, $fresh);
         }
-        seed_database();
-        db_migrate();
-        app_set_schema_version(APP_SCHEMA_VERSION);
-        @file_put_contents($donePath, (string) APP_SCHEMA_VERSION);
+        if ($previousVersion <= 15) {
+            require_once __DIR__ . '/Domain/CmsContentMigrate.php';
+            require_once __DIR__ . '/Domain/CmsV15CopyFix.php';
+            cms_run_migration_once(APP_V15_COPY_MIGRATION, 'cms_fix_en_untranslated_v15');
+        }
+        $version = max($previousVersion, APP_SCHEMA_VERSION);
+        $done = max(app_db_version('setup_done_version'), $version);
+        $stmt = $pdo->prepare('INSERT INTO app_secrets (k, v) VALUES (?, ?), (?, ?) ON DUPLICATE KEY UPDATE v = VALUES(v)');
+        $stmt->execute(['schema_version', (string) $version, 'setup_done_version', (string) $done]);
     } finally {
-        if (is_resource($lock)) {
-            flock($lock, LOCK_UN);
-            fclose($lock);
-        }
+        $unlock = $pdo->prepare('SELECT RELEASE_LOCK(?)');
+        $unlock->execute([$lockName]);
     }
 }
 
@@ -850,8 +889,6 @@ if (PHP_SAPI === 'cli' && isset($_SERVER['argv'][0]) && basename((string) $_SERV
     require_once __DIR__ . '/cms-doc.php';
     require_once __DIR__ . '/db.php';
     require_once __DIR__ . '/seed.php';
-    seed_database();
-    db_migrate();
-    app_set_schema_version(APP_SCHEMA_VERSION);
+    app_bootstrap_db();
     fwrite(STDOUT, "Migración lista (schema " . APP_SCHEMA_VERSION . ").\n");
 }

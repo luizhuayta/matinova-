@@ -71,9 +71,9 @@ Opcionales; no cambian las claves existentes. El contenido viejo sigue funcionan
 
 ## Versiones de schema
 
-- `APP_SCHEMA_VERSION` (migrate.php / `app_secrets.schema_version`): DDL de la app.
+- `APP_SCHEMA_VERSION` (migrate.php / `app_secrets.schema_version`): DDL y migraciones de datos de la app.
 - `CMS_SCHEMA_VERSION` (cms-schema.php / `document.schemaVersion`): forma JSON de cada documento.
-- `cms_studio_sitewide_migrate()` solo pisa contenido editorial si `APP_MIGRATE_CONTENT=1` o al subir a schema 10 por primera vez.
+- En bases que ya estaban en v14, las migraciones de datos anteriores se marcan como aplicadas. La v15 corrige datos de contacto de relleno y textos concretos en contenido publicado y borradores. Cada corrección tiene su propia marca de ejecución.
 
 ## Qué no tocar en este refactor
 

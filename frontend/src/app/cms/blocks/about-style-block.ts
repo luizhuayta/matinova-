@@ -73,6 +73,10 @@ export class AboutStyleBlock {
     return String(this.props()['cta'] ?? '');
   }
 
+  isEn(): boolean {
+    return this.locales.locale() === 'en';
+  }
+
   iconOf(icon: unknown, fallback: string): string {
     return bootstrapIcon(icon, fallback);
   }

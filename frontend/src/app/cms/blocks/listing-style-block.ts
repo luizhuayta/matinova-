@@ -30,12 +30,22 @@ export class ListingStyleBlock {
   readonly index = input.required<number>();
   props = computed(() => this.block().props);
   titleParts = computed(() => {
-    const fallback = this.cms.currentSlug() === 'clientes' ? 'empresas' : 'puesta en marcha';
+    const english = this.locales.locale() === 'en';
+    const isClients = this.cms.currentSlug() === 'clientes';
+    const fallback = isClients
+      ? (english ? 'companies' : 'empresas')
+      : (english ? 'go-live' : 'puesta en marcha');
     return splitAccent(this.props()['title'], this.props()['titleAccent'] || fallback);
   });
   cards = computed(() => asList(this.props()['cards']));
   headerBackground = computed<'grid' | 'none'>(() => (this.cms.currentSlug() === 'clientes' ? 'none' : 'grid'));
-  headerEyebrow = computed(() => (this.cms.currentSlug() === 'clientes' ? 'Clientes' : 'Servicios'));
+  headerEyebrow = computed(() => {
+    const english = this.locales.locale() === 'en';
+    if (this.cms.currentSlug() === 'clientes') {
+      return english ? 'Clients' : 'Clientes';
+    }
+    return english ? 'Services' : 'Servicios';
+  });
 
   path(field: string): string {
     return propsPath(this.index(), field);

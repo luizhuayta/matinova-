@@ -7,6 +7,8 @@ require __DIR__ . '/../cms-schema.php';
 require_once __DIR__ . '/../blocks.php';
 require __DIR__ . '/../cms-doc.php';
 require __DIR__ . '/../Domain/CmsImagePaths.php';
+require __DIR__ . '/../Domain/CmsPlaceholderContact.php';
+require __DIR__ . '/../Domain/CmsV15CopyFix.php';
 require __DIR__ . '/../redirects.php';
 require __DIR__ . '/../media.php';
 
@@ -263,5 +265,66 @@ expect($again === 'software.webp', 'reescribir webp es idempotente');
 expect(cms_media_basename('/api/uploads/27dd730a948402a6.webp') === '27dd730a948402a6.webp', 'basename de subida principal');
 expect(cms_media_basename('/api/uploads/27dd730a948402a6-480.webp') === '27dd730a948402a6.webp', 'basename quita variante 480');
 expect(cms_media_basename('/api/uploads/27dd730a948402a6-960.jpg') === '27dd730a948402a6.jpg', 'basename quita variante 960 jpg');
+
+$contactoReal = ['address' => 'Urb. Libertad, San Vicente de Cañete', 'email' => 'contacto@mattinnovasolution.com', 'phone' => '+51 992 422 219'];
+$cards = [
+    (object) ['title' => 'Custom address', 'text' => 'Av. República de Panamá 3591, Of. 802 — San Isidro, Lima'],
+    (object) ['title' => 'Email', 'text' => 'contacto@mattinnova.pe'],
+    (object) ['title' => 'WhatsApp', 'text' => '(+51) 987 654 321'],
+    (object) ['title' => 'Otro local', 'text' => 'Oficina temporal en San Isidro'],
+];
+$doc = (object) ['blocks' => [(object) ['type' => 'contactCards', 'props' => (object) ['items' => $cards]]]];
+expect(cms_replace_page_contact_placeholders($doc, 'inicio', $contactoReal), 'repara los tres datos de contacto de relleno');
+expect(array_column($cards, 'text') === [...array_values($contactoReal), 'Oficina temporal en San Isidro'], 'conserva otros contactos aunque mencionen San Isidro');
+expect($cards[0]->title === 'Custom address' && !cms_replace_page_contact_placeholders($doc, 'inicio', $contactoReal), 'conserva títulos y la reparación es idempotente');
+
+$spanishContacts = [(object) ['title' => 'Correo', 'text' => $contactoReal['email']]];
+$emptyEnglish = cms_fill_english_contact_items([], $spanishContacts);
+expect($emptyEnglish === [['title' => 'Email', 'text' => $contactoReal['email']]], 'localiza un contacto EN vacío a partir de ES');
+$editedEnglish = [['title' => 'Contact sales', 'icon' => 'bi-envelope', 'text' => 'ventas@example.com']];
+expect(cms_fill_english_contact_items($editedEnglish, $spanishContacts) === $editedEnglish, 'conserva los datos EN ya editados');
+
+$v15Document = static fn (array $blocks): stdClass => json_decode(json_encode(['blocks' => $blocks]));
+$serviceGrid = array_map(static fn (int $i): array => ['path' => '/servicio-' . $i], range(0, 4));
+$listing = $v15Document([['type' => 'serviceCards', 'props' => ['cards' => $serviceGrid]]]);
+expect(cms_v15_repair_copy($listing, 'servicios', 'en') && $listing->blocks[0]->props->cards[2]->path === '/servicios/soluciones-ti', 'v15 repone el servicio TI en el índice 2');
+$listing->blocks[0]->props->cards[2]->title = 'Edited IT services';
+$sameListing = json_encode($listing);
+expect(!cms_v15_repair_copy($listing, 'servicios', 'en') && json_encode($listing) === $sameListing, 'v15 conserva una tarjeta TI ya existente');
+$largeListing = $v15Document([['type' => 'serviceCards', 'props' => ['cards' => [...$serviceGrid, ['path' => '/nuevo']]]]]);
+expect(!cms_v15_repair_copy($largeListing, 'servicios', 'en'), 'v15 conserva una rejilla personalizada de seis tarjetas');
+
+$home = $v15Document([['type' => 'services', 'props' => ['cards' => [
+    ['alt' => 'Consultoría informática'],
+    ['alt' => 'Consultoría informática para PYMES'],
+]]]]);
+expect(!cms_v15_repair_copy($home, 'inicio', 'es'), 'v15 conserva el texto español en inicio ES');
+expect(cms_v15_repair_copy($home, 'inicio', 'en')
+    && array_column($home->blocks[0]->props->cards, 'alt') === ['IT consulting', 'Consultoría informática para PYMES'], 'v15 traduce alt por coincidencia exacta en EN');
+
+$faqES = cms_studio_faq_items('es');
+$faqEN = cms_studio_faq_items('en');
+$contact = $v15Document([['type' => 'faq', 'props' => $faqES]]);
+expect(cms_v15_repair_copy($contact, 'contacto', 'en')
+    && json_encode($contact->blocks[0]->props) === json_encode($faqEN), 'v15 traduce la lista de preguntas original');
+$faqES['items'][0]['answer'] = 'Respuesta editada';
+$contact = $v15Document([['type' => 'faq', 'props' => $faqES]]);
+expect(cms_v15_repair_copy($contact, 'contacto', 'en')
+    && $contact->blocks[0]->props->title === $faqEN['title']
+    && json_encode($contact->blocks[0]->props->items) === json_encode($faqES['items']), 'v15 conserva toda la lista cuando se editó una respuesta');
+
+$detail = $v15Document([
+    ['type' => 'serviceHero', 'props' => ['heroAlt' => 'Software Banner', 'cta' => 'Hablar con un experto hoy']],
+    ['type' => 'reasons', 'props' => ['title' => 'Qué queda instalado', 'items' => [
+        ['title' => 'Pagina Ecommerce para tu negocio', 'alt' => 'Pagina Ecommerce para tu negocio.'],
+    ]]],
+]);
+expect(cms_v15_repair_copy($detail, 'servicios-software', 'en')
+    && $detail->blocks[0]->props->cta === 'Hablar con un experto hoy'
+    && $detail->blocks[1]->props->title === 'What gets installed', 'v15 conserva el CTA personalizado');
+expect(cms_v15_repair_copy($detail, 'servicios-software', 'es')
+    && $detail->blocks[0]->props->heroAlt === 'Banner de Software'
+    && $detail->blocks[1]->props->items[0]->title === 'Página Ecommerce para tu negocio'
+    && $detail->blocks[1]->props->items[0]->alt === 'Pagina Ecommerce para tu negocio.', 'v15 corrige solo banner y título coincidentes');
 
 exit($failed > 0 ? 1 : 0);

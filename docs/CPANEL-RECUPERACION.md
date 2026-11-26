@@ -16,7 +16,8 @@ El paquete se genera con `bash tools/build-cpanel.sh`. No incluye contraseñas,
 
 Sube **el contenido de `dist-upload/`**, no la carpeta contenedora, a `public_html/`.
 Incluye los archivos ocultos `.htaccess` de la raíz, `api/`, `api/tmp/` y
-`api/uploads/`. No borres uploads existentes ni sobrescribas el `.env`.
+`api/uploads/`. Conserva `api/tmp/`, `api/uploads/` y el `.env` existente.
+Después de subir el paquete, deja `APP_SETUP=0` en el `.env`.
 
 **Conserva también el bloque PHP propio del hosting** si cPanel lo añadió al
 `.htaccess` anterior (`cPanel-generated handler` / `AddHandler` / `SetHandler`).
@@ -70,15 +71,11 @@ Elimina `diagnostico.php` cuando termines la revisión.
 
 ## Esquema y migraciones
 
-Las peticiones normales a `/api.php/site?locale=es` aplican automáticamente una
-migración pendiente aunque `APP_SETUP=0`. No actives `APP_SETUP=1` a ciegas: puede
-forzar inicializaciones de contenido. No importes el SQL sobre una base existente
-sin copia de seguridad y sin revisar previamente su estado.
-
-El bloqueo de migración ahora responde 503 con `Retry-After` si otro proceso
-lo tiene ocupado, en vez de esperar indefinidamente. **No borres `setup.lock` para
-liberar un proceso**: borrar el archivo no libera el bloqueo del proceso activo.
-Revisa primero el error PHP y, con el hosting, las sesiones/procesos bloqueados.
+Las peticiones normales a `/api.php/site?locale=es` aplican las migraciones
+pendientes con `APP_SETUP=0`. MariaDB registra cada migración de contenido y la
+versión de instalación completada. Si otro proceso está migrando, la API devuelve
+503 con `Retry-After`. Si necesitas importar SQL sobre una base existente, haz una
+copia de seguridad y revisa su estado antes de importarlo.
 
 ## Verificación final
 
