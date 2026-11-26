@@ -3,106 +3,81 @@
 > **Propiedad privada.** Código y contenido de titularidad de Matt Innova Solution.
 > Todos los derechos reservados — ver [Licencia y propiedad](#licencia-y-propiedad).
 
-Sitio público en Angular, panel CMS y API PHP + MariaDB. El chatbot clásico (respuestas predefinidas y enlaces a páginas) está activo por defecto; la IA se enciende desde el panel cuando hay una clave.
+Sitio web corporativo bilingüe (ES/EN) con CMS por bloques, panel de administración y API propia.
 
-## Si recibiste este zip
+- **Frontend:** Angular 21 (`frontend/`), tema público "Cyber UI" y panel `/admin`.
+- **API:** PHP 8.1+ sin framework (`API/`), MariaDB/MySQL, PHPMailer.
+- **Hosting:** cPanel compartido (Apache + PHP). No requiere Node en el servidor.
 
-Trae el código, el frontend, la API y `API/.env`. No trae `node_modules`, la caché de Angular ni el paquete de cPanel. Para levantarlo en local:
+Novedades de cada entrega: [CHANGELOG.md](CHANGELOG.md).
 
-```bash
-docker compose up --build
-cd frontend
-npm install
-npm start
-```
+## Funciones principales
 
-- Web: http://127.0.0.1:4200
-- API: http://127.0.0.1:8000
-- Admin local: http://127.0.0.1:4200/admin — `admin` / `admin123`
-
-Docker usa su propia base (MariaDB del compose). `API/.env` solo completa lo que el contenedor no define; en local no sustituye usuario, base ni origen. Necesitas Docker, Node.js 20+ y npm. PHPMailer se instala solo la primera vez que arranca la API.
-
-**¿No tienes Docker?** El proyecto también corre con **Podman** (`podman-compose up --build` / `podman compose up --build`) o **sin contenedores** (PHP + MariaDB + Node nativos, en Linux, macOS o Windows/XAMPP). Guía completa con verificación y consejos para agentes de IA: [docs/LEVANTAR-EN-OTRO-EQUIPO.md](docs/LEVANTAR-EN-OTRO-EQUIPO.md).
+- **CMS por bloques** con edición en línea, borrador/publicado, historial de revisiones, bloqueo optimista (`409` si alguien guardó antes) y autoguardado.
+  - Si la sesión caduca, el borrador se guarda en el navegador y se recupera al volver a entrar.
+- **Bilingüe ES/EN.** La URL manda: `/en/...` es inglés y sin prefijo es español. Si a una página le falta la versión EN, se muestra la ES.
+  - Al **crear una página en ES** se crea su versión EN con los mismos bloques. El texto se traduce a mano.
+  - Al **cambiar una imagen en ES** se actualiza en EN, salvo que en EN se haya puesto otra a propósito.
+- **Medios:** subidas en WebP con JPG hermano y variantes `-480`/`-960`, recorte e historial.
+- **Formularios** de contacto y **Libro de Reclamaciones** (INDECOPI) con correo SMTP y bandeja en `/admin/mensajes`.
+- **Chatbot híbrido:** clásico por defecto; IA opcional desde `/admin/chatbot`.
+- **Accesibilidad AA:** panel de herramientas, foco visible, `prefers-reduced-motion` y alto contraste.
 
 ## Requisitos
 
-- Node.js 20+
-- PHP 8.1+ con `pdo_mysql`, `gd`, `curl`, `openssl`, `mbstring`, `iconv`
-- MariaDB / MySQL
-- Composer (solo para instalar PHPMailer)
+| Uso | Necesitas |
+|---|---|
+| Desarrollo | Docker o Podman, Node.js 20+ y npm |
+| Servidor | PHP 8.1+ con `pdo_mysql`, `gd`, `curl`, `openssl`, `mbstring`, `iconv`; MariaDB/MySQL |
+
+El código se mantiene compatible con **PHP 8.1** aunque Docker use 8.3. No subas versiones de dependencias sin probar en el hosting.
 
 ## Desarrollo local
 
-La API corre en Docker y el frontend con el CLI de Angular.
-
 ```bash
-docker compose up --build
-cd frontend
-npm install
-npm start
+docker compose up --build              # API en :8000 + MariaDB en :3307
+cd frontend && npm install && npm start # web en http://localhost:4200
 ```
 
-- Web: http://127.0.0.1:4200
-- API: http://127.0.0.1:8000 (el proxy de Angular reescribe `/api` hacia ahí)
-- Admin: http://127.0.0.1:4200/admin — usuario `admin` / `admin123` (solo local)
-- Editor (si corre el seed de Docker): `editor` / `editor123`
+- Web: **http://localhost:4200**. Usa `localhost`: en algunos equipos `ng serve` no responde en `127.0.0.1`.
+- API: http://127.0.0.1:8000. El proxy de Angular reescribe `/api` hacia ahí.
+- Admin local: http://localhost:4200/admin — `admin` / `admin123` (editor: `editor` / `editor123`).
 
-El `docker-compose.yml` define la base y el admin local. No hace falta copiar `API/.env` para desarrollar.
+`docker-compose.yml` define la base y las credenciales locales; `API/.env` es opcional en local.
 
-Tests:
+Sin Docker: Podman (`podman compose up --build`) o PHP + MariaDB + Node nativos. Ver [docs/LEVANTAR-EN-OTRO-EQUIPO.md](docs/LEVANTAR-EN-OTRO-EQUIPO.md).
 
-```bash
-docker compose exec api php tests/verify-cms.php
-cd frontend && npm run test:cms
-cd frontend && npm run test:e2e
-```
-
-La primera vez: `cd frontend && npx playwright install chromium`.
-
-La contraseña SMTP **no** debe vivir en git. Si rotas el buzón, actualiza solo `API/.env` (local) y `public_html/api/.env` (servidor). Para borrar la clave antigua del historial, en un clon limpio: `./tools/purge-smtp-history.sh` y luego force-push coordinado.
-
-Migración / seed a mano (cPanel o CLI):
+## Pruebas
 
 ```bash
-php API/migrate.php
+docker compose exec api php tests/verify-cms.php      # sanitizado, migraciones, contratos
+cd frontend && npm run test:cms                       # Vitest
+cd frontend && npm run test:e2e                       # Playwright (API arriba)
+./tools/check-contracts.sh                            # verify + fixtures + SCSS + build prod
 ```
 
-## Chatbot híbrido
-
-- **Clásico** (por defecto): `POST /api/bot` devuelve texto y links clicables (`/servicios`, `/contacto`, `/libro-reclamaciones`, etc.).
-- **IA** (opcional): `POST /api/bot-ai` hace de proxy OpenAI-compatible (OpenRouter, DeepSeek o URL propia). La clave se guarda en `app_secrets` y **nunca** sale en un GET. Si no hay clave, está apagada o el proveedor falla, el widget usa el bot clásico.
-- Panel único: `/admin/chatbot` (modo clásico o híbrido, proveedor, modelo, prueba de conexión). El inspector del sitio solo controla si el widget se muestra.
-
-## Correos
-
-El remitente por defecto es `notificaciones@mattinnovasolution.com`. El destino de contacto y del libro de reclamaciones sale del CMS (`destinationEmail` del bloque), o de `CONTACT_DEST_EMAIL` / `CLAIMS_DEST_EMAIL` en `.env`, o de los buzones `contacto@` y `libroreclamaciones@`. El interesado recibe copia si el SMTP responde bien. Si el correo falla, el formulario se guarda igual y el panel muestra que no se envió.
-
-SMTP en cPanel:
-
-- `SMTP_ENCRYPTION=ssl` y puerto `465`, o
-- `SMTP_ENCRYPTION=tls` y puerto `587`
-
-Los mensajes y reclamos se ven en `/admin/mensajes` (filtro, ticket, estado, CSV).
+- **Primera vez:** `cd frontend && npx playwright install chromium`.
+- **Otra URL:** para probar contra otra dirección, por ejemplo el paquete de cPanel servido en local, usa `E2E_BASE_URL=http://localhost:8090 npm run test:e2e`.
+- **Idioma de las pruebas:** Playwright corre en `es-ES`. Las pruebas de idioma fijan el suyo.
+- **Límite de login:** la API limita los intentos de login por IP (`API/tmp/ratelimit/`). Si corres la suite muchas veces seguidas y aparece un `429`, espera un minuto o vacía esa carpeta.
 
 ## Publicar en cPanel
 
-Para recuperar una web vacía, subir sin perder datos y verificar el hosting:
-[guía de recuperación de cPanel](docs/CPANEL-RECUPERACION.md).
-El endpoint `/api.php/health` comprueba PHP, base, esquema y permisos sin ejecutar
-migraciones ni mostrar credenciales.
-
-El zip **no incluye** `.env`. Créalo en el servidor para no pisar credenciales al subir.
-
-1. En cPanel, crea la base MariaDB y el usuario. Anota host (casi siempre `localhost`), nombre, usuario y clave.
-2. Genera el paquete:
-
 ```bash
-chmod +x tools/build-cpanel.sh
-./tools/build-cpanel.sh
+./tools/build-cpanel.sh      # genera dist-upload/ y dist-upload.zip
 ```
 
-3. Sube **el contenido** de `dist-upload/` a `public_html/` (queda `public_html/index.html`, `public_html/api/`, `public_html/api.php`, etc.). No subas `node_modules/`, Docker ni tests. El `api.php` de la raíz es un frontal alternativo: el frontend lo usa (`/api.php/...`) para que el API funcione aunque el hosting regenere el `.htaccess` sin las reglas de `/api/`.
-4. Crea `public_html/api/.env` con los valores reales (sin comillas, una variable por línea):
+1. Sube y **descomprime el contenido** de `dist-upload.zip` en `public_html/`.
+   - **No borres** `public_html/api/uploads/` (imágenes del CMS), `public_html/api/tmp/` ni `public_html/api/.env`.
+   - El zip no trae `.env` ni subidas.
+2. Primera instalación: crea `public_html/api/.env` (ver plantilla abajo) y deja que la primera visita a `/api/site` cree tablas y contenido. También puedes importar `deploy/mattinnova-cpanel.sql`.
+3. Entra una vez al sitio. Si hay migraciones pendientes, se aplican solas en esa visita.
+4. `public_html/api/uploads` y `public_html/api/tmp` deben tener permiso de escritura.
+5. Diagnóstico sin credenciales: `/api.php/health`.
+
+Guía detallada y recuperación: [docs/CPANEL-RECUPERACION.md](docs/CPANEL-RECUPERACION.md).
+
+Plantilla de `public_html/api/.env` (sin comillas, una variable por línea):
 
 ```
 APP_ORIGIN=https://mattinnovasolution.com
@@ -128,20 +103,56 @@ CONTACT_DEST_EMAIL=contacto@mattinnovasolution.com
 CLAIMS_DEST_EMAIL=libroreclamaciones@mattinnovasolution.com
 ```
 
-Si el sitio se abre con `www`, usa ese mismo origen en `APP_ORIGIN` (también se acepta el par con/sin www). Para forzar una migración, pon `APP_SETUP=1` un momento, recarga `/api/site` y vuelve a `0`.
+`APP_SETUP` debe quedar en `0`. Aunque alguien lo ponga en `1`, no se re-instala nada si el esquema ya está al día: la marca se guarda en la base (`setup_done_version`).
 
-5. Importa `mattinnova-cpanel.sql` con phpMyAdmin **o** deja que el primer request a `/api/site` cree tablas y el contenido inicial.
-6. PHP 8.1+ y las extensiones de arriba (Select PHP Version). Escritura en `public_html/api/uploads` y `public_html/api/tmp`.
-7. `public_html/.htaccess` reescribe la SPA y deja pasar `api/` y `sitemap.xml`. `public_html/api/.htaccess` reescribe a `index.php` y bloquea `.env`, tests, `tmp/` y `vendor/`.
-8. Entra a `https://mattinnovasolution.com/admin`, cambia la contraseña del admin y, si vas a usar IA, carga la clave en **Chatbot**.
+### Base de datos y migraciones
+
+- `API/migrate.php` (`APP_SCHEMA_VERSION`, hoy **15**) define el DDL y las migraciones de datos. `API/cms-schema.php` (`CMS_SCHEMA_VERSION`) define la forma del JSON.
+- **Las migraciones de contenido corren una sola vez por base.** Quedan registradas en `app_secrets` (`migration_done:<nombre>`) y nunca vuelven a pisar lo editado en el CMS.
+- Las correcciones de datos son **condicionales**: solo cambian un valor si sigue siendo exactamente el de origen. Si ya se editó en el CMS, se respeta.
+- Migración manual por CLI: `php API/migrate.php`.
+
+### Caché y actualizaciones
+
+El sitio **no usa Service Worker**. El paquete trae el `safety-worker` de Angular como `ngsw-worker.js`, para que los navegadores que tenían el antiguo se limpien solos. Tras subir una versión, nadie tiene que borrar caché.
+
+| Recurso | Cabecera | Resultado |
+|---|---|---|
+| `index.html` | `no-cache` | Detecta la versión nueva en cada visita |
+| `.js` / `.css` (nombre con hash) | `max-age=1 año, immutable` | Solo se descarga lo que cambió |
+| Imágenes fijas del sitio | `no-cache` + ETag | `304` sin cuerpo si no cambiaron |
+| Subidas del CMS (`api/uploads`) | `max-age=1 año, immutable` | Cada subida tiene nombre único |
+| API pública | `no-cache` + ETag + `Vary` | Lo publicado se ve en la siguiente carga |
+| API con sesión de admin | `private, no-store` | El editor siempre lee datos frescos |
 
 ## Estructura
 
-- `frontend/` — Angular (páginas dinámicas, CMS, admin)
-- `API/` — PHP (CMS, correos, chatbot, media)
-- `deploy/mattinnova-cpanel.sql` — esquema vacío para phpMyAdmin
-- `tools/build-cpanel.sh` — build + zip de subida
-- `docs/LEVANTAR-EN-OTRO-EQUIPO.md` — transferencia a otro equipo (Docker, Podman, sin contenedores, agentes)
+```
+frontend/                Angular: páginas públicas, CMS (cms/), panel (admin/), widgets (components/)
+  src/styles/            tokens (_tokens.scss), Cyber UI (_cyber.scss), marco/fondo (_shared.scss)
+  e2e/                   pruebas Playwright
+API/                     PHP: index.php + Http/Router.php, handlers por dominio, Domain/, Repos/
+  migrate.php            esquema y migraciones run-once
+  seed.php, seed-en.php  contenido inicial ES/EN
+cms/blocks.json          catálogo de bloques → python3 tools/gen-blocks.py
+docs/                    contratos-cms.md, CPANEL-RECUPERACION.md, LEVANTAR-EN-OTRO-EQUIPO.md, historial/
+deploy/                  esquema SQL vacío para phpMyAdmin
+tools/                   build-cpanel.sh, check-contracts.sh, gen-blocks.py
+api.php                  frontal /api.php/... para hostings que regeneran el .htaccess
+```
+
+El contrato JSON entre Angular y PHP está en [docs/contratos-cms.md](docs/contratos-cms.md). Los campos no se renombran; los nuevos son aditivos y opcionales. Notas para agentes y desarrolladores: [AGENTS.md](AGENTS.md).
+
+## Correos y chatbot
+
+- **Remitente:** `notificaciones@mattinnovasolution.com`.
+- **Destino:** se toma del CMS (`destinationEmail`); si no está, de `CONTACT_DEST_EMAIL` / `CLAIMS_DEST_EMAIL`. Si el SMTP falla, el mensaje se guarda igual y el panel lo marca.
+- **Puertos SMTP:** `ssl`/465 o `tls`/587.
+- **Chatbot:**
+  - El modo clásico (`POST /api/bot`) responde con enlaces internos.
+  - El modo IA (`POST /api/bot-ai`) es opcional y usa un proveedor compatible con OpenAI. Su clave vive en `app_secrets` y nunca sale por GET.
+  - Si la IA falla, responde el modo clásico.
+- **Contraseñas:** nunca se commitean. Para rotar el SMTP, actualiza `API/.env` en local y `public_html/api/.env` en el servidor.
 
 ## Licencia y propiedad
 

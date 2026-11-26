@@ -9,7 +9,7 @@ docker compose up --build                  # API en :8000 + MariaDB en :3307
 cd frontend && npm install && npm start    # web en :4200
 ```
 
-- Admin: http://127.0.0.1:4200/admin — `admin` / `admin123` (solo local; `editor` / `editor123`).
+- Admin: http://localhost:4200/admin — `admin` / `admin123` (solo local; `editor` / `editor123`). Usa `localhost`: `ng serve` puede no responder en `127.0.0.1`.
 - El proxy de Angular reescribe `/api` hacia `http://127.0.0.1:8000`.
 - `API/.env` es opcional en local; el compose define base y credenciales.
 
@@ -60,6 +60,13 @@ Cyber UI: tokens y utilidades en `frontend/src/styles/_cyber.scss`; primitivos e
 - Campos CMS aditivos del rediseño: `hero.stats`, `slides[].titleAccent`, `secondaryCta`/`secondaryLink`, `services.text`/`titleAccent`, tarjetas de servicios con `icon`/`link`, `serviceCards.cards[].icon` y `titleAccent` en `pageHero`/`listingHero`/`serviceHero`. Son opcionales; el contenido viejo usa fallbacks.
 - `layout.backgroundImage`: imagen de fondo por sección (inspector, campo de imagen); tapa `layout.background` y lleva velo oscuro; los fondos opacos de cada bloque se neutralizan con `.has-bg-image` en `styles/_shared.scss`. Por defecto `CMS_DEFAULT_BG_IMAGE` (`/images/redesign/section-bg.webp`); schema 6 la rellena donde está vacía.
 
+- Idioma: la URL es la única fuente de verdad (`/en/...` = EN, sin prefijo = ES); la preferencia guardada solo redirige la primera visita a `/`.
+- Crear una página en ES crea su EN (mismos ids de bloque); guardar/publicar en ES sincroniza a EN solo las imágenes que EN aún comparte. Nunca textos; sin traducción con IA.
+- Migraciones de contenido = run-once (`app_secrets` `migration_done:<nombre>`) y condicionales (solo reemplazan el valor exacto de origen). Nunca escribir datos de contacto hardcodeados; una corrección nueva = migración nueva con nombre propio. `APP_SCHEMA_VERSION` = 15.
+- Sin Service Worker: `build-cpanel.sh` publica el safety worker como `ngsw-worker.js` y borra `ngsw.json`. No reactivar `serviceWorker` en `angular.json`.
+- Layout público: `--layout-max` (1360px), `--layout-gutter`, `--layout-measure` (68ch) en `_tokens.scss`; `zoom: 0.85` solo entre 1024 y 1439 px. Usa esas variables, no anchos fijos.
+- No subir versiones de dependencias, Angular ni PHP: el hosting cPanel es de terceros.
+
 ## Gotchas
 
 - `API/router.php` (dev) bloquea `.env`, `.sql`, `.log`, `.md`, `tmp/`, `tests/` y `vendor/`; `.htaccess` solo deja atender directo a `index.php`. No agregar endpoints PHP sueltos.
@@ -67,3 +74,5 @@ Cyber UI: tokens y utilidades en `frontend/src/styles/_cyber.scss`; primitivos e
 - `APP_SETUP=1` es one-shot: aplica el setup una vez y se ignora si el schema ya está al día.
 - Los límites de rate limit se guardan en `API/tmp/ratelimit/` (ignorado por git).
 - El directorio puede no tener `.git` (viene de un zip); verificar antes de usar comandos git.
+- E2E contra el paquete de cPanel: `E2E_BASE_URL=http://localhost:8090 npm run test:e2e`. Allí el frontend llama a `/api.php/...`; las pruebas que interceptan rutas deben aceptar `/api/` y `/api.php/`.
+- Varias corridas seguidas de la suite pueden chocar con el rate limit de login (`429`); no es un bug.
