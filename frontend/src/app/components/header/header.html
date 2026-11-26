@@ -122,9 +122,6 @@
             />
           </li>
         }
-        <li>
-          <a [routerLink]="contactLink()" routerLinkActive="active" (click)="closeMobileMenu()" cmsText="nav.contacto" cmsScope="site"></a>
-        </li>
         <li class="lang">
           <i class="bi bi-globe lang-globe" aria-hidden="true"></i>
           @for (item of localeOptions; track item.id) {
@@ -132,7 +129,7 @@
           }
         </li>
         <li class="nav-cta">
-          <a publicBtn [routerLink]="contactLink()" routerLinkActive="active" (click)="closeMobileMenu()" [attr.aria-label]="isEnglish() ? 'Talk to a Matt Innova expert' : 'Hablar con un experto de Matt Innova'">
+          <a publicBtn [routerLink]="contactLink()" routerLinkActive="active" (click)="closeMobileMenu()">
             <svg class="ui-icon ui-icon--sm" aria-hidden="true"><use href="assets/icons/ui.svg#mail"></use></svg>
             <span cmsText="nav.contacto" cmsScope="site"></span>
           </a>

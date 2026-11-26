@@ -114,7 +114,7 @@ test.describe('Idioma y sincronización con la URL', () => {
 
     // Navegar a Contacto en inglés mantiene el prefijo /en
     await openNavIfMobile(page);
-    await page.locator('app-header a[cmsText="nav.contacto"]').first().click();
+    await page.locator('app-header .nav-cta a').first().click();
     await expect(page).toHaveURL(/\/en\/contacto$/);
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.locator('app-header a[cmsText="nav.inicio"]')).toHaveText('Home');
