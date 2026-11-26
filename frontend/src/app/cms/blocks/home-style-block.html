@@ -124,10 +124,18 @@
                 </svg>
               </span>
               @if (stats().length) {
-                <strong [cmsText]="path('stats.' + $index + '.number')"></strong>
+                @if (editor.editMode()) {
+                  <strong [cmsText]="path('stats.' + $index + '.number')"></strong>
+                } @else {
+                  <strong [appCountUp]="stat['number']" [countUpDelay]="$index * 120">{{ stat['number'] }}</strong>
+                }
                 <span class="hero-metric-label" [cmsText]="path('stats.' + $index + '.label')"></span>
               } @else {
-                <strong>{{ stat['number'] }}</strong>
+                @if (editor.editMode()) {
+                  <strong>{{ stat['number'] }}</strong>
+                } @else {
+                  <strong [appCountUp]="stat['number']" [countUpDelay]="$index * 120">{{ stat['number'] }}</strong>
+                }
                 <span class="hero-metric-label">{{ stat['label'] }}</span>
               }
             </div>

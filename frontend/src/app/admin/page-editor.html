@@ -104,6 +104,9 @@
     </p>
   }
 
+  @if (cms.translationNotice(slug()); as translation) {
+    <p class="admin-banner info" role="status">{{ translation }}</p>
+  }
   @if (loadingDocuments()) {
     <p role="status">Cargando el documento…</p>
   }

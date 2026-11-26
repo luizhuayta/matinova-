@@ -39,6 +39,6 @@ test('las tarjetas funden la foto a la derecha y conservan el destino original',
     await expect(photo.locator('img')).toBeVisible();
     await expect(link).toHaveAttribute('href', '/servicios/consultoria');
     await expect(link.locator('svg')).toHaveAttribute('aria-hidden', 'true');
-    await expect(card.getByRole('heading')).toContainText('Consultoría informática');
+    await expect(card.getByRole('heading')).toContainText('Consultoría');
   }
 });

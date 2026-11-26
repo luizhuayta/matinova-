@@ -1,7 +1,7 @@
 import { Injectable, Optional, computed, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { blankClone } from './cms-fields';
-import { CmsApiService } from './cms-api.service';
+import { CmsApiService, CmsWriteResponse } from './cms-api.service';
 import { CmsHistoryService } from './cms-history.service';
 import { blankFromSchema, humanChangeLine, itemFieldsAt, migrateCmsDocument, minListLength, schemaForSlug } from './cms-schema';
 import {
@@ -61,7 +61,9 @@ export class CmsContentService {
   readonly draftStorageError = signal(false);
   readonly siteDraftError = signal('');
   private readonly localDrafts = new Map<string, LocalDraft>();
+  private readonly translationToast = signal<{ key: string; text: string } | null>(null);
   private toastTimer?: number;
+  private translationToastTimer?: number;
   private pendingRemove: { path: string; index: number; item: unknown } | null = null;
   private autosaveTimer?: number;
   private editing = false;
@@ -244,6 +246,7 @@ export class CmsContentService {
   }
 
   async createPage(body: { title: string; slug?: string; template?: string; showInMenu?: boolean }): Promise<CmsPageSummary> {
+    const context = this.editorContext();
     const res = await this.api.createPage(body);
     const catalog = await this.api.getPagesCatalog(true);
     this.pageList.set(catalog.pages);
@@ -253,7 +256,24 @@ export class CmsContentService {
       this.writeRoot(res.page.slug, migrateCmsDocument(res.content, res.page.slug));
       this.versions.update((map) => ({ ...map, [res.page.slug]: res.version }));
     }
+    if (res.translations?.includes('en')) {
+      this.showTranslationToast(res.page.slug, context, 'Se creó también la versión en inglés; traduce el texto cuando quieras.');
+    }
     return res.page;
+  }
+
+  translationNotice(slug: string): string {
+    const notice = this.translationToast();
+    return notice?.key === this.draftKey(slug) ? notice.text : '';
+  }
+
+  private showTranslationToast(slug: string, context: string, text: string): void {
+    this.translationToast.set({ key: this.draftKey(slug, context), text });
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.clearTimeout(this.translationToastTimer);
+    this.translationToastTimer = window.setTimeout(() => this.translationToast.set(null), 8000);
   }
 
   async deletePage(slug: string): Promise<void> {
@@ -729,7 +749,7 @@ export class CmsContentService {
     return res.version;
   }
 
-  private applyWriteResponse(slug: string, context: string, sent: LocalDraft | undefined, res: CmsDocResponse, hasDraft: boolean): void {
+  private applyWriteResponse(slug: string, context: string, sent: LocalDraft | undefined, res: CmsWriteResponse, hasDraft: boolean): void {
     const key = this.draftKey(slug, context);
     const isLoaded = this.editorContext() === context && (!this.auth || this.loadedEditorContext === context);
     if (isLoaded && res.version < (this.versions()[slug] ?? 0)) {
@@ -754,6 +774,9 @@ export class CmsContentService {
     }
     if (this.currentSlug() === slug) {
       this.dirty.set(!!newerDraft);
+      if ((res.syncedImages ?? 0) > 0) {
+        this.showTranslationToast(slug, context, 'Imagen actualizada también en inglés');
+      }
     }
   }
 

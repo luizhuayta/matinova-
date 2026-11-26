@@ -22,7 +22,11 @@
         <div class="container studio-grid stats-grid" [cmsList]="path('items')">
           @for (stat of items(); track $index) {
             <app-cyber-card class="span-3 stat-bay" [icon]="statIcon(stat['icon'], $index)" appReveal [delay]="($index * 70) + 'ms'">
-              <div class="stat-number" [cmsText]="path('items.' + $index + '.number')"></div>
+              @if (editor.editMode()) {
+                <div class="stat-number" [cmsText]="path('items.' + $index + '.number')"></div>
+              } @else {
+                <div class="stat-number" [appCountUp]="stat['number']" [countUpDelay]="$index * 120">{{ stat['number'] }}</div>
+              }
               <div class="stat-label" [cmsText]="path('items.' + $index + '.label')"></div>
             </app-cyber-card>
           }

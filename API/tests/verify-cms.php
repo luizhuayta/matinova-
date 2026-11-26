@@ -287,12 +287,21 @@ expect(cms_fill_english_contact_items($editedEnglish, $spanishContacts) === $edi
 $v15Document = static fn (array $blocks): stdClass => json_decode(json_encode(['blocks' => $blocks]));
 $serviceGrid = array_map(static fn (int $i): array => ['path' => '/servicio-' . $i], range(0, 4));
 $listing = $v15Document([['type' => 'serviceCards', 'props' => ['cards' => $serviceGrid]]]);
-expect(cms_v15_repair_copy($listing, 'servicios', 'en') && $listing->blocks[0]->props->cards[2]->path === '/servicios/soluciones-ti', 'v15 repone el servicio TI en el índice 2');
-$listing->blocks[0]->props->cards[2]->title = 'Edited IT services';
 $sameListing = json_encode($listing);
-expect(!cms_v15_repair_copy($listing, 'servicios', 'en') && json_encode($listing) === $sameListing, 'v15 conserva una tarjeta TI ya existente');
+expect(!cms_v15_repair_copy($listing, 'servicios', 'en') && json_encode($listing) === $sameListing, 'v15 conserva el catálogo de cinco tarjetas');
 $largeListing = $v15Document([['type' => 'serviceCards', 'props' => ['cards' => [...$serviceGrid, ['path' => '/nuevo']]]]]);
 expect(!cms_v15_repair_copy($largeListing, 'servicios', 'en'), 'v15 conserva una rejilla personalizada de seis tarjetas');
+
+$originalVideo = ['embed' => 'https://www.youtube.com/embed/RtNdTuCxWoI', 'user' => '@mattinnovasolution', 'title' => 'Local Microsoft partner relationship and Microsoft 365 tenant'];
+$videos = $v15Document([['type' => 'videos', 'props' => ['items' => [$originalVideo, $originalVideo]]]]);
+expect(cms_v15_repair_duplicate_video($videos, 'acerca-de', 'en')
+    && (array) $videos->blocks[0]->props->items[0] === $originalVideo
+    && $videos->blocks[0]->props->items[1]->embed === 'https://www.youtube.com/embed/zAW2X2805Qw'
+    && $videos->blocks[0]->props->items[1]->title === 'Matt Innova Solution', 'v15 sustituye solo el segundo video duplicado');
+expect(!cms_v15_repair_duplicate_video($videos, 'acerca-de', 'en'), 'v15 conserva una lista de videos ya distinta');
+$editedVideo = [...$originalVideo, 'title' => 'Título editado'];
+$videos = $v15Document([['type' => 'videos', 'props' => ['items' => [$originalVideo, $editedVideo]]]]);
+expect(!cms_v15_repair_duplicate_video($videos, 'acerca-de', 'en'), 'v15 conserva un video con título personalizado');
 
 $home = $v15Document([['type' => 'services', 'props' => ['cards' => [
     ['alt' => 'Consultoría informática'],
@@ -326,5 +335,146 @@ expect(cms_v15_repair_copy($detail, 'servicios-software', 'es')
     && $detail->blocks[0]->props->heroAlt === 'Banner de Software'
     && $detail->blocks[1]->props->items[0]->title === 'Página Ecommerce para tu negocio'
     && $detail->blocks[1]->props->items[0]->alt === 'Pagina Ecommerce para tu negocio.', 'v15 corrige solo banner y título coincidentes');
+
+$consultingCards = [
+    ['title' => 'Consultoría informática', 'img' => 'custom.jpg', 'icon' => 'bi-code', 'alt' => 'Antes', 'link' => '/contacto'],
+    ['title' => 'Tecnología de la información'],
+    ['title' => 'Consultoría de gestión'],
+    ['title' => 'SaaS'],
+    ['title' => 'Hardware'],
+    ['title' => 'Software'],
+];
+$home = $v15Document([['type' => 'services', 'props' => [
+    'title' => 'Seis líneas de servicio TI', 'titleAccent' => 'Seis', 'cards' => $consultingCards,
+]]]);
+expect(cms_v15_repair_consulting($home, 'inicio', 'es')
+    && array_column($home->blocks[0]->props->cards, 'title') === ['Consultoría', 'Tecnología de la información', 'SaaS', 'Hardware', 'Software'], 'v15 fusiona consultoría y mantiene el orden 6 a 5');
+$merged = $home->blocks[0]->props;
+expect($merged->title === 'Cinco líneas de servicio TI' && $merged->titleAccent === 'Cinco'
+    && $merged->cards[0]->img === 'custom.jpg' && $merged->cards[0]->icon === 'bi-code'
+    && $merged->cards[0]->alt === 'Consultoría' && $merged->cards[0]->link === '/servicios/consultoria', 'v15 ajusta el encabezado y conserva los recursos de la primera tarjeta');
+expect(!cms_v15_repair_consulting($home, 'inicio', 'es'), 'v15 no vuelve a modificar una consultoría ya unificada');
+$consultingCards[2]['title'] = 'Consultoría de gestión personalizada';
+$home = $v15Document([['type' => 'services', 'props' => ['title' => 'Servicios para PYMES', 'cards' => $consultingCards]]]);
+expect(!cms_v15_repair_consulting($home, 'inicio', 'es'), 'v15 conserva títulos y tarjetas personalizados');
+$consultingCards[2]['title'] = 'Consultoría de gestión';
+array_pop($consultingCards);
+$home = $v15Document([['type' => 'services', 'props' => ['cards' => $consultingCards]]]);
+expect(!cms_v15_repair_consulting($home, 'inicio', 'es'), 'v15 conserva una rejilla de cinco tarjetas');
+
+$oldEnglishGrid = [
+    ['title' => 'IT consulting', 'path' => '/servicios/consultoria'],
+    ['title' => 'Management consulting', 'path' => '/contacto'],
+    ['title' => 'SaaS solutions', 'path' => '/servicios/saas'],
+    ['title' => 'Hardware', 'path' => '/servicios/hardware'],
+    ['title' => 'Custom software development', 'path' => '/servicios/software'],
+];
+$spanishIt = (object) ['title' => 'TI personalizada', 'path' => '/servicios/soluciones-ti', 'img' => 'ti-propia.webp', 'link' => 'Ver TI'];
+$source = cms_v15_it_card([(object) [], (object) [], $spanishIt]);
+$services = $v15Document([['type' => 'serviceCards', 'props' => ['cards' => $oldEnglishGrid]]]);
+expect(cms_v15_repair_consulting($services, 'servicios', 'en', $source)
+    && array_column($services->blocks[0]->props->cards, 'title') === ['Consulting', 'SaaS solutions', 'TI personalizada', 'Hardware', 'Custom software development']
+    && (array) $services->blocks[0]->props->cards[2] === (array) $spanishIt, 'v15 repone la ficha TI de ES en la misma posición al fusionar una rejilla de cinco');
+expect(!cms_v15_repair_consulting($services, 'servicios', 'en', $source), 'v15 no duplica la ficha TI en una segunda ejecución');
+$oldEnglishGrid[3]['path'] = '/en/servicios/soluciones-ti?ref=web';
+$services = $v15Document([['type' => 'serviceCards', 'props' => ['cards' => $oldEnglishGrid]]]);
+expect(!cms_v15_repair_consulting($services, 'servicios', 'en', $source), 'v15 reconoce una ficha TI con prefijo de idioma y conserva la rejilla');
+
+$syncDoc = static fn (array $blocks): stdClass => json_decode(json_encode(['blocks' => $blocks], JSON_THROW_ON_ERROR));
+$syncHero = static fn (string $id, string $image, string $title, string $background): array => cms_make_block(
+    'hero', ['slides' => [['image' => $image, 'title' => $title]]], false, $id, ['backgroundImage' => $background]
+);
+$oldSpanish = $syncDoc([$syncHero('hero', 'old.webp', 'Inicio', 'bg-old.webp'), cms_make_block('cta', null, false, 'cta')]);
+$newSpanish = $syncDoc([$syncHero('hero', 'new.webp', 'Nuevo inicio', 'bg-new.webp'), cms_make_block('cta', null, false, 'cta')]);
+$english = $syncDoc([cms_make_block('cta', null, false, 'cta'), $syncHero('hero', 'old.webp', 'Home', 'custom.webp')]);
+expect(cms_image_sync_document('inicio', $oldSpanish, $newSpanish, $english) === 1
+    && $english->blocks[1]->props->slides[0]->image === 'new.webp'
+    && $english->blocks[1]->props->slides[0]->title === 'Home'
+    && $english->blocks[1]->layout->backgroundImage === 'custom.webp', 'imágenes ES→EN por ID pese a distinto orden, conserva textos y personalizaciones');
+
+$english = $syncDoc([$syncHero('legacy', 'old.webp', 'Home', 'bg-old.webp'), cms_make_block('cta', null, false, 'legacy-cta')]);
+expect(cms_image_sync_document('inicio', $oldSpanish, $newSpanish, $english) === 2
+    && $english->blocks[0]->props->slides[0]->image === 'new.webp'
+    && $english->blocks[0]->layout->backgroundImage === 'bg-new.webp', 'imágenes ES→EN por posición y tipos para IDs antiguos');
+$english = $syncDoc([$syncHero('legacy', 'old.webp', 'Home', 'bg-old.webp')]);
+expect(cms_image_sync_document('inicio', $oldSpanish, $newSpanish, $english) === null
+    && $english->blocks[0]->props->slides[0]->image === 'old.webp', 'imágenes ES→EN no modifican una estructura incompatible');
+expect(cms_image_sync_document('inicio', $oldSpanish, $newSpanish, $syncDoc([
+    $syncHero('legacy', 'old.webp', 'Home', 'bg-old.webp'), cms_make_block('about', null, false, 'legacy-about'),
+])) === null, 'imágenes ES→EN descartan secuencias de tipos distintas con la misma longitud');
+expect(cms_image_sync_document('inicio', $oldSpanish, $newSpanish, $syncDoc([
+    $syncHero('hero', 'old.webp', 'Home', 'bg-old.webp'), cms_make_block('cta', null, false, 'hero'),
+])) === null, 'imágenes ES→EN descartan IDs de bloque ambiguos');
+$english = $syncDoc([$syncHero('hero', 'old.webp', 'Home', 'bg-old.webp')]);
+$english->blocks[0]->props->slides[] = (object) ['image' => 'other.webp'];
+expect(cms_image_sync_document('inicio', $oldSpanish, $newSpanish, $english) === 1
+    && $english->blocks[0]->props->slides[0]->image === 'old.webp'
+    && $english->blocks[0]->layout->backgroundImage === 'bg-new.webp', 'imágenes ES→EN conservan listas de longitudes distintas');
+
+$siteOld = json_decode('{"logo":"old.webp","founderImage":"old.webp","footer":{"libroImage":"old.webp"},"splashImages":[{"image":"old.webp","alt":"Marca"}],"seo":{"image":"old.webp","title":"Sitio"}}');
+$siteNew = json_decode(str_replace('old.webp', 'new.webp', json_encode($siteOld)));
+$siteEnglish = json_decode(str_replace(['Marca', 'Sitio'], ['Brand', 'Site'], json_encode($siteOld)));
+expect(cms_image_sync_document('sitio', $siteOld, $siteNew, $siteEnglish) === 5
+    && $siteEnglish->splashImages[0]->alt === 'Brand' && $siteEnglish->seo->title === 'Site', 'imágenes ES→EN en logo, fundador, footer, carga y SEO de sitio');
+
+if (getenv('DB_HOST')) {
+    require_once __DIR__ . '/../config.php';
+    require_once __DIR__ . '/../db.php';
+    $conn = db();
+    $schema = file_get_contents(__DIR__ . '/../schema.sql');
+    foreach (explode(';', $schema) as $statement) {
+        if (preg_match('/^\s*CREATE TABLE IF NOT EXISTS (pages|site_settings) \(/', $statement)) {
+            $conn->exec(str_replace('CREATE TABLE IF NOT EXISTS', 'CREATE TEMPORARY TABLE', $statement));
+        }
+    }
+    $source = [
+        'title' => 'Prueba ES/EN', 'content' => json_encode($oldSpanish), 'draft' => json_encode($oldSpanish),
+        'path' => '/prueba-idiomas', 'show_in_menu' => 1, 'menu_order' => 20,
+    ];
+    expect(cms_pages_create_locales('prueba-idiomas', 'es', $source) === ['en'], 'crear página ES crea EN en la misma operación');
+    $localized = $conn->query('SELECT locale, title, content, draft, path, show_in_menu, menu_order, version FROM pages ORDER BY locale')
+        ->fetchAll(PDO::FETCH_UNIQUE | PDO::FETCH_ASSOC);
+    expect($localized['es'] === $localized['en'] && (int) $localized['en']['version'] === 1
+        && json_decode($localized['en']['content'])->blocks[0]->id === 'hero', 'EN copia los metadatos, el borrador y los IDs de ES con versión 1');
+    expect(!cms_pages_insert_locale('prueba-idiomas', 'en', $source)
+        && cms_pages_create_locales('prueba-idiomas', 'es', $source) === null, 'crear o traducir repetidamente conserva las filas existentes');
+    expect(cms_pages_create_locales('solo-en', 'en', $source) === []
+        && (int) $conn->query("SELECT COUNT(*) FROM pages WHERE slug = 'solo-en'")->fetchColumn() === 1, 'crear página EN no crea ES');
+    expect(cms_pages_create_locales('solo-en', 'es', array_replace($source, ['title' => 'Original ES'])) === []
+        && $conn->query("SELECT title FROM pages WHERE slug = 'solo-en' AND locale = 'en'")->fetchColumn() === 'Prueba ES/EN',
+        'crear ES conserva una versión EN que ya existía');
+
+    $siteInsert = $conn->prepare('INSERT INTO site_settings (locale, content, draft, version) VALUES (?, ?, NULL, 1)');
+    $siteInsert->execute(['es', json_encode($siteOld)]);
+    $siteInsert->execute(['en', json_encode($siteOld)]);
+    foreach (['prueba-idiomas' => $newSpanish, 'sitio' => $siteNew] as $slug => $nextSpanish) {
+        $next = json_decode(json_encode($nextSpanish), true);
+        $_GET['locale'] = 'es';
+        $row = cms_doc_read($slug, false);
+        $conn->beginTransaction();
+        $saved = cms_doc_write_draft($slug, $next, 2, 1);
+        $draftCount = cms_doc_sync_english_images($slug, $row, $next, true);
+        $conn->commit();
+        $_GET['locale'] = 'en';
+        $englishDraft = cms_doc_read($slug, false);
+        expect($saved === 1 && $draftCount === ($slug === 'sitio' ? 5 : 2)
+            && (int) $englishDraft['version'] === 2
+            && str_contains($englishDraft['draft'], 'new.webp') && !str_contains($englishDraft['content'], 'new.webp')
+            && cms_doc_write_draft($slug, $next, 2, 1) === 0, "$slug guarda solo borrador EN e invalida la versión EN anterior");
+        $_GET['locale'] = 'es';
+        $row = cms_doc_read($slug, false);
+        $conn->beginTransaction();
+        $published = cms_doc_write_publish($slug, $next, 3, 2);
+        $publishCount = cms_doc_sync_english_images($slug, $row, $next, false);
+        $conn->commit();
+        $_GET['locale'] = 'en';
+        $englishPublished = cms_doc_read($slug, false);
+        expect($published === 1 && $publishCount === $draftCount
+            && (int) $englishPublished['version'] === 3
+            && str_contains($englishPublished['content'], 'new.webp')
+            && $englishPublished['draft'] === $englishDraft['draft'], "$slug publica solo contenido EN y conserva su borrador");
+    }
+    unset($_GET['locale']);
+}
 
 exit($failed > 0 ? 1 : 0);

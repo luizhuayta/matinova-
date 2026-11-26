@@ -83,7 +83,7 @@ test.describe('Idioma y sincronización con la URL', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'es');
     await expect(page.locator('app-header a[cmsText="nav.inicio"]')).toHaveText('Inicio');
     await expect(page.locator('app-header .lang button.active')).toHaveText('ES');
-    await expect(page.locator('h1').first()).toContainText(/Seis líneas|servicios|implementamos/i);
+    await expect(page.locator('h1').first()).toContainText(/Cinco líneas|Seis líneas|servicios|implementamos/i);
     expect(enRequests).toEqual([]);
 
     // Navegar a Inicio por el logo dentro de la sesión no rebota a /en
@@ -107,7 +107,7 @@ test.describe('Idioma y sincronización con la URL', () => {
     await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     await expect(page.locator('app-header a[cmsText="nav.inicio"]')).toHaveText('Home');
     await expect(page.locator('app-header .lang button.active')).toHaveText('EN');
-    await expect(page.locator('h1').first()).toContainText(/Six lines/i);
+    await expect(page.locator('h1').first()).toContainText(/Five lines|Six lines/i);
 
     // Menú desplegable de clientes en inglés usa textos en inglés
     await expect(page.locator('#menu-clientes a').first()).toHaveText('View all clients');

@@ -164,13 +164,12 @@ HTML;
                 ],
                 'services' => [
                     'tag' => '',
-                    'title' => 'Seis líneas de servicio TI',
+                    'title' => 'Cinco líneas de servicio TI',
                     'text' => 'Soluciones tecnológicas diseñadas para hacer crecer tu empresa',
                     'titleAccent' => 'servicio',
                     'cards' => [
-                        ['img' => 'imac.jpg', 'alt' => 'Consultoría informática', 'title' => 'Consultoría informática', 'text' => 'Diagnóstico, arquitectura y plan de implementación con responsables, fechas y seguimiento en operación.', 'icon' => 'bi-briefcase', 'link' => '/servicios/consultoria'],
+                        ['img' => 'imac.jpg', 'alt' => 'Consultoría', 'title' => 'Consultoría', 'text' => 'Diagnóstico, arquitectura y plan de implementación, con procesos e indicadores alineados para que gerencia vea la operación.', 'icon' => 'bi-briefcase', 'link' => '/servicios/consultoria'],
                         ['img' => 'imas.jpg', 'alt' => 'Tecnología de la información', 'title' => 'Tecnología de la información', 'text' => 'Redes, servidores, copias y monitoreo para que Lima y provincias no se detengan.', 'icon' => 'bi-hdd-network', 'link' => '/servicios/soluciones-ti'],
-                        ['img' => 'imat.jpg', 'alt' => 'Consultoría de gestión', 'title' => 'Consultoría de gestión', 'text' => 'Alineamos procesos, indicadores y sistemas para que gerencia vea la operación sin planillas paralelas.', 'icon' => 'bi-graph-up', 'link' => '/servicios/consultoria'],
                         ['img' => 'saas.jpg', 'alt' => 'Soluciones SaaS', 'title' => 'Soluciones SaaS', 'text' => 'ERP, correo y herramientas en la nube, con puesta en marcha, capacitación y soporte posterior.', 'icon' => 'bi-cloud', 'link' => '/servicios/saas'],
                         ['img' => 'hardware2026.webp', 'alt' => 'Hardware e infraestructura', 'title' => 'Hardware e infraestructura', 'text' => 'Servidores, PCs y cableado dimensionados para tu sede, instalados y dejados operando.', 'icon' => 'bi-pc-display', 'link' => '/servicios/hardware'],
                         ['img' => 'software.webp', 'alt' => 'Desarrollo de software a medida', 'title' => 'Desarrollo de software a medida', 'text' => 'Sistemas Angular y APIs para procesos que un producto genérico no cubre en el Perú.', 'icon' => 'bi-code-slash', 'link' => '/servicios/software'],
@@ -256,7 +255,7 @@ HTML;
                 'videosText' => 'Microsoft 365, partners locales y la operación de cada sede.',
                 'videos' => [
                     ['embed' => 'https://www.youtube.com/embed/RtNdTuCxWoI', 'user' => '@mattinnovasolution', 'title' => 'Relacionamiento con Partner Microsoft Local y Tenant Microsoft 365'],
-                    ['embed' => 'https://www.youtube.com/embed/RtNdTuCxWoI', 'user' => '@mattinnovasolution', 'title' => 'Relacionamiento con Partner Microsoft Local y Tenant Microsoft 365'],
+                    ['embed' => 'https://www.youtube.com/embed/zAW2X2805Qw', 'user' => '@mattinnovasolution', 'title' => 'Matt Innova Solution'],
                 ],
             ],
         ],
@@ -264,13 +263,12 @@ HTML;
             'title' => 'Servicios',
             'content' => [
                 'heroImage' => 'INFRAESTRUCTURAIT.webp',
-                'heroTitle' => 'Seis líneas, cada una hasta la puesta en marcha.',
-                'heroText' => 'Software, hardware, SaaS, consultoría, gestión e infraestructura. Cotizamos con responsables y fechas, no con un catálogo de licencias.',
+                'heroTitle' => 'Cinco líneas, cada una hasta la puesta en marcha.',
+                'heroText' => 'Software, hardware, SaaS, consultoría e infraestructura. Cotizamos con responsables y fechas, no con un catálogo de licencias.',
                 'subtitle' => '',
                 'title' => 'Qué implementamos',
                 'cards' => [
-                    ['path' => '/servicios/consultoria', 'img' => 'imac.jpg', 'title' => 'Consultoría informática', 'text' => 'Diagnóstico, arquitectura y plan de implementación con responsables, fechas y seguimiento en operación.', 'link' => 'Ver consultoría'],
-                    ['path' => '/contacto', 'img' => 'imat.jpg', 'title' => 'Consultoría de gestión', 'text' => 'Alineamos procesos, indicadores y sistemas para que gerencia vea la operación sin planillas paralelas.', 'link' => 'Consultar'],
+                    ['path' => '/servicios/consultoria', 'img' => 'imac.jpg', 'title' => 'Consultoría', 'text' => 'Diagnóstico, arquitectura y plan de implementación, con procesos e indicadores alineados para que gerencia vea la operación.', 'link' => 'Ver consultoría'],
                     ['path' => '/servicios/soluciones-ti', 'img' => 'imas.jpg', 'title' => 'Tecnología de la información', 'text' => 'Redes, servidores, copias y monitoreo para que Lima y provincias no se detengan.', 'link' => 'Ver soluciones TI'],
                     ['path' => '/servicios/saas', 'img' => 'saas.jpg', 'title' => 'Soluciones SaaS', 'text' => 'ERP, correo y herramientas en la nube, con puesta en marcha, capacitación y soporte posterior.', 'link' => 'Ver SaaS'],
                     ['path' => '/servicios/hardware', 'img' => 'hardware2026.webp', 'title' => 'Hardware e infraestructura', 'text' => 'Servidores, PCs y cableado dimensionados para tu sede, instalados y dejados operando.', 'link' => 'Ver hardware'],

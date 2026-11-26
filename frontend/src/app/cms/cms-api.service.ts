@@ -15,6 +15,17 @@ import {
 import { BlockTypeDef, PageTemplateDef } from './block-registry';
 import { LocaleService } from './locale.service';
 
+interface CreatePageResponse {
+  page: CmsPageSummary;
+  content: JsonMap;
+  version: number;
+  translations?: string[];
+}
+
+export interface CmsWriteResponse extends CmsDocResponse {
+  syncedImages?: number;
+}
+
 export interface AiChatConfig {
   enabled: boolean;
   provider: 'openrouter' | 'deepseek' | 'custom' | string;
@@ -80,9 +91,9 @@ export class CmsApiService {
     template?: string;
     showInMenu?: boolean;
     path?: string;
-  }): Promise<{ page: CmsPageSummary; content: JsonMap; version: number }> {
+  }): Promise<CreatePageResponse> {
     return firstValueFrom(
-      this.http.post<{ page: CmsPageSummary; content: JsonMap; version: number }>(`${API_URL}/pages`, body, {
+      this.http.post<CreatePageResponse>(`${API_URL}/pages`, body, {
         params: this.locParams(),
       })
     );
@@ -104,14 +115,14 @@ export class CmsApiService {
       .then((res) => this.requireDoc(res));
   }
 
-  save(slug: string, content: JsonMap, version: number): Promise<CmsDocResponse> {
+  save(slug: string, content: JsonMap, version: number): Promise<CmsWriteResponse> {
     const url = slug === 'sitio' ? `${API_URL}/site` : `${API_URL}/pages/${slug}`;
-    return firstValueFrom(this.http.put<CmsDocResponse>(url, { content, version }, { params: this.locParams() }));
+    return firstValueFrom(this.http.put<CmsWriteResponse>(url, { content, version }, { params: this.locParams() }));
   }
 
-  publish(slug: string, version: number): Promise<CmsDocResponse> {
+  publish(slug: string, version: number): Promise<CmsWriteResponse> {
     const url = slug === 'sitio' ? `${API_URL}/site/publish` : `${API_URL}/pages/${slug}/publish`;
-    return firstValueFrom(this.http.post<CmsDocResponse>(url, { version }, { params: this.locParams() }));
+    return firstValueFrom(this.http.post<CmsWriteResponse>(url, { version }, { params: this.locParams() }));
   }
 
   listRevisions(slug: string): Promise<CmsRevision[]> {

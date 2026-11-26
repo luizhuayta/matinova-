@@ -2,7 +2,11 @@
 declare(strict_types=1);
 
 const APP_SCHEMA_VERSION = 15;
-const APP_V15_COPY_MIGRATION = 'fix_en_untranslated_v15';
+const APP_V15_DATA_MIGRATIONS = [
+    'fix_en_untranslated_v15' => 'cms_fix_en_untranslated_v15',
+    'fix_duplicate_video_v15' => 'cms_fix_duplicate_video_v15',
+    'merge_consulting_cards_v15' => 'cms_merge_consulting_cards_v15',
+];
 
 function db_migrate_schema(): void
 {
@@ -557,6 +561,10 @@ function cms_studio_polish_migrate(): void
     $pdo = db();
     $upd = $pdo->prepare('UPDATE pages SET content = ? WHERE slug = ? AND locale = ?');
     $rows = $pdo->query("SELECT slug, locale, content FROM pages WHERE slug IN ('inicio','contacto')")->fetchAll();
+    $serviceSeeds = [
+        'es' => pages_seed()['inicio']['content']['services'],
+        'en' => pages_seed_en()['inicio']['content']['services'],
+    ];
     $spanishContacts = [];
     foreach ($rows as $row) {
         if ($row['locale'] === 'es') {
@@ -619,16 +627,8 @@ function cms_studio_polish_migrate(): void
                 $props['items'] = cms_fill_english_contact_items($items, $spanishContacts[$slug] ?? []);
             }
             if ($type === 'services' && $slug === 'inicio') {
-                $cards = [
-                    ['img' => 'imac.jpg', 'alt' => 'Consultoría informática', 'title' => $locale === 'en' ? 'IT consulting' : 'Consultoría informática', 'text' => $locale === 'en' ? 'Diagnosis, architecture and an implementation plan with owners, dates and follow-through.' : 'Diagnóstico, arquitectura y plan de implementación con responsables, fechas y seguimiento en operación.'],
-                    ['img' => 'imas.jpg', 'alt' => 'Tecnología de la información', 'title' => $locale === 'en' ? 'Information technology' : 'Tecnología de la información', 'text' => $locale === 'en' ? 'Networks, servers, backups and monitoring so Lima and the provinces keep running.' : 'Redes, servidores, copias y monitoreo para que Lima y provincias no se detengan.'],
-                    ['img' => 'imat.jpg', 'alt' => 'Consultoría de gestión', 'title' => $locale === 'en' ? 'Management consulting' : 'Consultoría de gestión', 'text' => $locale === 'en' ? 'We align processes, indicators and systems so leadership sees the operation without shadow spreadsheets.' : 'Alineamos procesos, indicadores y sistemas para que gerencia vea la operación sin planillas paralelas.'],
-                    ['img' => 'saas.jpg', 'alt' => 'Soluciones SaaS', 'title' => $locale === 'en' ? 'SaaS solutions' : 'Soluciones SaaS', 'text' => $locale === 'en' ? 'ERP, mail and cloud tools, with go-live, training and support afterwards.' : 'ERP, correo y herramientas en la nube, con puesta en marcha, capacitación y soporte posterior.'],
-                    ['img' => 'hardware2026.webp', 'alt' => 'Hardware e infraestructura', 'title' => $locale === 'en' ? 'Hardware and infrastructure' : 'Hardware e infraestructura', 'text' => $locale === 'en' ? 'Servers, PCs and cabling sized for each site, installed and left running.' : 'Servidores, PCs y cableado dimensionados para tu sede, instalados y dejados operando.'],
-                    ['img' => 'software.webp', 'alt' => 'Desarrollo de software a medida', 'title' => $locale === 'en' ? 'Custom software development' : 'Desarrollo de software a medida', 'text' => $locale === 'en' ? 'Angular systems and APIs for processes a generic product does not cover in Peru.' : 'Sistemas Angular y APIs para procesos que un producto genérico no cubre en el Perú.'],
-                ];
-                $props['title'] = $locale === 'en' ? 'Six IT service lines' : 'Seis líneas de servicio TI';
-                $props['cards'] = $cards;
+                $props['title'] = $serviceSeeds[$locale]['title'];
+                $props['cards'] = $serviceSeeds[$locale]['cards'];
             }
             if ($type === 'innovative') {
                 $items = $props['items'] ?? [];
@@ -820,11 +820,11 @@ function app_schema_is_current(): bool
 function app_bootstrap_db(): void
 {
     $force = cfg('APP_SETUP', '0') === '1';
-    $copyMarker = 'migration_done:' . APP_V15_COPY_MIGRATION;
-    $versions = app_db_versions('schema_version', 'setup_done_version', $copyMarker);
+    $markers = array_map(static fn (string $name): string => 'migration_done:' . $name, array_keys(APP_V15_DATA_MIGRATIONS));
+    $versions = app_db_versions('schema_version', 'setup_done_version', ...$markers);
     $version = $versions['schema_version'] ?? 0;
-    $copyPending = $version === 15 && empty($versions[$copyMarker]);
-    if ($version >= APP_SCHEMA_VERSION && !$copyPending
+    $dataPending = $version === 15 && array_diff($markers, array_keys(array_filter($versions))) !== [];
+    if ($version >= APP_SCHEMA_VERSION && !$dataPending
         && (!$force || ($versions['setup_done_version'] ?? 0) >= APP_SCHEMA_VERSION)) {
         return;
     }
@@ -869,7 +869,9 @@ function app_bootstrap_db(): void
         if ($previousVersion <= 15) {
             require_once __DIR__ . '/Domain/CmsContentMigrate.php';
             require_once __DIR__ . '/Domain/CmsV15CopyFix.php';
-            cms_run_migration_once(APP_V15_COPY_MIGRATION, 'cms_fix_en_untranslated_v15');
+            foreach (APP_V15_DATA_MIGRATIONS as $name => $migration) {
+                cms_run_migration_once($name, $migration);
+            }
         }
         $version = max($previousVersion, APP_SCHEMA_VERSION);
         $done = max(app_db_version('setup_done_version'), $version);

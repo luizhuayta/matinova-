@@ -15,6 +15,7 @@ import { CmsCtaButton } from '../cms-cta-button';
 import { PublicButton } from '../../components/public/public-button';
 import { PublicReveal } from '../../components/public/public-reveal';
 import { ServicePhotoCard } from './service-photo-card';
+import { CountUpDirective } from '../count-up.directive';
 
 const DEFAULT_HERO_STATS = [
   { icon: 'users', number: '30+', es: 'Años de experiencia', en: 'Years of experience' },
@@ -44,6 +45,7 @@ const HERO_STAT_ICONS: Record<string, { paths: string[]; viewBox: string }> = {
     PublicButton,
     PublicReveal,
     ServicePhotoCard,
+    CountUpDirective,
   ],
   templateUrl: './home-style-block.html',
   styleUrl: './home-style-block.scss',

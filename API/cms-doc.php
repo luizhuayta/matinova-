@@ -1,6 +1,8 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/Domain/CmsImageSync.php';
+
 if (!function_exists('cms_revisions_insert')) {
     require_once __DIR__ . '/Repos/RevisionsRepository.php';
 }
@@ -209,6 +211,51 @@ function cms_doc_read_meta(string $slug): array
     return $fresh->fetch() ?: [];
 }
 
+function cms_doc_image_base(array $row, bool $draft): mixed
+{
+    if ($draft) {
+        $stored = json_decode((string) ($row['draft'] ?? ''));
+        if ($stored instanceof stdClass && (array) $stored !== []) {
+            return $stored;
+        }
+    }
+    return json_decode((string) $row['content']);
+}
+
+/** Debe ejecutarse dentro de la transacción de escritura ES. */
+function cms_doc_sync_english_images(string $slug, array $oldSpanish, array $nextSpanish, bool $draft): int
+{
+    if (cms_request_locale() !== 'es') {
+        return 0;
+    }
+    $conn = db();
+    $table = cms_doc_is_site($slug) ? 'site_settings' : 'pages';
+    $where = cms_doc_is_site($slug) ? "locale = 'en'" : "locale = 'en' AND slug = ?";
+    $params = cms_doc_is_site($slug) ? [] : [$slug];
+    $select = $conn->prepare("SELECT content, draft FROM $table WHERE $where FOR UPDATE");
+    $select->execute($params);
+    $row = $select->fetch();
+    if (!$row) {
+        return 0;
+    }
+    $old = cms_doc_image_base($oldSpanish, $draft);
+    $next = json_decode(json_encode($nextSpanish, JSON_THROW_ON_ERROR), false, 512, JSON_THROW_ON_ERROR);
+    $english = cms_doc_image_base($row, $draft);
+    $count = $old instanceof stdClass && $next instanceof stdClass && $english instanceof stdClass
+        ? cms_image_sync_document($slug, $old, $next, $english)
+        : null;
+    if ($count === null) {
+        error_log("CMS: no se sincronizaron imágenes ES→EN de $slug por diferencias en la estructura");
+        return 0;
+    }
+    if ($count > 0) {
+        $column = $draft ? 'draft' : 'content';
+        $update = $conn->prepare("UPDATE $table SET $column = ?, version = version + 1 WHERE $where");
+        $update->execute([json_encode($english, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR), ...$params]);
+    }
+    return $count;
+}
+
 function cms_doc_conflict(string $slug, string $message): never
 {
     $row = cms_doc_read($slug, false);
@@ -264,12 +311,24 @@ function cms_doc_save_draft(string $slug): never
     }
     $prepared = cms_prepare_document($content, $slug);
     $next = $current + 1;
-    if (cms_doc_write_draft($slug, $prepared, $next, $current) === 0) {
-        cms_doc_conflict($slug, $message);
+    $conn = db();
+    $conn->beginTransaction();
+    try {
+        if (cms_doc_write_draft($slug, $prepared, $next, $current) === 0) {
+            $conn->rollBack();
+            cms_doc_conflict($slug, $message);
+        }
+        $syncedImages = cms_doc_sync_english_images($slug, $row, $prepared, true);
+        $meta = cms_doc_read_meta($slug);
+        $conn->commit();
+    } catch (Throwable $err) {
+        if ($conn->inTransaction()) {
+            $conn->rollBack();
+        }
+        throw $err;
     }
-    $meta = cms_doc_read_meta($slug);
     $updatedAt = (int) ($meta['version'] ?? 0) === $next ? ($meta['updated_at'] ?? null) : null;
-    json_out(['ok' => true, 'version' => $next, 'updated_at' => $updatedAt, 'content' => $prepared]);
+    json_out(['ok' => true, 'version' => $next, 'updated_at' => $updatedAt, 'content' => $prepared, 'syncedImages' => $syncedImages]);
 }
 
 function cms_doc_require_version(string $slug, array $row, mixed $given, string $message): int
@@ -309,6 +368,7 @@ function cms_doc_publish(string $slug): never
             $conn->rollBack();
             cms_doc_conflict($slug, $message);
         }
+        $syncedImages = cms_doc_sync_english_images($slug, $row, $next, false);
         cms_revisions_insert($slug, cms_request_locale(), (string) ($_SESSION['admin_username'] ?? 'admin'), $next);
         $conn->commit();
     } catch (Throwable $err) {
@@ -323,7 +383,7 @@ function cms_doc_publish(string $slug): never
         'version' => $ver,
         'path' => cms_lookup_page_path($slug),
     ]);
-    json_out(['ok' => true, 'version' => $ver, 'content' => $next]);
+    json_out(['ok' => true, 'version' => $ver, 'content' => $next, 'syncedImages' => $syncedImages]);
 }
 
 function cms_doc_restore(string $slug, int $id): never

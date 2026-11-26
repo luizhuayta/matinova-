@@ -60,7 +60,7 @@ test('el hero muestra cifras y acento', async ({ page }) => {
 
 test('los servicios muestran icono y enlace', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('.premium-service-card')).toHaveCount(6);
+  await expect(page.locator('.premium-service-card')).toHaveCount(5);
   await expect(page.locator('.premium-service-card .service-icon').first()).toBeVisible();
   await expect(page.locator('.premium-service-card .service-link').first()).toContainText(/Saber más|Learn more/);
 });

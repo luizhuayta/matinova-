@@ -148,13 +148,12 @@ HTML;
                 ],
                 'services' => [
                     'tag' => '',
-                    'title' => 'Six IT service lines',
+                    'title' => 'Five IT service lines',
                     'text' => 'Technology solutions designed to grow your business',
                     'titleAccent' => 'service',
                     'cards' => [
-                        ['img' => 'imac.jpg', 'alt' => 'IT consulting', 'title' => 'IT consulting', 'text' => 'Diagnosis, architecture and an implementation plan with owners, dates and follow-through.', 'icon' => 'bi-briefcase', 'link' => '/servicios/consultoria'],
+                        ['img' => 'imac.jpg', 'alt' => 'Consulting', 'title' => 'Consulting', 'text' => 'Diagnosis, architecture and an implementation plan, with processes and indicators aligned so leadership sees the operation.', 'icon' => 'bi-briefcase', 'link' => '/servicios/consultoria'],
                         ['img' => 'imas.jpg', 'alt' => 'Information technology', 'title' => 'Information technology', 'text' => 'Networks, servers, backups and monitoring so Lima and the provinces keep running.', 'icon' => 'bi-hdd-network', 'link' => '/servicios/soluciones-ti'],
-                        ['img' => 'imat.jpg', 'alt' => 'Management consulting', 'title' => 'Management consulting', 'text' => 'We align processes, indicators and systems so leadership sees the operation without shadow spreadsheets.', 'icon' => 'bi-graph-up', 'link' => '/servicios/consultoria'],
                         ['img' => 'saas.jpg', 'alt' => 'SaaS solutions', 'title' => 'SaaS solutions', 'text' => 'ERP, mail and cloud tools, with go-live, training and support afterwards.', 'icon' => 'bi-cloud', 'link' => '/servicios/saas'],
                         ['img' => 'hardware2026.webp', 'alt' => 'Hardware and infrastructure', 'title' => 'Hardware and infrastructure', 'text' => 'Servers, PCs and cabling sized for each site, installed and left running.', 'icon' => 'bi-pc-display', 'link' => '/servicios/hardware'],
                         ['img' => 'software.webp', 'alt' => 'Custom software development', 'title' => 'Custom software development', 'text' => 'Angular systems and APIs for processes a generic product does not cover in Peru.', 'icon' => 'bi-code-slash', 'link' => '/servicios/software'],
@@ -233,7 +232,7 @@ HTML;
                 'videosText' => 'Technical walkthroughs from the company channel',
                 'videos' => [
                     ['embed' => 'https://www.youtube.com/embed/RtNdTuCxWoI', 'user' => '@mattinnovasolution', 'title' => 'Local Microsoft partner relationship and Microsoft 365 tenant'],
-                    ['embed' => 'https://www.youtube.com/embed/RtNdTuCxWoI', 'user' => '@mattinnovasolution', 'title' => 'Local Microsoft partner relationship and Microsoft 365 tenant'],
+                    ['embed' => 'https://www.youtube.com/embed/zAW2X2805Qw', 'user' => '@mattinnovasolution', 'title' => 'Matt Innova Solution'],
                 ],
             ],
         ],
@@ -241,13 +240,12 @@ HTML;
             'title' => 'Services',
             'content' => [
                 'heroImage' => 'INFRAESTRUCTURAIT.webp',
-                'heroTitle' => 'Six lines, each one through go-live.',
-                'heroText' => 'Software, hardware, SaaS, consulting, management and infrastructure. We quote with owners and dates, not a license catalog.',
+                'heroTitle' => 'Five lines, each one through go-live.',
+                'heroText' => 'Software, hardware, SaaS, consulting and infrastructure. We quote with owners and dates, not a license catalog.',
                 'subtitle' => '',
                 'title' => 'What we implement',
                 'cards' => [
-                    ['path' => '/servicios/consultoria', 'img' => 'imac.jpg', 'title' => 'IT consulting', 'text' => 'Diagnosis, architecture and an implementation plan with owners, dates and follow-through.', 'link' => 'View consulting'],
-                    ['path' => '/contacto', 'img' => 'imat.jpg', 'title' => 'Management consulting', 'text' => 'We align processes, indicators and systems so leadership sees the operation without shadow spreadsheets.', 'link' => 'Ask about it'],
+                    ['path' => '/servicios/consultoria', 'img' => 'imac.jpg', 'title' => 'Consulting', 'text' => 'Diagnosis, architecture and an implementation plan, with processes and indicators aligned so leadership sees the operation.', 'link' => 'View consulting'],
                     ['path' => '/servicios/soluciones-ti', 'img' => 'imas.jpg', 'title' => 'Information technology', 'text' => 'Networks, servers, backups and monitoring so Lima and the provinces keep running.', 'link' => 'View IT solutions'],
                     ['path' => '/servicios/saas', 'img' => 'saas.jpg', 'title' => 'SaaS solutions', 'text' => 'ERP, mail and cloud tools, with go-live, training and support afterwards.', 'link' => 'View SaaS'],
                     ['path' => '/servicios/hardware', 'img' => 'hardware2026.webp', 'title' => 'Hardware and infrastructure', 'text' => 'Servers, PCs and cabling sized for each site, installed and left running.', 'link' => 'View hardware'],

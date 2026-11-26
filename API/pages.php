@@ -175,11 +175,6 @@ function cms_pages_create(): never
     if (in_array($slug, cms_reserved_slugs(), true) || $slug === 'sitio') {
         json_out(['field' => 'slug', 'message' => 'Ese nombre está reservado.'], 400);
     }
-    $exists = db()->prepare('SELECT slug FROM pages WHERE slug = ? AND locale = ?');
-    $exists->execute([$slug, cms_request_locale()]);
-    if ($exists->fetch()) {
-        json_out(['field' => 'slug', 'message' => 'Ya existe una página con esa ruta.'], 409);
-    }
     $template = (string) ($input['template'] ?? 'blank');
     $ids = array_column(cms_page_templates(), 'id');
     if (!in_array($template, $ids, true)) {
@@ -190,8 +185,17 @@ function cms_pages_create(): never
     $order = (int) ($input['menuOrder'] ?? cms_next_menu_order());
     $locale = cms_request_locale();
     $doc = cms_blank_page_document($title, $template);
-    $ins = db()->prepare('INSERT INTO pages (slug, locale, title, content, path, show_in_menu, menu_order, version) VALUES (?, ?, ?, ?, ?, ?, ?, 1)');
-    $ins->execute([$slug, $locale, $title, json_encode($doc, JSON_UNESCAPED_UNICODE), $path, $show ? 1 : 0, $order]);
+    $translations = cms_pages_create_locales($slug, $locale, [
+        'title' => $title,
+        'content' => json_encode($doc, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR),
+        'draft' => null,
+        'path' => $path,
+        'show_in_menu' => $show ? 1 : 0,
+        'menu_order' => $order,
+    ]);
+    if ($translations === null) {
+        json_out(['field' => 'slug', 'message' => 'Ya existe una página con esa ruta.'], 409);
+    }
     json_out([
         'ok' => true,
         'page' => [
@@ -206,6 +210,7 @@ function cms_pages_create(): never
         ],
         'content' => $doc,
         'version' => 1,
+        'translations' => $translations,
     ], 201);
 }
 
@@ -316,22 +321,9 @@ function cms_pages_translate(string $slug): never
     if (!$row) {
         json_out(['message' => cms_doc_not_found_message($slug)], 404);
     }
-    $exists = db()->prepare('SELECT slug FROM pages WHERE slug = ? AND locale = ?');
-    $exists->execute([$slug, $target]);
-    if ($exists->fetch()) {
+    if (!cms_pages_insert_locale($slug, $target, $row)) {
         json_out(['ok' => true, 'slug' => $slug, 'locale' => $target, 'existed' => true]);
     }
-    $ins = db()->prepare('INSERT INTO pages (slug, locale, title, content, draft, path, show_in_menu, menu_order, version) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)');
-    $ins->execute([
-        $slug,
-        $target,
-        $row['title'],
-        $row['content'],
-        $row['draft'],
-        $row['path'],
-        $row['show_in_menu'],
-        $row['menu_order'],
-    ]);
     json_out(['ok' => true, 'slug' => $slug, 'locale' => $target], 201);
 }
 

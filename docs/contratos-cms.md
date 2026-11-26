@@ -16,6 +16,10 @@ Claves de respuesta: `content`, `version`, `updated_at`, `schemaVersion`. En adm
 
 Optimistic locking: `PUT` / `publish` envían `version`. Conflicto = **409** con `version` y `content`.
 
+La respuesta de `POST /pages` incluye `translations` con los locales que se crearon junto con la página. Una creación en ES copia sus datos e IDs de bloque a EN en la misma transacción, si EN todavía no existe.
+
+Las respuestas exitosas de `PUT /pages/{slug}`, `PUT /site` y sus rutas `publish` incluyen `syncedImages`, el número de campos de imagen copiados de ES a EN. El guardado actualiza el borrador EN y la publicación actualiza el contenido publicado EN. La copia conserva los textos y las imágenes personalizadas, incrementa la versión EN si hubo cambios y devuelve `0` si no hay cambios aplicables.
+
 ## Documento de sitio (`GET /site`)
 
 Campos planos que el shell público lee:
